@@ -24,6 +24,10 @@ The v1 release focuses on:
 **Constraints**: No external APIs, no auth, no YAML/JSON config editing, mobile responsive single-column
 **Scale/Scope**: Single-user, local-only
 
+### Wireframes
+- **Homepage Layout**: `temp/arike-homepage-wireframe-v2.html`
+- **Core Flows & Modals**: `temp/arike-core-flows-wireframes-v2.html`
+
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*

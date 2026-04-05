@@ -60,9 +60,9 @@ description: "Task list template for feature implementation"
 - [ ] T011 [P] [US1] Create ThemeSetting model and service, and seed required default themes (Gruvbox, Catppuccin, Everforest) in `src/services/theme_service.ts`
 - [ ] T012 [P] [US1] Create Clock component (mobile-first) to display date and time in `src/components/clock.tsx`
 - [ ] T013 [P] [US1] Create SearchBar component (mobile-first) with provider selection and local bookmark search integration in `src/components/search_bar.tsx`
-- [ ] T014 [US1] Implement Settings UI panel (mobile-first) for theme customization, including user-defined colors in `src/components/settings_panel.tsx`
+- [ ] T014 [US1] Implement Settings UI panel (mobile-first) for theme customization, including user-defined colors in `src/components/settings_panel.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
 - [ ] T015 [US1] Implement server API route for theme settings in `src/app/api/settings/route.ts`
-- [ ] T016 [US1] Create main dashboard page assembling Clock, SearchBar, and Settings (mobile-first single-column layout) in `src/app/page.tsx`
+- [ ] T016 [US1] Create main dashboard page assembling Clock, SearchBar, and Settings (mobile-first single-column layout) in `src/app/page.tsx` (Reference `temp/arike-homepage-wireframe-v2.html` for layout)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -84,8 +84,8 @@ description: "Task list template for feature implementation"
 - [ ] T019 [P] [US2] Implement Bookmark model and service for SQLite CRUD, including duplicate name resolution, in `src/services/bookmark_service.ts`
 - [ ] T020 [P] [US2] Implement API endpoint for icon file uploads in `src/app/api/icons/route.ts`
 - [ ] T021 [US2] Implement API endpoints for bookmarks in `src/app/api/bookmarks/route.ts` and `src/app/api/bookmarks/[id]/route.ts`
-- [ ] T022 [US2] Create Bookmark Form dialog for adding and editing bookmarks, including URL validation, in `src/components/bookmark_form.tsx`
-- [ ] T023 [US2] Create Bookmark Card component to display individual bookmarks, including missing-icon fallback handling, in `src/components/bookmark_card.tsx`
+- [ ] T022 [US2] Create Bookmark Form dialog for adding and editing bookmarks, including URL validation, in `src/components/bookmark_form.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
+- [ ] T023 [US2] Create Bookmark Card component to display individual bookmarks, including missing-icon fallback handling, in `src/components/bookmark_card.tsx` (Reference `temp/arike-homepage-wireframe-v2.html` for layout)
 - [ ] T024 [US2] Integrate bookmark grid display into the main dashboard in `src/app/page.tsx`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
@@ -107,7 +107,7 @@ description: "Task list template for feature implementation"
 
 - [ ] T027 [P] [US3] Implement Collection and CollectionBookmark models and services in `src/services/collection_service.ts`
 - [ ] T028 [US3] Implement API endpoints for managing collections in `src/app/api/collections/route.ts`
-- [ ] T029 [US3] Create Collection Manager UI for creating and deleting collections, including empty collection handling, in `src/components/collection_manager.tsx`
+- [ ] T029 [US3] Create Collection Manager UI for creating and deleting collections, including empty collection handling, in `src/components/collection_manager.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
 - [ ] T030 [US3] Update Bookmark Form to allow assigning bookmarks to multiple collections in `src/components/bookmark_form.tsx`
 - [ ] T031 [US3] Implement Collection Tabs to filter bookmarks on the dashboard in `src/app/page.tsx`
 
