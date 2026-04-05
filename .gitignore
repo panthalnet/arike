@@ -3,3 +3,44 @@ speckit-cheatsheet.md
 .specify/init-options.json
 .specify/integration.json
 temp/
+
+# Node.js / Next.js
+node_modules/
+.next/
+out/
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env*.local
+.env.production
+
+# Data and uploads
+data/
+*.db
+*.db-*
+
+# Testing
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp

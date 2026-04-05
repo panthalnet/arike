@@ -21,11 +21,11 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize Next.js 16.2.2 project with App Router and Tailwind CSS by updating `package.json`
-- [ ] T002 Install and configure shadcn/ui components in `components.json` and `tailwind.config.ts`
-- [ ] T002b [P] Install and configure Iconify for Material Icons and Simple Icons integration in `package.json`
-- [ ] T003 [P] Configure Vitest and Playwright test environment (including axe-core for WCAG AA compliance) in `vitest.config.ts` and `playwright.config.ts`
-- [ ] T004 [P] Create Dockerfile and `docker-compose.yml` for persistence configuration
+- [x] T001 Initialize Next.js 16.2.2 project with App Router and Tailwind CSS by updating `package.json`
+- [x] T002 Install and configure shadcn/ui components in `components.json` and `tailwind.config.ts`
+- [x] T002b [P] Install and configure Iconify for Material Icons and Simple Icons integration in `package.json`
+- [x] T003 [P] Configure Vitest and Playwright test environment (including axe-core for WCAG AA compliance) in `vitest.config.ts` and `playwright.config.ts`
+- [x] T004 [P] Create Dockerfile and `docker-compose.yml` for persistence configuration
 
 ---
 
@@ -35,13 +35,13 @@ description: "Task list template for feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Setup SQLite database connection and initialization logic in `src/lib/db.ts`
-- [ ] T006 Define SQLite database schema (Bookmark, Collection, CollectionBookmark, ThemeSetting) in `src/lib/schema.ts`
-- [ ] T007 Implement base application layout and ThemeProvider in `src/app/layout.tsx`
-- [ ] T008 [P] Implement file system storage utility for icon uploads in `src/lib/storage.ts`
-- [ ] T008b [P] Create base UI state components (Loading, Error, Empty) to ensure 4-state completeness in `src/components/ui/states.tsx`
-- [ ] T008c [P] Implement health check endpoint returning 200 OK for Docker health monitoring in `src/app/api/health/route.ts`
-- [ ] T008d [P] Implement icon color theming CSS utilities using `currentColor` inheritance from theme accent color in `src/styles/icons.css`
+- [x] T005 Setup SQLite database connection and initialization logic in `src/lib/db.ts`
+- [x] T006 Define SQLite database schema (Bookmark, Collection, CollectionBookmark, ThemeSetting) in `src/lib/schema.ts`
+- [x] T007 Implement base application layout and ThemeProvider in `src/app/layout.tsx`
+- [x] T008 [P] Implement file system storage utility for icon uploads in `src/lib/storage.ts`
+- [x] T008b [P] Create base UI state components (Loading, Error, Empty) to ensure 4-state completeness in `src/components/ui/states.tsx`
+- [x] T008c [P] Implement health check endpoint returning 200 OK for Docker health monitoring in `src/app/api/health/route.ts`
+- [x] T008d [P] Implement icon color theming CSS utilities using `currentColor` inheritance from theme accent color in `src/styles/icons.css`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

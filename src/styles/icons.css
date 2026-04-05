@@ -1,0 +1,41 @@
+/* Icon color theming - icons inherit theme accent color */
+.icon-container {
+  color: var(--color-primary);
+}
+
+.icon-container svg {
+  color: currentColor;
+}
+
+/* Ensure Iconify icons inherit color */
+.iconify {
+  color: currentColor;
+}
+
+/* Icon sizing utilities */
+.icon-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon-md {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.icon-lg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.icon-xl {
+  width: 4rem;
+  height: 4rem;
+}
+
+/* Bookmark icon specific (64×64px as per spec) */
+.bookmark-icon {
+  width: 4rem;
+  height: 4rem;
+  object-fit: contain;
+}
