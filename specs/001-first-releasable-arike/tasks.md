@@ -55,17 +55,17 @@ description: "Task list template for feature implementation"
 
 ### Tests for User Story 1
 
-- [ ] T009 [P] [US1] Write E2E test for homepage rendering and theme switching in `tests/e2e/homepage.spec.ts`
-- [ ] T010 [P] [US1] Write unit test for theme service in `tests/unit/theme_service.test.ts`
+- [x] T009 [P] [US1] Write E2E test for homepage rendering and theme switching in `tests/e2e/homepage.spec.ts`
+- [x] T010 [P] [US1] Write unit test for theme service in `tests/unit/theme_service.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] Create ThemeSetting model and service, and seed required default themes (Gruvbox, Catppuccin, Everforest) in `src/services/theme_service.ts`
-- [ ] T012 [P] [US1] Create Clock component (mobile-first) to display date and time in `src/components/clock.tsx`
-- [ ] T013 [P] [US1] Create SearchBar component (mobile-first) with provider selection and local bookmark search integration in `src/components/search_bar.tsx`
-- [ ] T014 [US1] Implement Settings UI panel (mobile-first) for theme customization, including user-defined colors in `src/components/settings_panel.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
-- [ ] T015 [US1] Implement server API route for theme settings in `src/app/api/settings/route.ts`
-- [ ] T016 [US1] Create main dashboard page assembling Clock, SearchBar, and Settings (mobile-first single-column layout) in `src/app/page.tsx` (Reference `temp/arike-homepage-wireframe-v2.html` for layout)
+- [x] T011 [P] [US1] Create ThemeSetting model and service, and seed required default themes (Gruvbox, Catppuccin, Everforest) in `src/services/theme_service.ts`
+- [x] T012 [P] [US1] Create Clock component (mobile-first) to display date and time in `src/components/clock.tsx`
+- [x] T013 [P] [US1] Create SearchBar component (mobile-first) with provider selection and local bookmark search integration in `src/components/search_bar.tsx`
+- [x] T014 [US1] Implement Settings UI panel (mobile-first) for theme customization, including user-defined colors in `src/components/settings_panel.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
+- [x] T015 [US1] Implement server API route for theme settings in `src/app/api/settings/route.ts`
+- [x] T016 [US1] Create main dashboard page assembling Clock, SearchBar, and Settings (mobile-first single-column layout) in `src/app/page.tsx` (Reference `temp/arike-homepage-wireframe-v2.html` for layout)
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 

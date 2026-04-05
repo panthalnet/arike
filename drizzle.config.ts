@@ -6,7 +6,7 @@ const DB_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data')
 export default {
   schema: './src/lib/schema.ts',
   out: './drizzle',
-  driver: 'better-sqlite',
+  dialect: 'sqlite',
   dbCredentials: {
     url: path.join(DB_DIR, 'arike.db'),
   },
