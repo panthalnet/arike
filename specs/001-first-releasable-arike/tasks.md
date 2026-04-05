@@ -23,6 +23,7 @@ description: "Task list template for feature implementation"
 
 - [ ] T001 Initialize Next.js 16.2.2 project with App Router and Tailwind CSS by updating `package.json`
 - [ ] T002 Install and configure shadcn/ui components in `components.json` and `tailwind.config.ts`
+- [ ] T002b [P] Install and configure Iconify for Material Icons and Simple Icons integration in `package.json`
 - [ ] T003 [P] Configure Vitest and Playwright test environment (including axe-core for WCAG AA compliance) in `vitest.config.ts` and `playwright.config.ts`
 - [ ] T004 [P] Create Dockerfile and `docker-compose.yml` for persistence configuration
 
@@ -39,6 +40,8 @@ description: "Task list template for feature implementation"
 - [ ] T007 Implement base application layout and ThemeProvider in `src/app/layout.tsx`
 - [ ] T008 [P] Implement file system storage utility for icon uploads in `src/lib/storage.ts`
 - [ ] T008b [P] Create base UI state components (Loading, Error, Empty) to ensure 4-state completeness in `src/components/ui/states.tsx`
+- [ ] T008c [P] Implement health check endpoint returning 200 OK for Docker health monitoring in `src/app/api/health/route.ts`
+- [ ] T008d [P] Implement icon color theming CSS utilities using `currentColor` inheritance from theme accent color in `src/styles/icons.css`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -81,10 +84,10 @@ description: "Task list template for feature implementation"
 
 ### Implementation for User Story 2
 
-- [ ] T019 [P] [US2] Implement Bookmark model and service for SQLite CRUD, including duplicate name resolution, in `src/services/bookmark_service.ts`
-- [ ] T020 [P] [US2] Implement API endpoint for icon file uploads in `src/app/api/icons/route.ts`
+- [ ] T019 [P] [US2] Implement Bookmark model and service for SQLite CRUD, including duplicate name resolution and icon reference metadata (`builtin:material:[name]`, `builtin:simple:[name]`, `upload:[uuid]`), in `src/services/bookmark_service.ts`
+- [ ] T020 [P] [US2] Implement API endpoint for icon file uploads with validation (PNG/JPEG/WebP/SVG, 2MB max, 1024x1024px max, SVG sanitization) in `src/app/api/icons/route.ts`
 - [ ] T021 [US2] Implement API endpoints for bookmarks in `src/app/api/bookmarks/route.ts` and `src/app/api/bookmarks/[id]/route.ts`
-- [ ] T022 [US2] Create Bookmark Form dialog for adding and editing bookmarks, including URL validation, in `src/components/bookmark_form.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
+- [ ] T022 [US2] Create Bookmark Form dialog for adding and editing bookmarks with URL validation and icon picker integration (Material Icons, Simple Icons, and upload options), in `src/components/bookmark_form.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
 - [ ] T023 [US2] Create Bookmark Card component to display individual bookmarks, including missing-icon fallback handling, in `src/components/bookmark_card.tsx` (Reference `temp/arike-homepage-wireframe-v2.html` for layout)
 - [ ] T024 [US2] Integrate bookmark grid display into the main dashboard in `src/app/page.tsx`
 
@@ -121,7 +124,7 @@ description: "Task list template for feature implementation"
 
 - [ ] T032 [P] Configure and run automated accessibility auditing (e.g., axe-core with Playwright) in `tests/e2e/accessibility.spec.ts`
 - [ ] T032b [P] Add Lighthouse CI performance benchmarking task to validate <2s first paint in `tests/e2e/performance.spec.ts`
-- [ ] T033 Add built-in open-source icon pack selector (e.g., RemixIcon) in `src/components/icon_picker.tsx`
+- [ ] T033 Implement built-in icon pack picker supporting Material Icons and Simple Icons with searchable grid, pack filter, 40 icons/page pagination, and hover tooltips in `src/components/icon_picker.tsx` (Reference spec §FR-003 for dual-pack requirements and theme color integration)
 - [ ] T034 Validate application startup and storage persistence using the command-line start script in `package.json`
 - [ ] T035 Update `README.md` with quickstart instructions and maintain `docs/design.md` with architectural decisions
 
