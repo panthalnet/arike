@@ -17,7 +17,7 @@ export async function ensureIconsDirectory() {
   }
 }
 
-// Save uploaded icon file
+// Save uploaded icon file (from File object)
 export async function saveIcon(file: File): Promise<string> {
   await ensureIconsDirectory()
 
@@ -30,7 +30,22 @@ export async function saveIcon(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer())
   await fs.writeFile(filepath, buffer)
 
-  return filename
+  return `upload:${filename}`
+}
+
+// Save icon from buffer (for API routes)
+export async function saveIconBuffer(buffer: Buffer, extension: string): Promise<string> {
+  await ensureIconsDirectory()
+
+  // Generate unique filename
+  const ext = extension.replace('.', '')
+  const filename = `${crypto.randomUUID()}.${ext}`
+  const filepath = path.join(ICONS_DIR, filename)
+
+  // Save file
+  await fs.writeFile(filepath, buffer)
+
+  return `upload:${filename}`
 }
 
 // Delete icon file

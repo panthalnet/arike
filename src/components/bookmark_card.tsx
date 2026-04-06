@@ -2,7 +2,7 @@
 
 import { Icon } from '@iconify/react'
 import { Edit, Trash2 } from 'lucide-react'
-import { parseIconReference } from '@/services/bookmark_service'
+import { parseIconReference } from '@/lib/icon-utils'
 import { Button } from '@/components/ui/button'
 
 type BookmarkCardProps = {

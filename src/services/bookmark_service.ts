@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { bookmarks, collectionBookmarks, type Bookmark, type NewBookmark } from '@/lib/schema'
 import { eq, and, inArray } from 'drizzle-orm'
+import { validateUrl, validateIconReference, parseIconReference } from '@/lib/icon-utils'
 
 /**
  * Icon format types
@@ -11,25 +12,21 @@ import { eq, and, inArray } from 'drizzle-orm'
 export type IconReference = string
 
 /**
- * Validate URL format (must be http or https)
+ * Input data for creating a bookmark (without auto-generated fields)
  */
-export function validateUrl(url: string): boolean {
-  const urlRegex = /^https?:\/\/.+/
-  return urlRegex.test(url)
+export type BookmarkInput = {
+  name: string
+  url: string
+  icon: string
 }
 
-/**
- * Validate icon reference format
- */
-export function validateIconReference(icon: string): boolean {
-  const iconRegex = /^(builtin:(material|simple):[a-z0-9-]+|upload:[a-f0-9-]+\.(png|jpg|jpeg|webp|svg))$/
-  return iconRegex.test(icon)
-}
+// Re-export utilities for convenience
+export { validateUrl, validateIconReference, parseIconReference } from '@/lib/icon-utils'
 
 /**
  * Create a new bookmark
  */
-export async function createBookmark(data: NewBookmark): Promise<Bookmark> {
+export async function createBookmark(data: BookmarkInput): Promise<Bookmark> {
   // Validate URL
   if (!validateUrl(data.url)) {
     throw new Error('Invalid URL format. Must start with http:// or https://')
@@ -99,7 +96,7 @@ export async function getBookmarksByCollection(collectionId: string): Promise<Bo
 /**
  * Update an existing bookmark
  */
-export async function updateBookmark(id: string, data: Partial<NewBookmark>): Promise<Bookmark> {
+export async function updateBookmark(id: string, data: Partial<BookmarkInput>): Promise<Bookmark> {
   // Validate URL if provided
   if (data.url && !validateUrl(data.url)) {
     throw new Error('Invalid URL format. Must start with http:// or https://')
@@ -207,29 +204,4 @@ export async function searchBookmarks(query: string): Promise<Bookmark[]> {
   )
 }
 
-/**
- * Parse icon reference to get type and identifier
- */
-export function parseIconReference(icon: string): {
-  type: 'material' | 'simple' | 'upload'
-  identifier: string
-} {
-  if (icon.startsWith('builtin:material:')) {
-    return {
-      type: 'material',
-      identifier: icon.replace('builtin:material:', ''),
-    }
-  } else if (icon.startsWith('builtin:simple:')) {
-    return {
-      type: 'simple',
-      identifier: icon.replace('builtin:simple:', ''),
-    }
-  } else if (icon.startsWith('upload:')) {
-    return {
-      type: 'upload',
-      identifier: icon.replace('upload:', ''),
-    }
-  }
 
-  throw new Error('Invalid icon reference format')
-}
