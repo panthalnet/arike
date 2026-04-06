@@ -125,6 +125,7 @@ description: "Task list template for feature implementation"
 - [ ] T032 [P] Configure and run automated accessibility auditing (e.g., axe-core with Playwright) in `tests/e2e/accessibility.spec.ts`
 - [ ] T032b [P] Add Lighthouse CI performance benchmarking task to validate <2s first paint in `tests/e2e/performance.spec.ts`
 - [ ] T033 Implement built-in icon pack picker supporting Material Icons and Simple Icons with searchable grid, pack filter, 40 icons/page pagination, and hover tooltips in `src/components/icon_picker.tsx` (Reference spec §FR-003 for dual-pack requirements and theme color integration)
+- [ ] T033b Implement live bookmark search dropdown in SearchBar component with real-time filtering, keyboard navigation (arrow keys), and "No bookmarks found" empty state (Reference spec §FR-005 for bookmark search requirements)
 - [ ] T034 Validate application startup and storage persistence using the command-line start script in `package.json`
 - [ ] T035 Update `README.md` with quickstart instructions and maintain `docs/design.md` with architectural decisions
 

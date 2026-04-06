@@ -44,7 +44,8 @@
   [data-theme="catppuccin"] {
     --background: 240 21% 15%;   /* #1e1e2e */
     --foreground: 226 64% 88%;   /* #cdd6f4 */
-    --primary: 316 72% 86%;      /* #f5c2e7 */
+    --primary: 217 92% 76%;      /* #89b4fa (Blue) - better contrast for buttons */
+    --primary-foreground: 240 21% 15%;  /* dark text on blue button */
     --secondary: 237 16% 23%;    /* #313244 */
     --muted: 237 16% 23%;
     --accent: 170 57% 73%;       /* #94e2d5 */

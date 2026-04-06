@@ -15,7 +15,7 @@ const THEME_COLORS = {
     muted: '#3c3836',
   },
   catppuccin: {
-    primary: '#f5c2e7',
+    primary: '#89b4fa',  // Blue - better contrast than Mauve
     background: '#1e1e2e',
     text: '#cdd6f4',
     border: '#45475a',
