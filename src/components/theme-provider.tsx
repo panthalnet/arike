@@ -82,19 +82,64 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return
 
-    // Apply theme colors to CSS variables and data attribute
-    const baseColors = THEME_COLORS[theme]
-    const colors = { ...baseColors, ...customColors }
-    
+    const hexToHSL = (hex: string): string => {
+      // Remove # if present
+      hex = hex.replace('#', '')
+      
+      // Convert hex to RGB
+      const r = parseInt(hex.substring(0, 2), 16) / 255
+      const g = parseInt(hex.substring(2, 4), 16) / 255
+      const b = parseInt(hex.substring(4, 6), 16) / 255
+      
+      const max = Math.max(r, g, b)
+      const min = Math.min(r, g, b)
+      let h = 0, s = 0, l = (max + min) / 2
+      
+      if (max !== min) {
+        const d = max - min
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+        
+        switch (max) {
+          case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break
+          case g: h = ((b - r) / d + 2) / 6; break
+          case b: h = ((r - g) / d + 4) / 6; break
+        }
+      }
+      
+      h = Math.round(h * 360)
+      s = Math.round(s * 100)
+      l = Math.round(l * 100)
+      
+      return `${h} ${s}% ${l}%`
+    }
+
+    // Set theme data attribute (CSS handles the colors via globals.css)
     document.documentElement.setAttribute('data-theme', theme)
     
-    // Apply colors using CSS custom properties
-    document.documentElement.style.setProperty('--primary', colors.primary)
-    document.documentElement.style.setProperty('--background', colors.background)
-    document.documentElement.style.setProperty('--foreground', colors.text)
-    document.documentElement.style.setProperty('--border', colors.border)
-    document.documentElement.style.setProperty('--accent', colors.accent)
-    document.documentElement.style.setProperty('--muted', colors.muted)
+    // Apply custom color overrides if set (convert hex to HSL)
+    if (customColors.primary) {
+      document.documentElement.style.setProperty('--primary', hexToHSL(customColors.primary))
+    } else {
+      document.documentElement.style.removeProperty('--primary')
+    }
+    
+    if (customColors.background) {
+      document.documentElement.style.setProperty('--background', hexToHSL(customColors.background))
+    } else {
+      document.documentElement.style.removeProperty('--background')
+    }
+    
+    if (customColors.text) {
+      document.documentElement.style.setProperty('--foreground', hexToHSL(customColors.text))
+    } else {
+      document.documentElement.style.removeProperty('--foreground')
+    }
+    
+    if (customColors.border) {
+      document.documentElement.style.setProperty('--border', hexToHSL(customColors.border))
+    } else {
+      document.documentElement.style.removeProperty('--border')
+    }
   }, [theme, customColors, mounted])
 
   return (

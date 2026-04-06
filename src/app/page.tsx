@@ -1,17 +1,21 @@
 import { Clock } from '@/components/clock'
 import { SearchBar } from '@/components/search_bar'
 import { SettingsPanel } from '@/components/settings_panel'
+import { BookmarksGrid } from '@/components/bookmarks_grid'
 import { getThemeSettings } from '@/services/theme_service'
+import { getAllBookmarks } from '@/services/bookmark_service'
 
 /**
  * Homepage / Dashboard
  * Mobile-first single-column layout
- * Displays: Clock, SearchBar, Settings, and Bookmarks (to be added in Phase 4)
+ * Displays: Clock, SearchBar, Settings, and Bookmarks
  * Meets FR-001 requirements: date/time top-left, centered search bar, settings access
+ * Meets FR-002: Bookmark management with grid display
  */
 export default async function Home() {
-  // Fetch theme settings server-side for initial render
+  // Fetch theme settings and bookmarks server-side for initial render
   const settings = await getThemeSettings()
+  const bookmarks = await getAllBookmarks()
 
   return (
     <main className="min-h-screen w-full">
@@ -35,34 +39,10 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Bookmarks Section - will be added in Phase 4 (User Story 2) */}
+      {/* Bookmarks Section */}
       <section className="w-full px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center py-16">
-            <div className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-muted mb-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-16 w-16 text-muted-foreground"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              No bookmarks yet
-            </h2>
-            <p className="text-muted-foreground">
-              Bookmark management coming in Phase 4
-            </p>
-          </div>
+          <BookmarksGrid initialBookmarks={bookmarks} />
         </div>
       </section>
     </main>

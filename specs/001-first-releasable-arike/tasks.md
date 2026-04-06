@@ -79,17 +79,17 @@ description: "Task list template for feature implementation"
 
 ### Tests for User Story 2
 
-- [ ] T017 [P] [US2] Write E2E test for adding, editing, and deleting a bookmark in `tests/e2e/bookmarks.spec.ts`
-- [ ] T018 [P] [US2] Write unit test for bookmark service in `tests/unit/bookmark_service.test.ts`
+- [x] T017 [P] [US2] Write E2E test for adding, editing, and deleting a bookmark in `tests/e2e/bookmarks.spec.ts`
+- [x] T018 [P] [US2] Write unit test for bookmark service in `tests/unit/bookmark_service.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T019 [P] [US2] Implement Bookmark model and service for SQLite CRUD, including duplicate name resolution and icon reference metadata (`builtin:material:[name]`, `builtin:simple:[name]`, `upload:[uuid]`), in `src/services/bookmark_service.ts`
-- [ ] T020 [P] [US2] Implement API endpoint for icon file uploads with validation (PNG/JPEG/WebP/SVG, 2MB max, 1024x1024px max, SVG sanitization) in `src/app/api/icons/route.ts`
-- [ ] T021 [US2] Implement API endpoints for bookmarks in `src/app/api/bookmarks/route.ts` and `src/app/api/bookmarks/[id]/route.ts`
-- [ ] T022 [US2] Create Bookmark Form dialog for adding and editing bookmarks with URL validation and icon picker integration (Material Icons, Simple Icons, and upload options), in `src/components/bookmark_form.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
-- [ ] T023 [US2] Create Bookmark Card component to display individual bookmarks, including missing-icon fallback handling, in `src/components/bookmark_card.tsx` (Reference `temp/arike-homepage-wireframe-v2.html` for layout)
-- [ ] T024 [US2] Integrate bookmark grid display into the main dashboard in `src/app/page.tsx`
+- [x] T019 [P] [US2] Implement Bookmark model and service for SQLite CRUD, including duplicate name resolution and icon reference metadata (`builtin:material:[name]`, `builtin:simple:[name]`, `upload:[uuid]`), in `src/services/bookmark_service.ts`
+- [x] T020 [P] [US2] Implement API endpoint for icon file uploads with validation (PNG/JPEG/WebP/SVG, 2MB max, 1024x1024px max, SVG sanitization) in `src/app/api/icons/route.ts`
+- [x] T021 [US2] Implement API endpoints for bookmarks in `src/app/api/bookmarks/route.ts` and `src/app/api/bookmarks/[id]/route.ts`
+- [x] T022 [US2] Create Bookmark Form dialog for adding and editing bookmarks with URL validation and icon picker integration (Material Icons, Simple Icons, and upload options), in `src/components/bookmark_form.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
+- [x] T023 [US2] Create Bookmark Card component to display individual bookmarks, including missing-icon fallback handling, in `src/components/bookmark_card.tsx` (Reference `temp/arike-homepage-wireframe-v2.html` for layout)
+- [x] T024 [US2] Integrate bookmark grid display into the main dashboard in `src/app/page.tsx`
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
