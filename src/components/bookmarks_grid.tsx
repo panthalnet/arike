@@ -21,9 +21,18 @@ type Bookmark = {
   icon: string
 }
 
+type Collection = {
+  id: string
+  name: string
+  order: number
+  bookmarkCount: number
+}
+
 type BookmarksGridProps = {
   initialBookmarks?: Bookmark[]
   collectionId?: string
+  collections?: Collection[]
+  onBookmarkSaved?: () => void
 }
 
 /**
@@ -31,10 +40,10 @@ type BookmarksGridProps = {
  * Displays bookmarks in a responsive grid with CRUD operations
  * Meets FR-002: 4-column grid (desktop), 2-column (tablet), 1-column (mobile)
  */
-export function BookmarksGrid({ initialBookmarks = [], collectionId }: BookmarksGridProps) {
+export function BookmarksGrid({ initialBookmarks = [], collectionId, collections = [], onBookmarkSaved }: BookmarksGridProps) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks)
   const [formOpen, setFormOpen] = useState(false)
-  const [editingBookmark, setEditingBookmark] = useState<Bookmark | undefined>()
+  const [editingBookmark, setEditingBookmark] = useState<(Bookmark & { collectionIds?: string[] }) | undefined>()
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [bookmarkToDelete, setBookmarkToDelete] = useState<Bookmark | null>(null)
   const [announcement, setAnnouncement] = useState('')
@@ -66,23 +75,36 @@ export function BookmarksGrid({ initialBookmarks = [], collectionId }: Bookmarks
     setFormOpen(true)
   }
 
-  const handleEditBookmark = (bookmark: Bookmark) => {
-    setEditingBookmark(bookmark)
+  const handleEditBookmark = async (bookmark: Bookmark) => {
+    // Fetch current collection memberships for this bookmark
+    try {
+      const res = await fetch(`/api/bookmarks/${bookmark.id}/collections`)
+      const collectionIds: string[] = res.ok ? await res.json() : []
+      setEditingBookmark({ ...bookmark, collectionIds })
+    } catch {
+      setEditingBookmark({ ...bookmark, collectionIds: collectionId ? [collectionId] : [] })
+    }
     setFormOpen(true)
   }
 
-  const handleSaveBookmark = async (data: { name: string; url: string; icon: string }) => {
+  const handleSaveBookmark = async (data: { name: string; url: string; icon: string; collectionIds: string[] }) => {
     try {
       if (editingBookmark) {
         // Update existing bookmark
         const response = await fetch(`/api/bookmarks/${editingBookmark.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            name: data.name,
+            url: data.url,
+            icon: data.icon,
+            collections: data.collectionIds,
+          }),
         })
 
         if (response.ok) {
           await fetchBookmarks()
+          onBookmarkSaved?.()
           setAnnouncement(`${data.name} updated`)
         }
       } else {
@@ -91,13 +113,16 @@ export function BookmarksGrid({ initialBookmarks = [], collectionId }: Bookmarks
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            ...data,
-            collections: collectionId ? [collectionId] : [],
+            name: data.name,
+            url: data.url,
+            icon: data.icon,
+            collections: data.collectionIds.length > 0 ? data.collectionIds : (collectionId ? [collectionId] : []),
           }),
         })
 
         if (response.ok) {
           await fetchBookmarks()
+          onBookmarkSaved?.()
           setAnnouncement(`${data.name} added`)
         }
       }
@@ -208,6 +233,8 @@ export function BookmarksGrid({ initialBookmarks = [], collectionId }: Bookmarks
         open={formOpen}
         onOpenChange={setFormOpen}
         bookmark={editingBookmark}
+        collections={collections}
+        activeCollectionId={collectionId}
         onSave={handleSaveBookmark}
       />
 

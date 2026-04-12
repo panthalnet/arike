@@ -103,16 +103,16 @@ description: "Task list template for feature implementation"
 
 ### Tests for User Story 3
 
-- [ ] T025 [P] [US3] Write E2E test for collection management and bookmark assignment in `tests/e2e/collections.spec.ts`
-- [ ] T026 [P] [US3] Write unit test for collection service in `tests/unit/collection_service.test.ts`
+- [x] T025 [P] [US3] Write E2E test for collection management and bookmark assignment in `tests/e2e/collections.spec.ts`
+- [x] T026 [P] [US3] Write unit test for collection service in `tests/unit/collection_service.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T027 [P] [US3] Implement Collection and CollectionBookmark models and services in `src/services/collection_service.ts`
-- [ ] T028 [US3] Implement API endpoints for managing collections in `src/app/api/collections/route.ts`
-- [ ] T029 [US3] Create Collection Manager UI for creating and deleting collections, including empty collection handling, in `src/components/collection_manager.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
-- [ ] T030 [US3] Update Bookmark Form to allow assigning bookmarks to multiple collections in `src/components/bookmark_form.tsx`
-- [ ] T031 [US3] Implement Collection Tabs to filter bookmarks on the dashboard in `src/app/page.tsx`
+- [x] T027 [P] [US3] Implement Collection and CollectionBookmark models and services in `src/services/collection_service.ts`
+- [x] T028 [US3] Implement API endpoints for managing collections in `src/app/api/collections/route.ts`
+- [x] T029 [US3] Create Collection Manager UI for creating and deleting collections, including empty collection handling, in `src/components/collection_manager.tsx` (Reference `temp/arike-core-flows-wireframes-v2.html` for layout)
+- [x] T030 [US3] Update Bookmark Form to allow assigning bookmarks to multiple collections in `src/components/bookmark_form.tsx`
+- [x] T031 [US3] Implement Collection Tabs to filter bookmarks on the dashboard in `src/app/page.tsx`
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -122,12 +122,12 @@ description: "Task list template for feature implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T032 [P] Configure and run automated accessibility auditing (e.g., axe-core with Playwright) in `tests/e2e/accessibility.spec.ts`
-- [ ] T032b [P] Add Lighthouse CI performance benchmarking task to validate <2s first paint in `tests/e2e/performance.spec.ts`
-- [ ] T033 Implement built-in icon pack picker supporting Material Icons and Simple Icons with searchable grid, pack filter, 40 icons/page pagination, and hover tooltips in `src/components/icon_picker.tsx` (Reference spec §FR-003 for dual-pack requirements and theme color integration)
-- [ ] T033b Implement live bookmark search dropdown in SearchBar component with real-time filtering, keyboard navigation (arrow keys), and "No bookmarks found" empty state (Reference spec §FR-005 for bookmark search requirements)
-- [ ] T034 Validate application startup and storage persistence using the command-line start script in `package.json`
-- [ ] T035 Update `README.md` with quickstart instructions and maintain `docs/design.md` with architectural decisions
+- [x] T032 [P] Configure and run automated accessibility auditing (e.g., axe-core with Playwright) in `tests/e2e/accessibility.spec.ts`
+- [x] T032b [P] Add Lighthouse CI performance benchmarking task to validate <2s first paint in `tests/e2e/performance.spec.ts`
+- [x] T033 Implement built-in icon pack picker supporting Material Icons and Simple Icons with searchable grid, pack filter, 40 icons/page pagination, and hover tooltips in `src/components/icon_picker.tsx` (Reference spec §FR-003 for dual-pack requirements and theme color integration)
+- [x] T033b Implement live bookmark search dropdown in SearchBar component with real-time filtering, keyboard navigation (arrow keys), and "No bookmarks found" empty state (Reference spec §FR-005 for bookmark search requirements)
+- [x] T034 Validate application startup and storage persistence using the command-line start script in `package.json`
+- [x] T035 Update `README.md` with quickstart instructions and maintain `docs/design.md` with architectural decisions
 
 ---
 

@@ -1,21 +1,26 @@
 import { Clock } from '@/components/clock'
 import { SearchBar } from '@/components/search_bar'
 import { SettingsPanel } from '@/components/settings_panel'
-import { BookmarksGrid } from '@/components/bookmarks_grid'
+import { DashboardContent } from '@/components/dashboard_content'
 import { getThemeSettings } from '@/services/theme_service'
+import { getAllCollections } from '@/services/collection_service'
 import { getAllBookmarks } from '@/services/bookmark_service'
 
 /**
  * Homepage / Dashboard
  * Mobile-first single-column layout
- * Displays: Clock, SearchBar, Settings, and Bookmarks
- * Meets FR-001 requirements: date/time top-left, centered search bar, settings access
+ * Displays: Clock, SearchBar, Settings, Collection Tabs, and Bookmarks
+ * Meets FR-001: date/time top-left, centered search bar, settings access
  * Meets FR-002: Bookmark management with grid display
+ * Meets FR-004: Collection tabs with active filtering
  */
 export default async function Home() {
-  // Fetch theme settings and bookmarks server-side for initial render
-  const settings = await getThemeSettings()
-  const bookmarks = await getAllBookmarks()
+  // Fetch all server-side data for initial render
+  const [settings, collections, allBookmarks] = await Promise.all([
+    getThemeSettings(),
+    getAllCollections(),
+    getAllBookmarks(),
+  ])
 
   return (
     <main className="min-h-screen w-full">
@@ -24,7 +29,7 @@ export default async function Home() {
         <div className="max-w-7xl mx-auto flex justify-between items-start">
           {/* Clock - top-left per spec */}
           <Clock />
-          
+
           {/* Settings Button - top-right */}
           <SettingsPanel initialSettings={settings} />
         </div>
@@ -39,10 +44,13 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Bookmarks Section */}
+      {/* Bookmarks Section with Collection Tabs */}
       <section className="w-full px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          <BookmarksGrid initialBookmarks={bookmarks} />
+          <DashboardContent
+            initialCollections={collections}
+            initialBookmarks={allBookmarks}
+          />
         </div>
       </section>
     </main>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Icon } from '@iconify/react'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +11,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { IconPicker } from '@/components/icon_picker'
+
+type Collection = {
+  id: string
+  name: string
+  order: number
+  bookmarkCount: number
+}
 
 type BookmarkFormProps = {
   open: boolean
@@ -21,26 +28,23 @@ type BookmarkFormProps = {
     name: string
     url: string
     icon: string
+    collectionIds?: string[]
   }
-  onSave: (data: { name: string; url: string; icon: string }) => Promise<void>
+  collections?: Collection[]
+  activeCollectionId?: string
+  onSave: (data: { name: string; url: string; icon: string; collectionIds: string[] }) => Promise<void>
 }
-
-// Common Material Icons for quick selection
-const QUICK_ICONS = [
-  'home', 'star', 'bookmark', 'favorite', 'work', 'school', 'shopping-cart',
-  'settings', 'dashboard', 'calendar-today', 'mail', 'account-circle',
-  'code', 'terminal', 'data-object', 'developer-board',
-]
 
 /**
  * Bookmark Form Dialog
- * For adding/editing bookmarks with URL validation and icon selection
- * Simplified version - full icon picker to be implemented in polish phase
+ * For adding/editing bookmarks with URL validation and full icon picker
+ * Supports Material Icons, Simple Icons (brand), and custom uploads
  */
-export function BookmarkForm({ open, onOpenChange, bookmark, onSave }: BookmarkFormProps) {
+export function BookmarkForm({ open, onOpenChange, bookmark, collections = [], activeCollectionId, onSave }: BookmarkFormProps) {
   const [name, setName] = useState('')
   const [url, setUrl] = useState('')
-  const [selectedIcon, setSelectedIcon] = useState('home')
+  const [selectedIcon, setSelectedIcon] = useState('builtin:material:home')
+  const [selectedCollectionIds, setSelectedCollectionIds] = useState<string[]>([])
   const [urlError, setUrlError] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -50,20 +54,18 @@ export function BookmarkForm({ open, onOpenChange, bookmark, onSave }: BookmarkF
       // Edit mode
       setName(bookmark.name)
       setUrl(bookmark.url)
-      // Parse icon if it's a material icon
-      if (bookmark.icon.startsWith('builtin:material:')) {
-        setSelectedIcon(bookmark.icon.replace('builtin:material:', ''))
-      } else {
-        setSelectedIcon('home')
-      }
+      setSelectedIcon(bookmark.icon || 'builtin:material:home')
+      // Restore collection membership
+      setSelectedCollectionIds(bookmark.collectionIds ?? (activeCollectionId ? [activeCollectionId] : []))
     } else if (open) {
-      // Add mode
+      // Add mode - default to active collection
       setName('')
       setUrl('')
-      setSelectedIcon('home')
+      setSelectedIcon('builtin:material:home')
+      setSelectedCollectionIds(activeCollectionId ? [activeCollectionId] : [])
     }
     setUrlError('')
-  }, [open, bookmark])
+  }, [open, bookmark, activeCollectionId])
 
   const validateUrl = (value: string): boolean => {
     const urlRegex = /^https?:\/\/.+/
@@ -77,6 +79,12 @@ export function BookmarkForm({ open, onOpenChange, bookmark, onSave }: BookmarkF
     } else {
       setUrlError('')
     }
+  }
+
+  const toggleCollection = (id: string) => {
+    setSelectedCollectionIds((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    )
   }
 
   const handleSave = async () => {
@@ -94,7 +102,8 @@ export function BookmarkForm({ open, onOpenChange, bookmark, onSave }: BookmarkF
       await onSave({
         name: name.trim(),
         url: url.trim(),
-        icon: `builtin:material:${selectedIcon}`,
+        icon: selectedIcon || 'builtin:material:home',
+        collectionIds: selectedCollectionIds,
       })
       onOpenChange(false)
     } catch (error) {
@@ -157,64 +166,38 @@ export function BookmarkForm({ open, onOpenChange, bookmark, onSave }: BookmarkF
             )}
           </div>
 
-          {/* Icon Selection */}
-          <div className="space-y-2">
+          {/* Icon Selection - full picker */}
+          <div className="space-y-2" data-testid="icon-picker-button">
             <Label>Icon</Label>
-            <div 
-              data-testid="icon-picker-button"
-              className="border rounded-lg p-4"
-            >
-              <div className="flex items-center gap-4 mb-3">
-                <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-muted">
-                  <Icon 
-                    icon={`material-symbols:${selectedIcon}`}
-                    width={48}
-                    height={48}
-                    className="text-accent"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">
-                    {selectedIcon.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Material Icon
-                  </p>
-                </div>
-              </div>
+            <IconPicker
+              value={selectedIcon}
+              onChange={setSelectedIcon}
+            />
+          </div>
 
-              {/* Quick icon grid */}
-              <div 
-                data-testid="icon-tab-material"
-                className="grid grid-cols-8 gap-2"
-              >
-                {QUICK_ICONS.map((iconName) => (
-                  <button
-                    key={iconName}
-                    data-testid={`icon-option-${iconName}`}
-                    type="button"
-                    onClick={() => setSelectedIcon(iconName)}
-                    className={`
-                      flex items-center justify-center w-10 h-10 rounded 
-                      border-2 transition-colors
-                      ${selectedIcon === iconName 
-                        ? 'border-accent bg-accent/10' 
-                        : 'border-border hover:border-accent/50 hover:bg-muted'
-                      }
-                    `}
-                    title={iconName.replace(/-/g, ' ')}
+          {/* Collections */}
+          {collections.length > 0 && (
+            <div className="space-y-2">
+              <Label>Collections</Label>
+              <div className="border rounded-lg p-3 space-y-2 max-h-40 overflow-y-auto">
+                {collections.map((col) => (
+                  <label
+                    key={col.id}
+                    className="flex items-center gap-2 cursor-pointer select-none"
                   >
-                    <Icon 
-                      icon={`material-symbols:${iconName}`}
-                      width={24}
-                      height={24}
-                      className={selectedIcon === iconName ? 'text-accent' : 'text-foreground'}
+                    <input
+                      type="checkbox"
+                      data-testid={`collection-checkbox-${col.name}`}
+                      checked={selectedCollectionIds.includes(col.id)}
+                      onChange={() => toggleCollection(col.id)}
+                      className="h-4 w-4 rounded border-border accent-primary"
                     />
-                  </button>
+                    <span className="text-sm">{col.name}</span>
+                  </label>
                 ))}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Actions */}

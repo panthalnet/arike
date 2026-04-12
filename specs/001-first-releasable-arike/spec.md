@@ -263,7 +263,10 @@ This section defines specific requirements for edge cases and error states:
   - **Touch targets**: Minimum 44×44px for all interactive elements (WCAG AA compliance)
   - **Spacing**: Minimum 8px between adjacent interactive elements
   - **Collections**: Horizontal scrollable tabs, swipe gestures enabled
-  - **Keyboard**: Mobile keyboard appears when search input focused, autocomplete="off"
+  - **Keyboard**: Mobile keyboard appears when search input focused
+    - **Keyboard type**: `inputMode="search"` for search-optimized keyboard layout
+    - **Action button**: "Go" or "Search" button on keyboard (browser default behavior)
+    - **Autocomplete**: `autocomplete="off"` to prevent browser autofill suggestions
   - **Orientation**: Support both portrait and landscape, no layout breaks
 
 #### Command-Line Deployment
