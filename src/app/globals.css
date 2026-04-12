@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default theme: Gruvbox Dark */
+    --background: 40 11% 16%;  /* #282828 in HSL */
+    --foreground: 43 13% 90%;  /* #ebdbb2 in HSL */
+    --card: 40 11% 16%;
+    --card-foreground: 43 13% 90%;
+    --popover: 40 11% 16%;
+    --popover-foreground: 43 13% 90%;
+    --primary: 27 96% 61%;     /* #d65d0e in HSL */
+    --primary-foreground: 43 13% 90%;
+    --secondary: 40 11% 22%;   /* #3c3836 in HSL */
+    --secondary-foreground: 43 13% 90%;
+    --muted: 40 11% 22%;       /* #3c3836 in HSL */
+    --muted-foreground: 43 13% 70%;
+    --accent: 41 86% 59%;      /* #d79921 in HSL */
+    --accent-foreground: 40 11% 16%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 43 13% 90%;
+    --border: 40 11% 31%;      /* #504945 in HSL */
+    --input: 40 11% 31%;
+    --ring: 27 96% 61%;
+    --radius: 0.5rem;
+  }
+
+  /* Gruvbox Dark theme */
+  [data-theme="gruvbox"] {
+    --background: 40 11% 16%;
+    --foreground: 43 13% 90%;
+    --primary: 27 96% 61%;
+    --secondary: 40 11% 22%;
+    --muted: 40 11% 22%;
+    --accent: 41 86% 59%;
+    --border: 40 11% 31%;
+    --popover: 40 11% 16%;
+    --popover-foreground: 43 13% 90%;
+  }
+
+  /* Catppuccin Mocha theme */
+  [data-theme="catppuccin"] {
+    --background: 240 21% 15%;   /* #1e1e2e */
+    --foreground: 226 64% 88%;   /* #cdd6f4 */
+    --primary: 217 92% 76%;      /* #89b4fa (Blue) - better contrast for buttons */
+    --primary-foreground: 240 21% 15%;  /* dark text on blue button */
+    --secondary: 237 16% 23%;    /* #313244 */
+    --muted: 237 16% 23%;
+    --accent: 170 57% 73%;       /* #94e2d5 */
+    --border: 240 16% 31%;       /* #45475a */
+    --popover: 240 21% 15%;
+    --popover-foreground: 226 64% 88%;
+  }
+
+  /* Everforest Dark theme */
+  [data-theme="everforest"] {
+    --background: 200 20% 21%;   /* #2d353b */
+    --foreground: 35 14% 81%;    /* #d3c6aa */
+    --primary: 95 28% 65%;       /* #a7c080 */
+    --secondary: 200 16% 27%;    /* #343f44 */
+    --muted: 200 16% 27%;
+    --accent: 35 44% 68%;        /* #dbbc7f */
+    --border: 200 14% 37%;       /* #475258 */
+    --popover: 200 20% 21%;
+    --popover-foreground: 35 14% 81%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Screen reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
