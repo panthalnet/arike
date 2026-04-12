@@ -1,6 +1,6 @@
 /* Icon color theming - icons inherit theme accent color */
 .icon-container {
-  color: var(--color-primary);
+  color: hsl(var(--primary));
 }
 
 .icon-container svg {

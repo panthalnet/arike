@@ -16,7 +16,7 @@ The v1 release focuses on:
 
 **Language/Version**: Next.js 16.2.2 (App Router) / Node 20
 **Primary Dependencies**: Next.js, SQLite, Tailwind, shadcn/ui
-**Storage**: SQLite (bookmarks.db)
+**Storage**: SQLite (`./data/arike.db`)
 **Testing**: Vitest + Playwright (90%+ coverage mandate)
 **Target Platform**: Docker container or command-line (self-hosted)
 **Project Type**: Web application (standalone)
@@ -70,6 +70,10 @@ tests/
 ```
 
 **Structure Decision**: Standard Next.js + SQLite project structure using domain-driven separation.
+
+## Delivery Approach
+
+The implementation is organized as vertical slices per user story. Shared infrastructure work should be introduced only when it directly enables a user-facing capability and should remain coupled to the story that consumes it.
 
 ## Complexity Tracking
 

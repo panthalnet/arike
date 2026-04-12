@@ -21,7 +21,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://github.com')
 
     // Select a built-in icon (Material Icons)
-    await page.locator('[data-testid="icon-picker-button"]').click()
+    await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-tab-material"]').click()
     await page.locator('[data-testid="icon-option-home"]').first().click()
 
@@ -39,8 +39,8 @@ test.describe('Bookmark Management', () => {
     await expect(bookmarkCard.locator('[data-testid="bookmark-name"]')).toHaveText('GitHub')
     await expect(bookmarkCard.locator('[data-testid="bookmark-icon"]')).toBeVisible()
 
-    // Verify bookmark is clickable
-    await expect(bookmarkCard).toHaveAttribute('href', 'https://github.com')
+    // Verify bookmark is interactive (role=button, keyboard accessible)
+    await expect(bookmarkCard).toHaveAttribute('role', 'button')
   })
 
   test('should add bookmark with uploaded icon', async ({ page }) => {
@@ -52,7 +52,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://example.com')
 
     // Upload custom icon
-    await page.locator('[data-testid="icon-picker-button"]').click()
+    await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-tab-upload"]').click()
     
     // Simulate file upload (in real test, would upload actual file)
@@ -90,7 +90,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="add-bookmark-button"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('Example')
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://example.com')
-    await page.locator('[data-testid="icon-picker-button"]').click()
+    await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
     await page.locator('[data-testid="bookmark-save-button"]').click()
 
@@ -124,7 +124,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="add-bookmark-button"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('To Delete')
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://delete.com')
-    await page.locator('[data-testid="icon-picker-button"]').click()
+    await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
     await page.locator('[data-testid="bookmark-save-button"]').click()
 
@@ -172,7 +172,7 @@ test.describe('Bookmark Management', () => {
       await page.locator('[data-testid="add-bookmark-button"]').click()
       await page.locator('[data-testid="bookmark-name-input"]').fill(bookmark.name)
       await page.locator('[data-testid="bookmark-url-input"]').fill(bookmark.url)
-      await page.locator('[data-testid="icon-picker-button"]').click()
+      await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
       await page.locator('[data-testid="icon-option-home"]').first().click()
       await page.locator('[data-testid="bookmark-save-button"]').click()
       await page.waitForTimeout(300) // Wait between additions
@@ -200,7 +200,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="add-bookmark-button"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('Touch Test')
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://touch.com')
-    await page.locator('[data-testid="icon-picker-button"]').click()
+    await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
     await page.locator('[data-testid="bookmark-save-button"]').click()
 
@@ -218,7 +218,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="add-bookmark-button"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('Duplicate')
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://first.com')
-    await page.locator('[data-testid="icon-picker-button"]').click()
+    await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
     await page.locator('[data-testid="bookmark-save-button"]').click()
 
@@ -226,7 +226,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="add-bookmark-button"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('Duplicate')
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://second.com')
-    await page.locator('[data-testid="icon-picker-button"]').click()
+    await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
     await page.locator('[data-testid="bookmark-save-button"]').click()
 
@@ -240,7 +240,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="add-bookmark-button"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('External')
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://example.com')
-    await page.locator('[data-testid="icon-picker-button"]').click()
+    await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
     await page.locator('[data-testid="bookmark-save-button"]').click()
 
@@ -248,9 +248,12 @@ test.describe('Bookmark Management', () => {
     const bookmarkCard = page.locator('[data-testid="bookmark-card-External"]')
     await expect(bookmarkCard).toBeVisible()
 
-    // Verify target="_blank"
-    await expect(bookmarkCard).toHaveAttribute('target', '_blank')
-    await expect(bookmarkCard).toHaveAttribute('rel', /noopener/)
+    // Bookmark card uses window.open (role=button div); verify it opens a new page on click
+    const [newPage] = await Promise.all([
+      context.waitForEvent('page'),
+      bookmarkCard.click(),
+    ])
+    await expect(newPage).toHaveURL('https://example.com')
   })
 
   test('should display icon at 64x64px', async ({ page }) => {
@@ -258,7 +261,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="add-bookmark-button"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('Icon Test')
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://icon.com')
-    await page.locator('[data-testid="icon-picker-button"]').click()
+    await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
     await page.locator('[data-testid="bookmark-save-button"]').click()
 

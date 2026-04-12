@@ -3,6 +3,7 @@ import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import fs from 'fs'
 import path from 'path'
+import { AVAILABLE_THEMES, AVAILABLE_SEARCH_PROVIDERS, THEME_COLORS } from '../../src/services/theme_service'
 
 // We'll import the theme service after it's created
 // For now, let's define the expected interface
@@ -127,25 +128,33 @@ describe('Theme Service', () => {
     expect(settings.searchProvider).toBe('google')
   })
 
-  it('should validate theme names', () => {
-    const validThemes = ['gruvbox', 'catppuccin', 'everforest']
-    const invalidTheme = 'invalid-theme'
-
-    expect(validThemes).toContain('gruvbox')
-    expect(validThemes).toContain('catppuccin')
-    expect(validThemes).toContain('everforest')
-    expect(validThemes).not.toContain(invalidTheme)
+  it('should validate theme names via service constants', () => {
+    expect(AVAILABLE_THEMES).toContain('gruvbox')
+    expect(AVAILABLE_THEMES).toContain('catppuccin')
+    expect(AVAILABLE_THEMES).toContain('everforest')
+    expect(AVAILABLE_THEMES).not.toContain('invalid-theme')
+    expect(AVAILABLE_THEMES).toHaveLength(3)
   })
 
-  it('should validate search provider names', () => {
-    const validProviders = ['duckduckgo', 'google', 'bing', 'brave']
-    const invalidProvider = 'invalid-provider'
+  it('should validate search provider names via service constants', () => {
+    expect(AVAILABLE_SEARCH_PROVIDERS).toContain('duckduckgo')
+    expect(AVAILABLE_SEARCH_PROVIDERS).toContain('google')
+    expect(AVAILABLE_SEARCH_PROVIDERS).toContain('bing')
+    expect(AVAILABLE_SEARCH_PROVIDERS).toContain('brave')
+    expect(AVAILABLE_SEARCH_PROVIDERS).not.toContain('invalid-provider')
+    expect(AVAILABLE_SEARCH_PROVIDERS).toHaveLength(4)
+  })
 
-    expect(validProviders).toContain('duckduckgo')
-    expect(validProviders).toContain('google')
-    expect(validProviders).toContain('bing')
-    expect(validProviders).toContain('brave')
-    expect(validProviders).not.toContain(invalidProvider)
+  it('should have correct THEME_COLORS structure for all themes', () => {
+    const themeKeys = ['gruvbox', 'catppuccin', 'everforest'] as const
+    const colorKeys = ['primary', 'background', 'text', 'border', 'accent', 'muted'] as const
+
+    themeKeys.forEach(theme => {
+      expect(THEME_COLORS[theme]).toBeDefined()
+      colorKeys.forEach(key => {
+        expect(THEME_COLORS[theme][key]).toMatch(/^#[0-9A-Fa-f]{6}$/)
+      })
+    })
   })
 
   it('should validate hex color format', () => {

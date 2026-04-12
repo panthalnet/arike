@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Trash2, X } from 'lucide-react'
+import { Check, Pencil, Plus, Trash2, X } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -35,7 +35,11 @@ export function CollectionManager({ open, onOpenChange, onCollectionsChange }: C
   const [collections, setCollections] = useState<Collection[]>([])
   const [newName, setNewName] = useState('')
   const [nameError, setNameError] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingName, setEditingName] = useState('')
+  const [editError, setEditError] = useState('')
   const [creating, setCreating] = useState(false)
+  const [savingId, setSavingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [announcement, setAnnouncement] = useState('')
@@ -90,6 +94,55 @@ export function CollectionManager({ open, onOpenChange, onCollectionsChange }: C
       setNameError('Failed to create collection')
     } finally {
       setCreating(false)
+    }
+  }
+
+  const startEdit = (id: string, name: string) => {
+    setEditingId(id)
+    setEditingName(name)
+    setEditError('')
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditingName('')
+    setEditError('')
+  }
+
+  const handleRename = async (id: string) => {
+    const trimmed = editingName.trim()
+    if (!trimmed) {
+      setEditError('Collection name is required')
+      return
+    }
+
+    setSavingId(id)
+    setEditError('')
+
+    try {
+      const res = await fetch(`/api/collections/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: trimmed }),
+      })
+
+      if (res.ok) {
+        await fetchCollections()
+        onCollectionsChange()
+        setAnnouncement(`Collection renamed to "${trimmed}"`)
+        cancelEdit()
+      } else if (res.status === 409) {
+        setEditError('A collection with that name already exists')
+      } else if (res.status === 422) {
+        const data = await res.json()
+        setEditError(data.error)
+      } else {
+        setEditError('Failed to rename collection')
+      }
+    } catch {
+      setEditError('Failed to rename collection')
+    } finally {
+      setSavingId(null)
     }
   }
 
@@ -187,32 +240,91 @@ export function CollectionManager({ open, onOpenChange, onCollectionsChange }: C
                 data-testid={`collection-list-item-${col.name}`}
                 className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2"
               >
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="truncate font-medium text-sm">{col.name}</span>
-                  <span
-                    data-testid={`collection-badge-${col.name}`}
-                    className="shrink-0 text-xs bg-muted text-muted-foreground rounded-full px-2 py-0.5"
-                    aria-label={`${col.bookmarkCount} bookmarks`}
-                  >
-                    {col.bookmarkCount}
-                  </span>
-                </div>
-                <Button
-                  data-testid={`delete-collection-button-${col.name}`}
-                  variant="ghost"
-                  size="icon"
-                  disabled={isLastCollection || deletingId === col.id}
-                  onClick={() => handleDeleteRequest(col.id)}
-                  aria-label={`Delete collection ${col.name}`}
-                  title={isLastCollection ? 'Cannot delete the last collection' : `Delete "${col.name}"`}
-                  className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                {editingId === col.id ? (
+                  <div className="flex w-full items-center gap-2 min-w-0">
+                    <Input
+                      data-testid={`edit-collection-name-input-${col.name}`}
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          void handleRename(col.id)
+                        }
+                        if (e.key === 'Escape') {
+                          cancelEdit()
+                        }
+                      }}
+                      autoFocus
+                      className="h-8"
+                    />
+                    <Button
+                      data-testid={`save-collection-button-${col.name}`}
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      onClick={() => void handleRename(col.id)}
+                      disabled={savingId === col.id}
+                      aria-label={`Save collection name for ${col.name}`}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 shrink-0"
+                      onClick={cancelEdit}
+                      aria-label={`Cancel editing ${col.name}`}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="truncate font-medium text-sm">{col.name}</span>
+                      <span
+                        data-testid={`collection-badge-${col.name}`}
+                        className="shrink-0 text-xs bg-muted text-muted-foreground rounded-full px-2 py-0.5"
+                        aria-label={`${col.bookmarkCount} bookmarks`}
+                      >
+                        {col.bookmarkCount}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        data-testid={`edit-collection-button-${col.name}`}
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => startEdit(col.id, col.name)}
+                        aria-label={`Edit collection ${col.name}`}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        data-testid={`delete-collection-button-${col.name}`}
+                        variant="ghost"
+                        size="icon"
+                        disabled={isLastCollection || deletingId === col.id}
+                        onClick={() => handleDeleteRequest(col.id)}
+                        aria-label={`Delete collection ${col.name}`}
+                        title={isLastCollection ? 'Cannot delete the last collection' : `Delete "${col.name}"`}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             ))
           )}
         </div>
+
+        {editError && (
+          <p className="text-sm text-destructive" role="alert">
+            {editError}
+          </p>
+        )}
 
         {/* Close button */}
         <div className="flex justify-end pt-2">

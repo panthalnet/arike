@@ -5,7 +5,7 @@ export function Loading({ message = 'Loading...' }: { message?: string }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[200px] p-8">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4" />
-      <p className="text-sm text-text/60">{message}</p>
+      <p className="text-sm text-foreground/60">{message}</p>
     </div>
   )
 }
@@ -21,7 +21,7 @@ export function ErrorState({
   return (
     <div className="flex flex-col items-center justify-center min-h-[200px] p-8">
       <div className="text-4xl mb-4">⚠️</div>
-      <p className="text-sm text-text/80 mb-4">{message}</p>
+      <p className="text-sm text-foreground/80 mb-4">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
@@ -54,7 +54,7 @@ export function EmptyState({
       <div className="text-6xl mb-4 opacity-50">{icon}</div>
       <h3 className="text-lg font-semibold mb-2">{title}</h3>
       {description && (
-        <p className="text-sm text-text/60 mb-4 max-w-md">{description}</p>
+        <p className="text-sm text-foreground/60 mb-4 max-w-md">{description}</p>
       )}
       {action && (
         <button

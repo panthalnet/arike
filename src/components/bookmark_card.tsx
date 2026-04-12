@@ -36,6 +36,13 @@ export function BookmarkCard({
     window.open(url, '_blank', 'noopener,noreferrer')
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      window.open(url, '_blank', 'noopener,noreferrer')
+    }
+  }
+
   // Parse icon reference to determine rendering method
   let iconElement: React.ReactNode
 
@@ -66,7 +73,7 @@ export function BookmarkCard({
       // Uploaded custom icon
       iconElement = (
         <img
-          src={`/api/icons?filename=${identifier}`}
+          src={`/api/icons/${identifier}`}
           alt={`${name} icon`}
           width={64}
           height={64}
@@ -89,8 +96,12 @@ export function BookmarkCard({
   return (
     <div
       data-testid={`bookmark-card-${name}`}
-      className="group relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-border bg-card hover:bg-accent/10 hover:border-accent transition-colors duration-200 cursor-pointer"
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${name}`}
+      className="group relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-border bg-card hover:bg-accent/10 hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors duration-200 cursor-pointer"
       onClick={handleCardClick}
+      onKeyDown={handleKeyDown}
       style={{ minWidth: '120px', minHeight: '120px' }}
     >
       {/* Icon */}
@@ -145,13 +156,14 @@ export function BookmarkCard({
         )}
       </div>
 
-      {/* Hidden link for accessibility and SEO */}
+      {/* Hidden link for SEO */}
       <a
         href={url}
         target="_blank"
         rel="noopener noreferrer"
         className="sr-only"
         tabIndex={-1}
+        aria-hidden="true"
       >
         {name} - {url}
       </a>

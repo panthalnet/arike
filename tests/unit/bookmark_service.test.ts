@@ -3,6 +3,7 @@ import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import fs from 'fs'
 import path from 'path'
+import { validateUrl, validateIconReference, parseIconReference } from '../../src/lib/icon-utils'
 
 // Type definitions for the bookmark service (will be implemented)
 type Bookmark = {
@@ -186,15 +187,37 @@ describe('Bookmark Service', () => {
       '',
     ]
 
-    const urlRegex = /^https?:\/\/.+/
-
     validUrls.forEach(url => {
-      expect(urlRegex.test(url)).toBe(true)
+      expect(validateUrl(url)).toBe(true)
     })
 
     invalidUrls.forEach(url => {
-      expect(urlRegex.test(url)).toBe(false)
+      expect(validateUrl(url)).toBe(false)
     })
+  })
+
+  it('should validate icon reference format via service utility', () => {
+    // Valid references
+    expect(validateIconReference('builtin:material:home')).toBe(true)
+    expect(validateIconReference('builtin:simple:github')).toBe(true)
+    expect(validateIconReference(`upload:${crypto.randomUUID()}.png`)).toBe(true)
+    expect(validateIconReference(`upload:${crypto.randomUUID()}.svg`)).toBe(true)
+
+    // Invalid references
+    expect(validateIconReference('')).toBe(false)
+    expect(validateIconReference('invalid')).toBe(false)
+    expect(validateIconReference('builtin:unknown:icon')).toBe(false)
+    expect(validateIconReference('upload:notauuid.exe')).toBe(false)
+  })
+
+  it('should parse icon references correctly via service utility', () => {
+    expect(parseIconReference('builtin:material:home')).toEqual({ type: 'material', identifier: 'home' })
+    expect(parseIconReference('builtin:simple:github')).toEqual({ type: 'simple', identifier: 'github' })
+    const uuid = crypto.randomUUID()
+    expect(parseIconReference(`upload:${uuid}.png`)).toEqual({ type: 'upload', identifier: `${uuid}.png` })
+
+    // Invalid reference should throw
+    expect(() => parseIconReference('invalid')).toThrow()
   })
 
   it('should support duplicate bookmark names', () => {
@@ -317,7 +340,7 @@ describe('Bookmark Service', () => {
     expect(bookmarks).toHaveLength(2)
   })
 
-  it('should update updatedAt timestamp on changes', () => {
+  it('should update updatedAt timestamp on changes', async () => {
     const bookmarkId = crypto.randomUUID()
     
     // Create bookmark
@@ -328,19 +351,18 @@ describe('Bookmark Service', () => {
 
     const before = sqlite.prepare('SELECT updated_at FROM bookmarks WHERE id = ?').get(bookmarkId) as any
     
-    // Wait a moment
-    const wait = new Promise(resolve => setTimeout(resolve, 100))
-    wait.then(() => {
-      // Update bookmark
-      sqlite.prepare(`
-        UPDATE bookmarks 
-        SET name = ?, updated_at = unixepoch()
-        WHERE id = ?
-      `).run('Updated', bookmarkId)
+    // Wait at least 1 second so unixepoch() resolution produces a different value
+    await new Promise(resolve => setTimeout(resolve, 1100))
 
-      const after = sqlite.prepare('SELECT updated_at FROM bookmarks WHERE id = ?').get(bookmarkId) as any
-      
-      expect(after.updated_at).toBeGreaterThan(before.updated_at)
-    })
+    // Update bookmark
+    sqlite.prepare(`
+      UPDATE bookmarks 
+      SET name = ?, updated_at = unixepoch()
+      WHERE id = ?
+    `).run('Updated', bookmarkId)
+
+    const after = sqlite.prepare('SELECT updated_at FROM bookmarks WHERE id = ?').get(bookmarkId) as any
+    
+    expect(after.updated_at).toBeGreaterThan(before.updated_at)
   })
 })

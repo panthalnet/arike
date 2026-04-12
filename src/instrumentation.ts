@@ -1,20 +1,19 @@
-import { runMigrations, initializeDefaults } from './lib/migrate'
-
 /**
- * Instrumentation hook - runs once when Next.js starts
- * Ensures database is migrated and initialized with defaults
+ * Instrumentation hook - runs once when Next.js starts.
+ * Node.js-specific modules (fs, path, better-sqlite3) are dynamically
+ * imported inside the runtime guard so the Edge runtime never tries to
+ * evaluate them at parse time.
  */
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     console.log('🚀 Initializing Arike database...')
-    
+
     try {
-      // Run database migrations
+      const { runMigrations, initializeDefaults } = await import('./lib/migrate')
+
       runMigrations()
-      
-      // Initialize default data (theme settings, default collection)
       initializeDefaults()
-      
+
       console.log('✅ Database initialization complete')
     } catch (error) {
       console.error('❌ Database initialization failed:', error)

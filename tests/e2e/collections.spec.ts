@@ -37,6 +37,23 @@ test.describe('Collection Management', () => {
     await expect(newTab).toBeVisible({ timeout: 500 })
   })
 
+  test('should rename a collection from the manager', async ({ page }) => {
+    const manageBtn = page.locator('[data-testid="manage-collections-button"]')
+    await manageBtn.click()
+
+    const editButton = page.locator('[data-testid="edit-collection-button-Bookmarks"]')
+    await expect(editButton).toBeVisible()
+    await editButton.click()
+
+    const nameInput = page.locator('input').filter({ has: page.locator('') })
+    await page.locator('input').nth(0).fill('Main')
+    await page.locator('[data-testid="save-collection-button-Bookmarks"]').click()
+
+    await expect(page.locator('[data-testid="collection-list-item-Main"]')).toBeVisible()
+    await page.locator('[data-testid="close-collection-manager"]').click()
+    await expect(page.locator('[data-testid="collection-tab-Main"]')).toBeVisible()
+  })
+
   test('should switch between collections and filter bookmarks', async ({ page }) => {
     // Add a bookmark to default collection
     await page.locator('[data-testid="add-bookmark-button"]').click()
@@ -169,6 +186,21 @@ test.describe('Collection Management', () => {
     // Tab bar should be scrollable
     const tabBar = page.locator('[data-testid="collection-tabs"]')
     await expect(tabBar).toBeVisible()
+  })
+
+  test('should support reordering collections from the dashboard', async ({ page }) => {
+    const manageBtn = page.locator('[data-testid="manage-collections-button"]')
+    await manageBtn.click()
+    for (const name of ['One', 'Two']) {
+      await page.locator('[data-testid="new-collection-name-input"]').fill(name)
+      await page.locator('[data-testid="add-collection-button"]').click()
+    }
+    await page.locator('[data-testid="close-collection-manager"]').click()
+
+    await page.locator('[data-testid="move-collection-right-Bookmarks"]').click()
+
+    const tabs = page.locator('[role="tab"]')
+    await expect(tabs.nth(0)).toHaveAttribute('data-testid', 'collection-tab-One')
   })
 
   test('should show bookmark count badge on collection tabs', async ({ page }) => {

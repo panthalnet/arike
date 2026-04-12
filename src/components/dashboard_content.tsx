@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Settings2 } from 'lucide-react'
+import { GripVertical, Settings2 } from 'lucide-react'
 import { BookmarksGrid } from '@/components/bookmarks_grid'
 import { CollectionManager } from '@/components/collection_manager'
 import { Button } from '@/components/ui/button'
@@ -77,6 +77,30 @@ export function DashboardContent({
     fetchCollections() // Refresh badge counts
   }, [fetchCollections])
 
+  const handleMoveCollection = useCallback(async (id: string, direction: 'left' | 'right') => {
+    const index = collections.findIndex((collection) => collection.id === id)
+    if (index < 0) return
+
+    const targetIndex = direction === 'left' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= collections.length) return
+
+    const next = [...collections]
+    const [moved] = next.splice(index, 1)
+    next.splice(targetIndex, 0, moved)
+    setCollections(next)
+
+    try {
+      await fetch('/api/collections/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds: next.map((collection) => collection.id) }),
+      })
+    } catch (error) {
+      console.error('Failed to reorder collections:', error)
+      await fetchCollections()
+    }
+  }, [collections, fetchCollections])
+
   const activeCollection = collections.find((c) => c.id === activeCollectionId)
 
   return (
@@ -91,41 +115,66 @@ export function DashboardContent({
           className="flex-1 flex items-center gap-1 overflow-x-auto pb-1 scrollbar-thin"
           style={{ scrollbarWidth: 'thin' }}
         >
-          {collections.map((col) => {
+          {collections.map((col, index) => {
             const isActive = col.id === activeCollectionId
             return (
-              <button
-                key={col.id}
-                role="tab"
-                data-testid={`collection-tab-${col.name}`}
-                aria-selected={isActive}
-                aria-controls={`tabpanel-${col.id}`}
-                onClick={() => setActiveCollectionId(col.id)}
-                className={`
-                  inline-flex items-center gap-1.5 shrink-0 rounded-lg px-3 py-2 text-sm font-medium
-                  transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
-                  ${isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
-                  }
-                `}
-                style={{ minHeight: '44px' }}
-              >
-                <span>{col.name}</span>
-                <span
-                  data-testid="tab-badge"
-                  aria-label={`${col.bookmarkCount} bookmarks`}
+              <div key={col.id} className="inline-flex items-stretch shrink-0">
+                <button
+                  role="tab"
+                  data-testid={`collection-tab-${col.name}`}
+                  aria-selected={isActive}
+                  aria-controls={`tabpanel-${col.id}`}
+                  onClick={() => setActiveCollectionId(col.id)}
                   className={`
-                    text-xs rounded-full px-1.5 py-0.5 min-w-[1.25rem] text-center
+                    inline-flex items-center gap-1.5 shrink-0 rounded-l-lg px-3 py-2 text-sm font-medium
+                    transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
                     ${isActive
-                      ? 'bg-primary-foreground/20 text-primary-foreground'
-                      : 'bg-background text-muted-foreground'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                     }
                   `}
+                  style={{ minHeight: '44px' }}
                 >
-                  {col.bookmarkCount}
-                </span>
-              </button>
+                  <span>{col.name}</span>
+                  <span
+                    data-testid="tab-badge"
+                    aria-label={`${col.bookmarkCount} bookmarks`}
+                    className={`
+                      text-xs rounded-full px-1.5 py-0.5 min-w-[1.25rem] text-center
+                      ${isActive
+                        ? 'bg-primary-foreground/20 text-primary-foreground'
+                        : 'bg-background text-muted-foreground'
+                      }
+                    `}
+                  >
+                    {col.bookmarkCount}
+                  </span>
+                </button>
+                <div className="flex items-stretch overflow-hidden rounded-r-lg border border-l-0 border-border">
+                  <button
+                    type="button"
+                    data-testid={`move-collection-left-${col.name}`}
+                    aria-label={`Move collection ${col.name} left`}
+                    disabled={index === 0}
+                    onClick={() => void handleMoveCollection(col.id, 'left')}
+                    className="inline-flex items-center justify-center px-2 text-muted-foreground hover:text-foreground disabled:opacity-40"
+                    style={{ minHeight: '44px' }}
+                  >
+                    <GripVertical className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    data-testid={`move-collection-right-${col.name}`}
+                    aria-label={`Move collection ${col.name} right`}
+                    disabled={index === collections.length - 1}
+                    onClick={() => void handleMoveCollection(col.id, 'right')}
+                    className="inline-flex items-center justify-center px-2 text-muted-foreground hover:text-foreground disabled:opacity-40"
+                    style={{ minHeight: '44px' }}
+                  >
+                    <GripVertical className="h-4 w-4 rotate-90" />
+                  </button>
+                </div>
+              </div>
             )
           })}
         </div>

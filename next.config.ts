@@ -2,6 +2,7 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
   // Disable external directory scanning for better performance
   experimental: {
     optimizePackageImports: ['@iconify/react'],

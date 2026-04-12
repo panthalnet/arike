@@ -167,7 +167,7 @@ export function BookmarkForm({ open, onOpenChange, bookmark, collections = [], a
           </div>
 
           {/* Icon Selection - full picker */}
-          <div className="space-y-2" data-testid="icon-picker-button">
+          <div className="space-y-2" data-testid="icon-picker-section">
             <Label>Icon</Label>
             <IconPicker
               value={selectedIcon}
