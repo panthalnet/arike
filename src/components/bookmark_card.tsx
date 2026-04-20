@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Icon } from '@iconify/react'
 import { Edit, Trash2 } from 'lucide-react'
 import { parseIconReference } from '@/lib/icon-utils'

@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { wallpaperAssets } from '@/lib/schema'
 import { saveWallpaper, deleteWallpaperFile } from '@/lib/storage'
@@ -25,7 +25,8 @@ export interface WallpaperAssetDTO {
 }
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2 MB
-const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']
+// SVG is excluded: serving SVGs can allow XSS via embedded scripts
+const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/webp']
 
 function rowToDTO(row: typeof wallpaperAssets.$inferSelect): WallpaperAssetDTO {
   return {
@@ -78,17 +79,12 @@ export async function setActiveWallpaper(wallpaperId: string): Promise<void> {
     throw new Error(`Wallpaper not found: ${wallpaperId}`)
   }
 
-  // Deactivate all, then activate the target
-  await db
-    .update(wallpaperAssets)
-    .set({ isActive: false, updatedAt: new Date() })
-    .run()
-
-  await db
-    .update(wallpaperAssets)
-    .set({ isActive: true, updatedAt: new Date() })
-    .where(eq(wallpaperAssets.id, wallpaperId))
-    .run()
+  // Deactivate all then activate target — wrapped in a transaction for atomicity
+  await db.transaction(async (tx) => {
+    await tx.update(wallpaperAssets).set({ isActive: false, updatedAt: new Date() }).run()
+    await tx.update(wallpaperAssets).set({ isActive: true, updatedAt: new Date() }).where(eq(wallpaperAssets.id, wallpaperId)).run()
+  })
+}
 }
 
 export async function deactivateAllWallpapers(): Promise<void> {

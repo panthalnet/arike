@@ -1,19 +1,48 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import Database from 'better-sqlite3'
+import { drizzle } from 'drizzle-orm/better-sqlite3'
+import os from 'os'
 import path from 'path'
+import fs from 'fs'
 import { NextRequest } from 'next/server'
 
-let sqlite: InstanceType<typeof Database>
+let tmpDb: string
+let sqlite: Database.Database
 
-beforeAll(() => {
-  const DB_PATH = path.join(process.cwd(), 'data', 'arike.db')
-  sqlite = new Database(DB_PATH)
-  sqlite.prepare('UPDATE wallpaper_assets SET is_active = 0').run()
+vi.mock('@/lib/db', () => ({
+  get db() { return drizzle(sqlite) },
+  get sqlite() { return sqlite },
+}))
+
+beforeEach(() => {
+  tmpDb = path.join(os.tmpdir(), `arike-test-wallpaper-int-${Date.now()}.db`)
+  sqlite = new Database(tmpDb)
+  sqlite.pragma('foreign_keys = ON')
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS wallpaper_assets (
+      id TEXT PRIMARY KEY,
+      source_type TEXT NOT NULL DEFAULT 'builtin',
+      source_reference TEXT NOT NULL DEFAULT '',
+      file_path TEXT,
+      display_name TEXT NOT NULL DEFAULT '',
+      is_active INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER DEFAULT (unixepoch()),
+      updated_at INTEGER DEFAULT (unixepoch())
+    )
+  `)
+  const insert = sqlite.prepare(
+    `INSERT OR IGNORE INTO wallpaper_assets (id, source_type, source_reference, display_name)
+     VALUES (?, 'builtin', ?, ?)`
+  )
+  insert.run('builtin-1', 'gradient-ocean', 'Ocean Gradient')
+  insert.run('builtin-2', 'gradient-forest', 'Forest Gradient')
+  insert.run('builtin-3', 'gradient-sunset', 'Sunset Gradient')
 })
 
-afterAll(() => {
-  sqlite.prepare('UPDATE wallpaper_assets SET is_active = 0').run()
+afterEach(() => {
   sqlite.close()
+  fs.unlinkSync(tmpDb)
+  vi.resetModules()
 })
 
 describe('wallpaper settings integration', () => {
@@ -26,18 +55,26 @@ describe('wallpaper settings integration', () => {
     expect(json.length).toBeGreaterThanOrEqual(3)
   })
 
-  it('POST /api/wallpapers/[id]/activate activates a built-in wallpaper', async () => {
+  it('POST /api/wallpapers/[id] with action=activate activates a built-in wallpaper', async () => {
     const { POST } = await import('@/app/api/wallpapers/[id]/route')
-    const req = new NextRequest('http://localhost/api/wallpapers/builtin-2/activate', { method: 'POST' })
+    const req = new NextRequest(`http://localhost/api/wallpapers/builtin-2`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'activate' }),
+    })
     const res = await POST(req, { params: Promise.resolve({ id: 'builtin-2' }) })
     expect(res.status).toBe(200)
     const json = await res.json()
     expect(json.success).toBe(true)
   })
 
-  it('POST /api/wallpapers/[id]/activate rejects unknown id', async () => {
+  it('POST /api/wallpapers/[id] rejects unknown id', async () => {
     const { POST } = await import('@/app/api/wallpapers/[id]/route')
-    const req = new NextRequest('http://localhost/api/wallpapers/unknown-id/activate', { method: 'POST' })
+    const req = new NextRequest(`http://localhost/api/wallpapers/unknown-id`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'activate' }),
+    })
     const res = await POST(req, { params: Promise.resolve({ id: 'unknown-id' }) })
     expect(res.status).toBe(404)
   })
@@ -49,3 +86,4 @@ describe('wallpaper settings integration', () => {
     expect(res.status).toBe(400)
   })
 })
+

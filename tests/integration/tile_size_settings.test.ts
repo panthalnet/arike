@@ -1,28 +1,50 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import Database from 'better-sqlite3'
+import { drizzle } from 'drizzle-orm/better-sqlite3'
+import os from 'os'
 import path from 'path'
+import fs from 'fs'
 
 const TEST_BM_ID = 'integration-tile-bm-1'
-let sqlite: InstanceType<typeof Database>
+let tmpDb: string
+let sqlite: Database.Database
 
-beforeAll(() => {
-  const DB_PATH = path.join(process.cwd(), 'data', 'arike.db')
-  sqlite = new Database(DB_PATH)
+vi.mock('@/lib/db', () => ({
+  get db() { return drizzle(sqlite) },
+  get sqlite() { return sqlite },
+}))
+
+beforeEach(() => {
+  tmpDb = path.join(os.tmpdir(), `arike-test-tile-int-${Date.now()}.db`)
+  sqlite = new Database(tmpDb)
+  sqlite.pragma('foreign_keys = ON')
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS bookmarks (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      url TEXT NOT NULL,
+      icon TEXT NOT NULL,
+      tile_size TEXT NOT NULL DEFAULT 'medium',
+      created_at INTEGER DEFAULT (unixepoch()),
+      updated_at INTEGER DEFAULT (unixepoch())
+    )
+  `)
   sqlite.prepare(
     `INSERT OR REPLACE INTO bookmarks (id, name, url, icon, tile_size)
      VALUES (?, 'Integration Test Bookmark', 'https://example.com', 'builtin:material:bookmark', 'medium')`
   ).run(TEST_BM_ID)
 })
 
-afterAll(() => {
-  sqlite.prepare('DELETE FROM bookmarks WHERE id = ?').run(TEST_BM_ID)
+afterEach(() => {
   sqlite.close()
+  fs.unlinkSync(tmpDb)
+  vi.resetModules()
 })
 
 describe('tile size settings integration', () => {
   it('PATCH /api/bookmarks/[id] sets tile size to large', async () => {
     const { PATCH } = await import('@/app/api/bookmarks/[id]/route')
-    const req = new Request('http://localhost/api/bookmarks/bm-1', {
+    const req = new Request(`http://localhost/api/bookmarks/${TEST_BM_ID}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tileSize: 'large' }),
@@ -35,7 +57,7 @@ describe('tile size settings integration', () => {
 
   it('PATCH /api/bookmarks/[id] rejects invalid tile size', async () => {
     const { PATCH } = await import('@/app/api/bookmarks/[id]/route')
-    const req = new Request('http://localhost/api/bookmarks/bm-1', {
+    const req = new Request(`http://localhost/api/bookmarks/${TEST_BM_ID}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tileSize: 'gigantic' }),
@@ -44,3 +66,4 @@ describe('tile size settings integration', () => {
     expect(res.status).toBe(400)
   })
 })
+

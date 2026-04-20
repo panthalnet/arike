@@ -194,14 +194,16 @@ export function BookmarksGrid({ initialBookmarks = [], collectionId, collections
               onEdit={() => handleEditBookmark(bookmark)}
               onDelete={() => handleDeleteClick(bookmark)}
               onTileSizeChange={async (size) => {
-                await fetch(`/api/bookmarks/${bookmark.id}`, {
+                const res = await fetch(`/api/bookmarks/${bookmark.id}`, {
                   method: 'PATCH',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ tileSize: size }),
                 })
-                setBookmarks(prev =>
-                  prev.map(b => b.id === bookmark.id ? { ...b, tileSize: size } : b)
-                )
+                if (res.ok) {
+                  setBookmarks(prev =>
+                    prev.map(b => b.id === bookmark.id ? { ...b, tileSize: size } : b)
+                  )
+                }
               }}
             />
           ))}

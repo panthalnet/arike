@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Settings } from 'lucide-react'
 import {
   Dialog,
@@ -84,6 +84,7 @@ export function SettingsPanel({
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([])
   const [wallpapersLoaded, setWallpapersLoaded] = useState(false)
   const [layoutMode, setLayoutModeState] = useState<'uniform-grid' | 'bento-grid'>(initialLayoutMode)
+  const blurDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Load initial settings
   useEffect(() => {
@@ -266,9 +267,13 @@ export function SettingsPanel({
   const handleBlurChange = (values: number[]) => {
     const px = values[0]
     setSettings(prev => ({ ...prev, blurIntensity: px }))
-    // Apply immediately via CSS variable
+    // Apply CSS variable immediately for live preview
     document.documentElement.style.setProperty('--glass-blur', `${px}px`)
-    updateSetting({ blurIntensity: px })
+    // Debounce the API write — slider fires on every pixel while dragging
+    if (blurDebounceRef.current) clearTimeout(blurDebounceRef.current)
+    blurDebounceRef.current = setTimeout(() => {
+      updateSetting({ blurIntensity: px })
+    }, 400)
   }
 
   const handleProviderChange = (provider: string) => {

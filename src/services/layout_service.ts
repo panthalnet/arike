@@ -40,6 +40,9 @@ export async function setLayoutMode(mode: LayoutMode): Promise<LayoutPreferenceD
     throw new Error(`Invalid layout mode: "${mode}". Must be one of: ${VALID_LAYOUT_MODES.join(', ')}`)
   }
 
+  // Ensure the singleton row exists before updating (upsert pattern)
+  await getLayoutPreferences()
+
   await db
     .update(layoutPreferences)
     .set({ layoutMode: mode, updatedAt: new Date() })

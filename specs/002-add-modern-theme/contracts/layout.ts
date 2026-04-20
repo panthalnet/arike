@@ -4,7 +4,7 @@
 export type LayoutMode = 'uniform-grid' | 'bento-grid';
 
 export interface LayoutPreference {
-  id: integer;                  // Always 1 in v1
+  id: number;                  // Always 1 in v1
   layoutMode: LayoutMode;       // Selected layout mode
   createdAt: string;            // ISO 8601 timestamp
   updatedAt: string;            // ISO 8601 timestamp
@@ -96,8 +96,8 @@ export function getTileSpan(
   const spanMap: Record<typeof viewportCategory, Record<TileSize, number>> = {
     mobile: { small: 1, medium: 1, large: 1 },
     mobileBase: { small: 1, medium: 1, large: 1 },
-    tablet: DEFAULT_TILE_SPANS.large[viewportCategory === 'tablet' ? 'tabletSpan' : 'mobileSpan'],
-    desktop: DEFAULT_TILE_SPANS[tileSize]['desktopSpan'],
+    tablet: { small: 1, medium: DEFAULT_TILE_SPANS.medium.tabletSpan, large: DEFAULT_TILE_SPANS.large.tabletSpan },
+    desktop: { small: DEFAULT_TILE_SPANS.small.desktopSpan, medium: DEFAULT_TILE_SPANS.medium.desktopSpan, large: DEFAULT_TILE_SPANS.large.desktopSpan },
   };
   
   return spanMap[viewportCategory][tileSize];

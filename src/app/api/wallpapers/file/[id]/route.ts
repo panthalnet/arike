@@ -20,6 +20,11 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const fileBuffer = await fs.readFile(wallpaper.filePath)
 
     const ext = wallpaper.filePath.substring(wallpaper.filePath.lastIndexOf('.')).toLowerCase()
+    // SVG is explicitly excluded — serving SVGs can allow XSS via embedded scripts
+    if (ext === '.svg') {
+      return NextResponse.json({ error: 'Wallpaper not found' }, { status: 404 })
+    }
+
     const contentTypeMap: Record<string, string> = {
       '.png': 'image/png',
       '.jpg': 'image/jpeg',
@@ -31,6 +36,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': contentType,
+        'X-Content-Type-Options': 'nosniff',
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     })

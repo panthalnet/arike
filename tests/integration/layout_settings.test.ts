@@ -1,19 +1,37 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import Database from 'better-sqlite3'
+import { drizzle } from 'drizzle-orm/better-sqlite3'
+import os from 'os'
 import path from 'path'
+import fs from 'fs'
 import { NextRequest } from 'next/server'
 
-let sqlite: InstanceType<typeof Database>
+let tmpDb: string
+let sqlite: Database.Database
 
-beforeAll(() => {
-  const DB_PATH = path.join(process.cwd(), 'data', 'arike.db')
-  sqlite = new Database(DB_PATH)
-  sqlite.prepare("UPDATE layout_preferences SET layout_mode = 'uniform-grid' WHERE id = 1").run()
+vi.mock('@/lib/db', () => ({
+  get db() { return drizzle(sqlite) },
+  get sqlite() { return sqlite },
+}))
+
+beforeEach(() => {
+  tmpDb = path.join(os.tmpdir(), `arike-test-layout-int-${Date.now()}.db`)
+  sqlite = new Database(tmpDb)
+  sqlite.pragma('foreign_keys = ON')
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS layout_preferences (
+      id INTEGER PRIMARY KEY,
+      layout_mode TEXT NOT NULL DEFAULT 'uniform-grid',
+      updated_at INTEGER DEFAULT (unixepoch())
+    )
+  `)
+  sqlite.prepare(`INSERT OR IGNORE INTO layout_preferences (id, layout_mode) VALUES (1, 'uniform-grid')`).run()
 })
 
-afterAll(() => {
-  sqlite.prepare("UPDATE layout_preferences SET layout_mode = 'uniform-grid' WHERE id = 1").run()
+afterEach(() => {
   sqlite.close()
+  fs.unlinkSync(tmpDb)
+  vi.resetModules()
 })
 
 describe('layout settings integration', () => {
@@ -61,3 +79,4 @@ describe('layout settings integration', () => {
     expect(res.status).toBe(400)
   })
 })
+

@@ -5,42 +5,6 @@ import { getCachedWallpaper, setCachedWallpaper } from '@/lib/wallpaper_cache'
 
 type Theme = 'gruvbox' | 'catppuccin' | 'everforest' | 'modern'
 
-// Theme colors (duplicated from service to avoid server-side imports in client)
-const THEME_COLORS = {
-  gruvbox: {
-    primary: '#d65d0e',
-    background: '#282828',
-    text: '#ebdbb2',
-    border: '#504945',
-    accent: '#d79921',
-    muted: '#3c3836',
-  },
-  catppuccin: {
-    primary: '#89b4fa',  // Blue - better contrast than Mauve
-    background: '#1e1e2e',
-    text: '#cdd6f4',
-    border: '#45475a',
-    accent: '#94e2d5',
-    muted: '#313244',
-  },
-  everforest: {
-    primary: '#a7c080',
-    background: '#2d353b',
-    text: '#d3c6aa',
-    border: '#475258',
-    accent: '#dbbc7f',
-    muted: '#343f44',
-  },
-  modern: {
-    primary: '#38bdf8',
-    background: 'linear-gradient(135deg, #1e3a5f 0%, #2d1b5e 100%)',
-    text: '#ffffff',
-    border: 'rgba(255, 255, 255, 0.15)',
-    accent: '#a78bfa',
-    muted: 'rgba(255, 255, 255, 0.65)',
-  },
-} as const
-
 interface ThemeColors {
   primary: string
   background: string

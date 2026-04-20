@@ -1,8 +1,6 @@
 // TypeScript Interface: Wallpaper Asset Contract
 // Purpose: Define wallpaper types and operations
 
-import { ThemeName } from './theme';
-
 export type WallpaperSourceType = 'upload' | 'builtin';
 
 export interface WallpaperAsset {
@@ -91,7 +89,7 @@ export interface WallpaperService {
 }
 
 // Helper: Validate file
-export function validateWallpaperFile(file: File): { valid: boolean; error?: string } {
+export async function validateWallpaperFile(file: File): Promise<{ valid: boolean; error?: string }> {
   const rules = WALLPAPER_VALIDATION_RULES;
   
   // Check file size

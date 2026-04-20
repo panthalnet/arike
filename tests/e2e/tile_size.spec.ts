@@ -21,19 +21,19 @@ test.describe('Tile Size Controls', () => {
   test('changing tile size to large expands the card span', async ({ page }) => {
     const card = page.locator('[data-testid^="bookmark-card-"]').first()
     await card.hover()
-    const sizeSelect = card.locator('[data-testid="tile-size-select"]')
-    await sizeSelect.selectOption('large')
+    // tile-size-select is the first button (Small) in the pill group
+    // click the Large button by aria-label
+    await card.locator('button[aria-label="large tile"]').click()
     await expect(card).toHaveClass(/bento-tile-large/)
   })
 
   test('tile size persists after page reload', async ({ page }) => {
     const card = page.locator('[data-testid^="bookmark-card-"]').first()
-    const cardName = await card.getAttribute('data-testid')
+    const cardTestId = await card.getAttribute('data-testid')
     await card.hover()
-    const sizeSelect = card.locator('[data-testid="tile-size-select"]')
-    await sizeSelect.selectOption('small')
+    await card.locator('button[aria-label="small tile"]').click()
     await page.reload()
-    const reloadedCard = page.locator(`[data-testid="${cardName}"]`)
+    const reloadedCard = page.locator(`[data-testid="${cardTestId}"]`)
     await expect(reloadedCard).toHaveClass(/bento-tile-small/)
   })
 })
