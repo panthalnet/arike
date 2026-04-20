@@ -6,7 +6,8 @@ test.describe('Wallpaper Upload', () => {
     // Switch to Modern theme first so wallpaper controls are visible
     await page.locator('[data-testid="settings-button"]').click()
     const themeSelect = page.locator('[data-testid="theme-select"]')
-    await themeSelect.selectOption('modern')
+    await themeSelect.click()
+    await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
     // Wait for settings to be applied
     await page.waitForTimeout(500)
   })
@@ -14,9 +15,9 @@ test.describe('Wallpaper Upload', () => {
   test('should display built-in wallpaper options in settings panel', async ({ page }) => {
     const wallpaperSection = page.locator('[data-testid="wallpaper-section"]')
     await expect(wallpaperSection).toBeVisible()
-    // Should list at least 3 built-in options
-    const options = wallpaperSection.locator('[data-testid^="wallpaper-option-"]')
-    await expect(options).toHaveCount(3)
+    // Should list at least 3 built-in options (excludes 'none' option)
+    const options = wallpaperSection.locator('[data-testid^="wallpaper-option-builtin"]')
+    expect(await options.count()).toBeGreaterThanOrEqual(3)
   })
 
   test('should activate a built-in wallpaper on click', async ({ page }) => {

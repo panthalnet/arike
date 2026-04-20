@@ -6,7 +6,8 @@ test.describe('Blur Intensity Control', () => {
     // Switch to Modern theme to expose blur controls
     await page.locator('[data-testid="settings-button"]').click()
     const themeSelect = page.locator('[data-testid="theme-select"]')
-    await themeSelect.selectOption('modern')
+    await themeSelect.click()
+    await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
     await page.waitForTimeout(300)
   })
 
@@ -17,7 +18,8 @@ test.describe('Blur Intensity Control', () => {
 
   test('blur slider is hidden for non-Modern themes', async ({ page }) => {
     const themeSelect = page.locator('[data-testid="theme-select"]')
-    await themeSelect.selectOption('gruvbox')
+    await themeSelect.click()
+    await page.locator('[role="option"]').filter({ hasText: /gruvbox/i }).click()
     const blurControl = page.locator('[data-testid="blur-intensity-control"]')
     await expect(blurControl).not.toBeVisible()
   })

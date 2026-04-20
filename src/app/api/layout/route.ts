@@ -18,7 +18,11 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body: unknown = await request.json()
+
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
 
     if (!('layoutMode' in body)) {
       return NextResponse.json({ error: 'layoutMode field is required' }, { status: 400 })

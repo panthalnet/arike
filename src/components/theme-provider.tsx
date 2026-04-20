@@ -35,14 +35,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Load theme settings on mount
   useEffect(() => {
     setMounted(true)
-
-    // Apply cached wallpaper immediately — avoids flash and skips the API call
-    // when the wallpaper hasn't changed since last visit.
-    const cached = getCachedWallpaper()
-    if (cached) {
-      document.documentElement.style.setProperty('--theme-background', cached)
-      setActiveWallpaper(cached)
-    }
     
     const BUILTIN_GRADIENTS: Record<string, string> = {
       'builtin-1': 'linear-gradient(135deg, #0a3d62 0%, #1a5c7a 100%)',
@@ -72,9 +64,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           setCustomColors(custom)
         }
 
-        // Verify active wallpaper from server only when on Modern theme.
-        // If the server-side value matches the cache, no DOM update is needed.
+        // Apply cached wallpaper only once we know the theme is Modern —
+        // prevents a wallpaper flash when loading on a non-Modern theme.
         if (loadedTheme === 'modern') {
+          const cached = getCachedWallpaper()
+          if (cached) {
+            document.documentElement.style.setProperty('--theme-background', cached)
+            setActiveWallpaper(cached)
+          }
           fetch('/api/wallpapers')
             .then(r => r.json())
             .then((wallpapers: Array<{ id: string; isActive: boolean; sourceType: string }>) => {
@@ -90,8 +87,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             })
             .catch(() => { /* wallpaper load failure is non-fatal */ })
         } else {
-          // Non-modern theme: clear wallpaper cache
+          // Non-modern theme: clear wallpaper cache and reset state so a
+          // subsequent switch back to Modern re-fetches from the server.
           setCachedWallpaper(null)
+          setActiveWallpaper(null)
         }
       })
       .catch(err => {

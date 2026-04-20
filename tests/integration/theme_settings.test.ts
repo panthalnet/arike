@@ -2,8 +2,7 @@
  * Integration tests: Theme Settings API (T002)
  * Covers Modern theme switching, persistence, and malformed payload rejection
  */
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { NextRequest } from 'next/server'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'

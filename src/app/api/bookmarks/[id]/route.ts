@@ -163,7 +163,11 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const params = await context.params
     const id = params.id
-    const body = await request.json()
+    const body: unknown = await request.json()
+
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
 
     if ('tileSize' in body) {
       if (!(VALID_TILE_SIZES as readonly string[]).includes(body.tileSize)) {

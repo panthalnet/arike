@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import path from 'path'
 import { getWallpaperById } from '@/services/wallpaper_service'
+import { WALLPAPERS_DIR } from '@/lib/storage'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -17,9 +19,17 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     }
 
     const fs = await import('fs/promises')
-    const fileBuffer = await fs.readFile(wallpaper.filePath)
 
-    const ext = wallpaper.filePath.substring(wallpaper.filePath.lastIndexOf('.')).toLowerCase()
+    // Path traversal guard: ensure the file is inside the wallpapers directory
+    const resolvedPath = path.resolve(wallpaper.filePath)
+    const resolvedDir = path.resolve(WALLPAPERS_DIR)
+    if (!resolvedPath.startsWith(resolvedDir + path.sep) && resolvedPath !== resolvedDir) {
+      return NextResponse.json({ error: 'Wallpaper not found' }, { status: 404 })
+    }
+
+    const fileBuffer = await fs.readFile(resolvedPath)
+
+    const ext = resolvedPath.substring(resolvedPath.lastIndexOf('.')).toLowerCase()
     // SVG is explicitly excluded — serving SVGs can allow XSS via embedded scripts
     if (ext === '.svg') {
       return NextResponse.json({ error: 'Wallpaper not found' }, { status: 404 })

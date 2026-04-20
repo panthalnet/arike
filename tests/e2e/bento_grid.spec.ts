@@ -23,7 +23,8 @@ test.describe('Bento Grid Layout', () => {
   test('bento grid is default for Modern theme', async ({ page }) => {
     await page.locator('[data-testid="settings-button"]').click()
     const themeSelect = page.locator('[data-testid="theme-select"]')
-    await themeSelect.selectOption('modern')
+    await themeSelect.click()
+    await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
     await page.waitForTimeout(300)
     const grid = page.locator('[data-testid="bookmarks-grid"]')
     await expect(grid).toHaveAttribute('data-layout', 'bento-grid')
