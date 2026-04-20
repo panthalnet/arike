@@ -21,6 +21,7 @@ beforeEach(() => {
     CREATE TABLE IF NOT EXISTS layout_preferences (
       id INTEGER PRIMARY KEY,
       layout_mode TEXT NOT NULL DEFAULT 'uniform-grid',
+      created_at INTEGER DEFAULT (unixepoch()),
       updated_at INTEGER DEFAULT (unixepoch())
     )
   `)

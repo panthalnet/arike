@@ -96,6 +96,13 @@ export function SettingsPanel({
     }
   }, [initialSettings])
 
+  // Clear debounce timer on unmount to prevent state updates after unmount
+  useEffect(() => {
+    return () => {
+      if (blurDebounceRef.current) clearTimeout(blurDebounceRef.current)
+    }
+  }, [])
+
   // Load wallpapers when Modern theme is selected
   useEffect(() => {
     if (settings.selectedTheme === 'modern' && !wallpapersLoaded) {

@@ -103,7 +103,7 @@ export interface WallpaperUploadResult {
 export async function uploadWallpaper(file: File): Promise<WallpaperUploadResult> {
   // Validate MIME type
   if (!ALLOWED_MIME_TYPES.includes(file.type)) {
-    return { success: false, validationError: `File type "${file.type}" is not allowed. Use PNG, JPEG, WebP or SVG.` }
+    return { success: false, validationError: `File type "${file.type}" is not allowed. Use PNG, JPEG, or WebP.` }
   }
 
   // Validate size
@@ -111,7 +111,8 @@ export async function uploadWallpaper(file: File): Promise<WallpaperUploadResult
     return { success: false, validationError: `File size ${(file.size / 1024 / 1024).toFixed(1)} MB exceeds the 2 MB limit.` }
   }
 
-  const ext = file.name.split('.').pop() ?? 'png'
+  const MIME_TO_EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp' }
+  const ext = MIME_TO_EXT[file.type] ?? 'png'
   const buffer = Buffer.from(await file.arrayBuffer())
   const filePath = await saveWallpaper(buffer, ext)
 
