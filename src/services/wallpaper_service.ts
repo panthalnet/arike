@@ -85,7 +85,6 @@ export async function setActiveWallpaper(wallpaperId: string): Promise<void> {
     await tx.update(wallpaperAssets).set({ isActive: true, updatedAt: new Date() }).where(eq(wallpaperAssets.id, wallpaperId)).run()
   })
 }
-}
 
 export async function deactivateAllWallpapers(): Promise<void> {
   await db
