@@ -21,18 +21,18 @@
 
 ### Tests for User Story 1
 
-- [ ] T001 [P] [US1] Add Modern theme service coverage in `tests/unit/theme_service.test.ts`
-- [ ] T002 [P] [US1] Add Modern theme settings integration coverage, including malformed settings payload rejection, in `tests/integration/theme_settings.test.ts`
-- [ ] T003 [P] [US1] Add Modern theme switching and persistence coverage in `tests/e2e/homepage.spec.ts`
+- [X] T001 [P] [US1] Add Modern theme service coverage in `tests/unit/theme_service.test.ts`
+- [X] T002 [P] [US1] Add Modern theme settings integration coverage, including malformed settings payload rejection, in `tests/integration/theme_settings.test.ts`
+- [X] T003 [P] [US1] Add Modern theme switching and persistence coverage in `tests/e2e/homepage.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Add Modern theme support and selected-theme persistence in `src/services/theme_service.ts`
-- [ ] T005 [P] [US1] Define Modern CSS variables and shared glass tokens in `src/app/globals.css` and `src/styles/theme/modern.css`
-- [ ] T006 [P] [US1] Load and apply Modern CSS variables from persisted settings in `src/components/theme-provider.tsx`
-- [ ] T007 [US1] Expose Modern theme selection with pending, success, and error states in `src/components/settings_panel.tsx`
-- [ ] T008 [P] [US1] Apply Modern glass surface styling to `src/components/search_bar.tsx`, `src/components/bookmark_card.tsx`, and `src/components/dashboard_content.tsx`
-- [ ] T009 [US1] Hydrate Modern theme settings on first render and add shared runtime schema validation for theme-settings request payloads in `src/app/page.tsx` and `src/app/api/settings/route.ts`
+- [X] T004 [US1] Add Modern theme support and selected-theme persistence in `src/services/theme_service.ts`
+- [X] T005 [P] [US1] Define Modern CSS variables and shared glass tokens in `src/app/globals.css` and `src/styles/theme/modern.css`
+- [X] T006 [P] [US1] Load and apply Modern CSS variables from persisted settings in `src/components/theme-provider.tsx`
+- [X] T007 [US1] Expose Modern theme selection with pending, success, and error states in `src/components/settings_panel.tsx`
+- [X] T008 [P] [US1] Apply Modern glass surface styling to `src/components/search_bar.tsx`, `src/components/bookmark_card.tsx`, and `src/components/dashboard_content.tsx`
+- [X] T009 [US1] Hydrate Modern theme settings on first render and add shared runtime schema validation for theme-settings request payloads in `src/app/page.tsx` and `src/app/api/settings/route.ts`
 
 **Checkpoint**: User Story 1 is independently functional and delivers the MVP.
 
@@ -46,19 +46,19 @@
 
 ### Tests for User Story 2
 
-- [ ] T010 [P] [US2] Add wallpaper validation, rollback, and fallback coverage in `tests/unit/wallpaper_service.test.ts`
-- [ ] T011 [P] [US2] Add wallpaper settings integration coverage, including invalid upload metadata rejection and no-op persistence on invalid input, in `tests/integration/wallpaper_settings.test.ts`
-- [ ] T012 [P] [US2] Add wallpaper upload, selection, fallback, and partial-failure recovery coverage in `tests/e2e/wallpaper_upload.spec.ts`
+- [X] T010 [P] [US2] Add wallpaper validation, rollback, and fallback coverage in `tests/unit/wallpaper_service.test.ts`
+- [X] T010 [P] [US2] Add wallpaper settings integration coverage, including invalid upload metadata rejection and no-op persistence on invalid input, in `tests/integration/wallpaper_settings.test.ts`
+- [X] T010 [P] [US2] Add wallpaper upload, selection, fallback, and partial-failure recovery coverage in `tests/e2e/wallpaper_upload.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Add wallpaper persistence schema and migration in `src/lib/schema.ts` and `drizzle/0001_add_modern_theme.sql`
-- [ ] T014 [P] [US2] Extend file storage helpers to manage `data/wallpapers/` in `src/lib/storage.ts`
-- [ ] T015 [US2] Implement wallpaper validation, built-in wallpaper registry, transaction-backed active wallpaper persistence, and cleanup of failed uploads in `src/services/wallpaper_service.ts` and `src/lib/storage.ts`
-- [ ] T016 [P] [US2] Add wallpaper list, upload, delete, and set-active handlers with shared runtime schema validation for request bodies, route params, and upload metadata in `src/app/api/wallpapers/route.ts` and `src/app/api/wallpapers/[id]/route.ts`
-- [ ] T017 [P] [US2] Build the wallpaper uploader with empty, loading, error, and success states in `src/components/wallpaper_uploader.tsx`
-- [ ] T018 [US2] Integrate wallpaper selection, fallback messaging, and pending/error UI that preserves the last known good background on failed changes in `src/components/settings_panel.tsx` and `src/components/theme-provider.tsx`
-- [ ] T019 [US2] Apply the active wallpaper and default gradient fallback in `src/app/page.tsx`
+- [X] T010 [US2] Add wallpaper persistence schema and migration in `src/lib/schema.ts` and `drizzle/0001_add_modern_theme.sql`
+- [X] T010 [P] [US2] Extend file storage helpers to manage `data/wallpapers/` in `src/lib/storage.ts`
+- [X] T010 [US2] Implement wallpaper validation, built-in wallpaper registry, transaction-backed active wallpaper persistence, and cleanup of failed uploads in `src/services/wallpaper_service.ts` and `src/lib/storage.ts`
+- [X] T010 [P] [US2] Add wallpaper list, upload, delete, and set-active handlers with shared runtime schema validation for request bodies, route params, and upload metadata in `src/app/api/wallpapers/route.ts` and `src/app/api/wallpapers/[id]/route.ts`
+- [X] T010 [P] [US2] Build the wallpaper uploader with empty, loading, error, and success states in `src/components/wallpaper_uploader.tsx`
+- [X] T010 [US2] Integrate wallpaper selection, fallback messaging, and pending/error UI that preserves the last known good background on failed changes in `src/components/settings_panel.tsx` and `src/components/theme-provider.tsx`
+- [X] T010 [US2] Apply the active wallpaper and default gradient fallback in `src/app/page.tsx`
 
 **Checkpoint**: User Story 2 is independently functional with persisted wallpaper personalization.
 
@@ -72,19 +72,19 @@
 
 ### Tests for User Story 3
 
-- [ ] T020 [P] [US3] Add layout mode persistence and compaction coverage in `tests/unit/layout_service.test.ts`
-- [ ] T021 [P] [US3] Add layout selector integration coverage, including invalid layout payload rejection, in `tests/integration/layout_settings.test.ts`
-- [ ] T022 [P] [US3] Add Bento Grid responsiveness and compaction coverage in `tests/e2e/bento_grid.spec.ts`
+- [X] T020 [P] [US3] Add layout mode persistence and compaction coverage in `tests/unit/layout_service.test.ts`
+- [X] T021 [P] [US3] Add layout selector integration coverage, including invalid layout payload rejection, in `tests/integration/layout_settings.test.ts`
+- [X] T022 [P] [US3] Add Bento Grid responsiveness and compaction coverage in `tests/e2e/bento_grid.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US3] Add layout preference persistence schema and migration in `src/lib/schema.ts` and `drizzle/0001_add_modern_theme.sql`
-- [ ] T024 [US3] Implement layout mode persistence and Modern default-to-Bento behavior in `src/services/layout_service.ts`
-- [ ] T025 [P] [US3] Add layout mode GET and PUT handlers with shared runtime schema validation in `src/app/api/layout/route.ts`
-- [ ] T026 [P] [US3] Define responsive Bento Grid rules and dense auto-flow behavior in `src/styles/layout/bento_grid.css`
-- [ ] T027 [US3] Render Uniform Grid and Bento Grid from persisted layout state in `src/components/bookmarks_grid.tsx`
-- [ ] T028 [US3] Pass layout mode through dashboard state and homepage data hydration in `src/components/dashboard_content.tsx` and `src/app/page.tsx`
-- [ ] T029 [US3] Add a layout mode selector with loading, rollback, and error states to `src/components/settings_panel.tsx`
+- [X] T023 [US3] Add layout preference persistence schema and migration in `src/lib/schema.ts` and `drizzle/0001_add_modern_theme.sql`
+- [X] T024 [US3] Implement layout mode persistence and Modern default-to-Bento behavior in `src/services/layout_service.ts`
+- [X] T025 [P] [US3] Add layout mode GET and PUT handlers with shared runtime schema validation in `src/app/api/layout/route.ts`
+- [X] T026 [P] [US3] Define responsive Bento Grid rules and dense auto-flow behavior in `src/styles/layout/bento_grid.css`
+- [X] T027 [US3] Render Uniform Grid and Bento Grid from persisted layout state in `src/components/bookmarks_grid.tsx`
+- [X] T028 [US3] Pass layout mode through dashboard state and homepage data hydration in `src/components/dashboard_content.tsx` and `src/app/page.tsx`
+- [X] T029 [US3] Add a layout mode selector with loading, rollback, and error states to `src/components/settings_panel.tsx`
 
 **Checkpoint**: User Story 3 is independently functional and layout mode remains decoupled from theme selection.
 
@@ -98,17 +98,17 @@
 
 ### Tests for User Story 4
 
-- [ ] T030 [P] [US4] Add per-bookmark tile size persistence coverage in `tests/unit/layout_service.test.ts`
-- [ ] T031 [P] [US4] Add tile size controls integration coverage, including invalid tile size rejection, in `tests/integration/tile_size_settings.test.ts`
-- [ ] T032 [P] [US4] Add bookmark tile resizing coverage in `tests/e2e/bookmarks.spec.ts`
+- [X] T030 [P] [US4] Add per-bookmark tile size persistence coverage in `tests/unit/layout_service.test.ts`
+- [X] T031 [P] [US4] Add tile size controls integration coverage, including invalid tile size rejection, in `tests/integration/tile_size_settings.test.ts`
+- [X] T032 [P] [US4] Add bookmark tile resizing coverage in `tests/e2e/bookmarks.spec.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T033 [US4] Add bookmark tile presentation persistence schema and migration in `src/lib/schema.ts` and `drizzle/0001_add_modern_theme.sql`
-- [ ] T034 [US4] Implement per-bookmark tile size persistence in `src/services/layout_service.ts` and `src/services/bookmark_service.ts`
-- [ ] T035 [P] [US4] Add tile size update handlers with shared runtime schema validation in `src/app/api/bookmarks/[id]/tile-size/route.ts`
-- [ ] T036 [US4] Add tile size controls with saving and failure states in `src/components/bookmark_card.tsx`
-- [ ] T037 [US4] Apply saved small, medium, and large spans in `src/components/bookmarks_grid.tsx` and `src/styles/layout/bento_grid.css`
+- [X] T033 [US4] Add bookmark tile presentation persistence schema and migration in `src/lib/schema.ts` and `drizzle/0001_add_modern_theme.sql`
+- [X] T034 [US4] Implement per-bookmark tile size persistence in `src/services/layout_service.ts` and `src/services/bookmark_service.ts`
+- [X] T035 [P] [US4] Add tile size update handlers with shared runtime schema validation in `src/app/api/bookmarks/[id]/tile-size/route.ts`
+- [X] T036 [US4] Add tile size controls with saving and failure states in `src/components/bookmark_card.tsx`
+- [X] T037 [US4] Apply saved small, medium, and large spans in `src/components/bookmarks_grid.tsx` and `src/styles/layout/bento_grid.css`
 
 **Checkpoint**: User Story 4 is independently functional and tile sizing persists per bookmark.
 
@@ -122,17 +122,17 @@
 
 ### Tests for User Story 5
 
-- [ ] T038 [P] [US5] Add blur bounds and fallback coverage in `tests/unit/theme_service.test.ts`
-- [ ] T039 [P] [US5] Add live blur update integration coverage in `tests/integration/blur_settings.test.ts`
-- [ ] T040 [P] [US5] Add blur adjustment persistence coverage in `tests/e2e/blur_intensity.spec.ts`
+- [X] T038 [P] [US5] Add blur bounds and fallback coverage in `tests/unit/theme_service.test.ts`
+- [X] T039 [P] [US5] Add live blur update integration coverage in `tests/integration/blur_settings.test.ts`
+- [X] T040 [P] [US5] Add blur adjustment persistence coverage in `tests/e2e/blur_intensity.spec.ts`
 
 ### Implementation for User Story 5
 
-- [ ] T041 [US5] Add blur persistence fields and migration in `src/lib/schema.ts` and `drizzle/0001_add_modern_theme.sql`
-- [ ] T042 [US5] Persist 8px-20px blur intensity and fallback surface values in `src/services/theme_service.ts`
-- [ ] T043 [P] [US5] Apply blur CSS variables and `@supports` fallbacks in `src/styles/theme/glassmorphism.css` and `src/components/theme-provider.tsx`
-- [ ] T044 [US5] Add the blur intensity slider with loading, success, and error announcements to `src/components/settings_panel.tsx`
-- [ ] T045 [US5] Consume the shared blur variable across Modern surfaces in `src/components/search_bar.tsx`, `src/components/bookmark_card.tsx`, and `src/components/settings_panel.tsx`
+- [X] T041 [US5] Add blur persistence fields and migration in `src/lib/schema.ts` and `drizzle/0001_add_modern_theme.sql`
+- [X] T042 [US5] Persist 8px-20px blur intensity and fallback surface values in `src/services/theme_service.ts`
+- [X] T043 [P] [US5] Apply blur CSS variables and `@supports` fallbacks in `src/styles/theme/glassmorphism.css` and `src/components/theme-provider.tsx`
+- [X] T044 [US5] Add the blur intensity slider with loading, success, and error announcements to `src/components/settings_panel.tsx`
+- [X] T045 [US5] Consume the shared blur variable across Modern surfaces in `src/components/search_bar.tsx`, `src/components/bookmark_card.tsx`, and `src/components/settings_panel.tsx`
 
 **Checkpoint**: User Story 5 is independently functional with persisted blur customization.
 
@@ -142,11 +142,11 @@
 
 **Purpose**: Final validation, accessibility coverage, and documentation updates across stories.
 
-- [ ] T046 [P] Expand Modern-theme accessibility and contrast audits, including loading and error states, in `tests/e2e/accessibility.spec.ts`
-- [ ] T047 [P] Update user-facing Modern theme documentation and persistence notes in `README.md`
-- [ ] T048 [P] Update architecture notes for theme, wallpaper, layout, tile persistence, state handling, structured logging, and error taxonomy in `docs/design.md`
-- [ ] T049 [P] Add structured logging and stable error categories for theme, wallpaper, layout, and tile-size services and routes in `src/services/theme_service.ts`, `src/services/wallpaper_service.ts`, `src/services/layout_service.ts`, `src/app/api/settings/route.ts`, `src/app/api/wallpapers/route.ts`, `src/app/api/wallpapers/[id]/route.ts`, `src/app/api/layout/route.ts`, and `src/app/api/bookmarks/[id]/tile-size/route.ts`
-- [ ] T050 Run lint, typecheck, production build, coverage, E2E, and the quickstart acceptance checklist; record any implementation-specific updates in `specs/002-add-modern-theme/quickstart.md`
+- [X] T046 [P] Expand Modern-theme accessibility and contrast audits, including loading and error states, in `tests/e2e/accessibility.spec.ts`
+- [X] T047 [P] Update user-facing Modern theme documentation and persistence notes in `README.md`
+- [X] T048 [P] Update architecture notes for theme, wallpaper, layout, tile persistence, state handling, structured logging, and error taxonomy in `docs/design.md`
+- [X] T049 [P] Add structured logging and stable error categories for theme, wallpaper, layout, and tile-size services and routes in `src/services/theme_service.ts`, `src/services/wallpaper_service.ts`, `src/services/layout_service.ts`, `src/app/api/settings/route.ts`, `src/app/api/wallpapers/route.ts`, `src/app/api/wallpapers/[id]/route.ts`, `src/app/api/layout/route.ts`, and `src/app/api/bookmarks/[id]/tile-size/route.ts`
+- [X] T050 Run lint, typecheck, production build, coverage, E2E, and the quickstart acceptance checklist; record any implementation-specific updates in `specs/002-add-modern-theme/quickstart.md`
 
 ---
 

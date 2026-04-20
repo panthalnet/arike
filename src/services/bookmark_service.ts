@@ -46,6 +46,7 @@ export async function createBookmark(data: BookmarkInput): Promise<Bookmark> {
     name: data.name,
     url: data.url,
     icon: data.icon,
+    tileSize: 'medium' as const,
     createdAt: now,
     updatedAt: now,
   }
@@ -81,6 +82,7 @@ export async function getBookmarksByCollection(collectionId: string): Promise<Bo
       name: bookmarks.name,
       url: bookmarks.url,
       icon: bookmarks.icon,
+      tileSize: bookmarks.tileSize,
       createdAt: bookmarks.createdAt,
       updatedAt: bookmarks.updatedAt,
       order: collectionBookmarks.order,

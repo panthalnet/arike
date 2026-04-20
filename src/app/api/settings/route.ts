@@ -5,6 +5,11 @@ import {
   updateCustomColors,
   updateSearchProvider,
   resetCustomColors,
+  updateBlurIntensity,
+  AVAILABLE_THEMES,
+  AVAILABLE_SEARCH_PROVIDERS,
+  BLUR_MIN,
+  BLUR_MAX,
   type CustomColors,
 } from '@/services/theme_service'
 
@@ -39,14 +44,41 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
 
+    // Runtime schema validation: at least one known key required
+    const knownKeys = ['selectedTheme', 'searchProvider', 'blurIntensity', 'customPrimary',
+      'customBackground', 'customText', 'customBorder', 'resetColors']
+    const hasKnown = knownKeys.some(k => k in body)
+    if (!hasKnown) {
+      return NextResponse.json({ error: 'No valid settings fields provided' }, { status: 400 })
+    }
+
     // Handle theme change
-    if (body.selectedTheme) {
+    if (body.selectedTheme !== undefined) {
+      if (!(AVAILABLE_THEMES as readonly string[]).includes(body.selectedTheme)) {
+        return NextResponse.json({ error: `Invalid theme: ${body.selectedTheme}` }, { status: 400 })
+      }
       const updated = await updateTheme(body.selectedTheme)
       return NextResponse.json(updated)
     }
 
+    // Handle blur intensity change
+    if (body.blurIntensity !== undefined) {
+      const px = Number(body.blurIntensity)
+      if (!Number.isInteger(px) || px < BLUR_MIN || px > BLUR_MAX) {
+        return NextResponse.json(
+          { error: `blurIntensity must be an integer between ${BLUR_MIN} and ${BLUR_MAX}` },
+          { status: 400 }
+        )
+      }
+      const updated = await updateBlurIntensity(px)
+      return NextResponse.json(updated)
+    }
+
     // Handle search provider change
-    if (body.searchProvider) {
+    if (body.searchProvider !== undefined) {
+      if (!(AVAILABLE_SEARCH_PROVIDERS as readonly string[]).includes(body.searchProvider)) {
+        return NextResponse.json({ error: `Invalid search provider: ${body.searchProvider}` }, { status: 400 })
+      }
       const updated = await updateSearchProvider(body.searchProvider)
       return NextResponse.json(updated)
     }
@@ -83,25 +115,14 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json(updated)
     }
 
-    // No valid updates provided
-    return NextResponse.json(
-      { error: 'No valid settings provided for update' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'No valid settings provided for update' }, { status: 400 })
   } catch (error) {
     console.error('Failed to update theme settings:', error)
     
-    // Check if it's a validation error
     if (error instanceof Error && error.message.includes('Invalid')) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update settings' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 })
   }
 }

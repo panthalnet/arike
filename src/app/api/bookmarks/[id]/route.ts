@@ -7,6 +7,7 @@ import {
   addBookmarkToCollection,
   removeBookmarkFromCollection,
 } from '@/services/bookmark_service'
+import { setTileSize, getTileSize, VALID_TILE_SIZES, type TileSize } from '@/services/tile_size_service'
 
 type RouteContext = {
   params: Promise<{ id: string }>
@@ -151,5 +152,37 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       { error: 'Failed to delete bookmark' },
       { status: 500 }
     )
+  }
+}
+
+/**
+ * PATCH /api/bookmarks/[id]
+ * Partial update — currently supports: { tileSize: 'small' | 'medium' | 'large' }
+ */
+export async function PATCH(request: NextRequest, context: RouteContext) {
+  try {
+    const params = await context.params
+    const id = params.id
+    const body = await request.json()
+
+    if ('tileSize' in body) {
+      if (!(VALID_TILE_SIZES as readonly string[]).includes(body.tileSize)) {
+        return NextResponse.json(
+          { error: `Invalid tileSize: "${body.tileSize}". Must be one of: ${VALID_TILE_SIZES.join(', ')}` },
+          { status: 400 }
+        )
+      }
+      await setTileSize(id, body.tileSize as TileSize)
+      const tileSize = await getTileSize(id)
+      return NextResponse.json({ id, tileSize })
+    }
+
+    return NextResponse.json({ error: 'No patchable fields provided' }, { status: 400 })
+  } catch (error) {
+    console.error('Failed to patch bookmark:', error)
+    if (error instanceof Error && error.message.includes('not found')) {
+      return NextResponse.json({ error: 'Bookmark not found' }, { status: 404 })
+    }
+    return NextResponse.json({ error: 'Failed to update bookmark' }, { status: 500 })
   }
 }

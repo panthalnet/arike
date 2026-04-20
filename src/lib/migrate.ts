@@ -22,8 +22,8 @@ export function initializeDefaults() {
     if (!themeSetting) {
       console.log('Initializing default theme settings...')
       sqlite.prepare(`
-        INSERT INTO theme_settings (id, selected_theme, search_provider)
-        VALUES (1, 'gruvbox', 'duckduckgo')
+        INSERT INTO theme_settings (id, selected_theme, search_provider, blur_intensity)
+        VALUES (1, 'gruvbox', 'duckduckgo', 12)
       `).run()
     }
 
@@ -37,6 +37,12 @@ export function initializeDefaults() {
         INSERT INTO collections (id, name, "order")
         VALUES (?, 'Bookmarks', 0)
       `).run(collectionId)
+    }
+
+    // Initialize layout preferences singleton
+    const layoutPref = sqlite.prepare('SELECT * FROM layout_preferences WHERE id = 1').get()
+    if (!layoutPref) {
+      sqlite.prepare(`INSERT INTO layout_preferences (id, layout_mode) VALUES (1, 'uniform-grid')`).run()
     }
 
     console.log('Database initialization complete')

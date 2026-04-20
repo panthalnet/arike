@@ -3,6 +3,7 @@ import { SearchBar } from '@/components/search_bar'
 import { SettingsPanel } from '@/components/settings_panel'
 import { DashboardContent } from '@/components/dashboard_content'
 import { getThemeSettings } from '@/services/theme_service'
+import { getLayoutMode } from '@/services/layout_service'
 import { getAllCollections } from '@/services/collection_service'
 import { getAllBookmarks } from '@/services/bookmark_service'
 
@@ -16,10 +17,11 @@ import { getAllBookmarks } from '@/services/bookmark_service'
  */
 export default async function Home() {
   // Fetch all server-side data for initial render
-  const [settings, collections, allBookmarks] = await Promise.all([
+  const [settings, collections, allBookmarks, layoutMode] = await Promise.all([
     getThemeSettings(),
     getAllCollections(),
     getAllBookmarks(),
+    getLayoutMode(),
   ])
 
   return (
@@ -50,6 +52,7 @@ export default async function Home() {
           <DashboardContent
             initialCollections={collections}
             initialBookmarks={allBookmarks}
+            initialLayoutMode={layoutMode}
           />
         </div>
       </section>

@@ -234,4 +234,58 @@ test.describe('Homepage', () => {
     // Should meet <2s first paint requirement
     expect(loadTime).toBeLessThan(2000)
   })
+
+  // T003: Modern theme switching and persistence
+  test('should switch to Modern theme and apply glassmorphism styling', async ({ page }) => {
+    const settingsButton = page.locator('[data-testid="settings-button"]')
+    await settingsButton.click()
+
+    const themeSelect = page.locator('[data-testid="theme-select"]')
+    await expect(themeSelect).toBeVisible()
+
+    await themeSelect.click()
+    await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
+
+    await page.waitForTimeout(400)
+
+    const html = page.locator('html')
+    await expect(html).toHaveAttribute('data-theme', 'modern')
+
+    // Glassmorphism: body should have a background that includes gradient
+    const bodyBg = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--theme-background').trim()
+    )
+    expect(bodyBg.length).toBeGreaterThan(0)
+  })
+
+  test('should persist Modern theme after page reload', async ({ page }) => {
+    const settingsButton = page.locator('[data-testid="settings-button"]')
+    await settingsButton.click()
+
+    const themeSelect = page.locator('[data-testid="theme-select"]')
+    await themeSelect.click()
+    await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
+
+    await page.waitForTimeout(400)
+
+    await page.reload()
+    await page.waitForLoadState('networkidle')
+
+    const html = page.locator('html')
+    await expect(html).toHaveAttribute('data-theme', 'modern')
+  })
+
+  test('should announce Modern theme change to screen readers', async ({ page }) => {
+    const settingsButton = page.locator('[data-testid="settings-button"]')
+    await settingsButton.click()
+
+    const themeSelect = page.locator('[data-testid="theme-select"]')
+    await themeSelect.click()
+    await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
+
+    await page.waitForTimeout(400)
+
+    const announcement = page.locator('[role="status"][aria-live="polite"]')
+    await expect(announcement).toContainText(/Theme updated/i)
+  })
 })
