@@ -13,13 +13,14 @@ Add a Modern built-in theme to Arike using a glassmorphism visual design (froste
 
 **Language/Version**: TypeScript / Node 20  
 **Primary Dependencies**: Next.js 16.2.2 (App Router), Tailwind CSS 3, shadcn/ui, Drizzle ORM, CSS custom properties for theming  
-**Storage**: SQLite (local file-based, persisted at `./data/arike.db`), wallpapers in `./data/icons/` directory  
-**Testing**: vitest (unit/integration), Playwright (E2E, minimum 90% coverage required)  
+**Storage**: SQLite (local file-based, persisted at `./data/arike.db`), wallpapers in `./data/wallpapers/` directory  
+**Testing**: vitest (unit/integration), Playwright (E2E), ESLint, TypeScript typecheck, and production Next build; minimum 90% coverage required  
 **Target Platform**: Web browser (Chrome ≥100, Firefox ≥100, Safari ≥15, mobile browsers ≥100)  
 **Project Type**: Web application (browser homepage + personal dashboard)  
 **Performance Goals**: First Contentful Paint <2s, theme switch <300ms, layout recompute <50ms, blur/color updates applied immediately  
 **Constraints**: Offline-capable (no cloud dependencies), WCAG AA accessibility mandatory, wallpaper files <2MB max 1024×1024px, no prefers-reduced-motion animations  
 **Scale/Scope**: Single-user v1 (dark theme only, Gruvbox default, Modern opt-in)
+**Persistence Strategy**: Multi-step wallpaper and preference writes use SQLite or Drizzle transactions or equivalent atomic boundaries; failed file writes or activation changes must clean up partial durable state.
 
 ## Constitution Check
 
@@ -29,13 +30,13 @@ Add a Modern built-in theme to Arike using a glassmorphism visual design (froste
 |-----------|--------|-------|
 | I. Self-Hosted First | ✅ PASS | Modern theme CSS and wallpapers are local; no cloud dependencies; all settings UI-driven; FCP <2s |
 | II. Responsive by Design | ✅ PASS | Mobile-first bento grid with single-column collapse <768px; all tokens via CSS custom properties |
-| III. Layered Architecture | ✅ PASS | Theme services decoupled from UI; wallpaper adapter pattern; graceful fallback for missing/unsupported wallpapers |
+| III. Layered Architecture | ✅ PASS | Theme services remain decoupled from UI; implementation tasks include shared runtime schema validation for settings, wallpapers, layout, and tile-size boundaries plus atomic persistence for wallpaper lifecycle changes |
 | IV. Modern Stable Stack | ✅ PASS | Next.js 16, Tailwind 3, TypeScript strict; no experimental dependencies |
-| V. Quality Gates | ✅ PASS | E2E testable feature; 90% coverage enforced; WCAG AA required for glass surfaces; all 4 states (empty/load/error/success) |
+| V. Quality Gates | ✅ PASS | E2E and 90% coverage remain required; implementation tasks include accessibility/state coverage, structured logging and error categories, plus lint, typecheck, and build verification before merge |
 | VI. Documentation Discipline | ✅ PASS | Will update README (user-facing features) and docs/design.md (architecture decisions); no duplication |
 | VII. Legal Compliance | ✅ PASS | Original implementation; icon libraries (Material Icons, Simple Icons) already CC0/Apache 2.0 licensed |
 
-**GATE RESULT**: ✅ All 7 principles PASS. Feature ready for Phase 0 research.
+**GATE RESULT**: ✅ All 7 principles PASS. Implementation planning now explicitly covers Constitution 1.1.0 validation, transactionality, observability, and static-analysis requirements.
 
 ## Project Structure
 
@@ -60,48 +61,59 @@ specs/002-add-modern-theme/
 ```text
 src/
 ├── app/
-│   ├── (settings)/
-│   │   └── theme/
-│   │       ├── page.tsx         # Theme settings UI (selector, preview, wallpaper upload)
-│   │       └── layout-picker.tsx # Layout mode selector (Uniform Grid / Bento Grid)
+│   ├── page.tsx                 # Homepage and dashboard hydration
+│   ├── api/
+│   │   ├── settings/route.ts   # Theme settings and blur persistence
+│   │   ├── wallpapers/route.ts # Wallpaper list and upload handlers
+│   │   ├── wallpapers/[id]/route.ts # Wallpaper activation and delete handlers
+│   │   ├── layout/route.ts     # Layout mode persistence handlers
+│   │   └── bookmarks/[id]/tile-size/route.ts # Per-bookmark tile size handlers
 │   └── [other app routes - unchanged]
 ├── components/
-│   ├── ThemeProvider.tsx        # React context for theme switching, token updates
-│   ├── WallpaperUploader.tsx    # File upload UI, validation, preview
-│   ├── BentoGrid.tsx            # Responsive bento grid layout component
-│   ├── BookmarkTile.tsx          # Updated to support tile sizing (small/medium/large)
+│   ├── theme-provider.tsx       # React context for theme switching, token updates
+│   ├── settings_panel.tsx       # Theme settings UI, blur slider, and layout selector
+│   ├── wallpaper_uploader.tsx   # File upload UI, validation, preview
+│   ├── bookmarks_grid.tsx       # Uniform and bento grid rendering
+│   ├── bookmark_card.tsx        # Bookmark tile presentation and tile-size controls
 │   └── [other shared components]
 ├── services/
-│   ├── theme/
-│   │   ├── themeService.ts      # Theme selection, token management, persistence
-│   │   ├── modernTheme.ts       # Modern token definitions (colors, blur ranges, border radius)
-│   │   ├── wallpaperService.ts  # Upload validation, storage, cleanup
-│   │   └── layoutEngine.ts      # Bento grid calculation, tile compaction algorithm
+│   ├── theme_service.ts         # Theme selection, token management, blur persistence
+│   ├── wallpaper_service.ts     # Upload validation, storage, and wallpaper fallback logic
+│   ├── layout_service.ts        # Layout selection, tile sizing, and bento helpers
+│   ├── bookmark_service.ts      # Bookmark CRUD with tile-size reads
 │   └── [other domain services]
-├── db/
-│   ├── schema.ts                # Drizzle schema additions: ModernThemePreference, WallpaperAsset, BookmarkTilePresentation tables
-│   └── migrations/
-│       └── add-modern-theme.sql # Migration: create new tables, add tile_size column to bookmarks
+├── lib/
+│   ├── schema.ts                # Drizzle schema additions for wallpaper, layout, and tile presentation
+│   ├── storage.ts               # File storage helpers for icons and wallpapers
+│   └── migrate.ts               # Startup defaults and migration bootstrapping
 └── styles/
-    └── theme/
-        ├── modern.css           # Modern theme token definitions (CSS custom properties)
-        ├── glassmorphism.css    # Frosted glass styling (backdrop-filter, semi-transparent backgrounds)
-        └── bentoGrid.css        # Bento layout CSS Grid rules
+    ├── theme/
+    │   ├── modern.css           # Modern theme token definitions (CSS custom properties)
+    │   └── glassmorphism.css    # Frosted glass styling (backdrop-filter, semi-transparent backgrounds)
+    └── layout/
+        └── bento_grid.css       # Bento layout CSS Grid rules
+
+drizzle/
+└── 0001_add_modern_theme.sql    # Migration: add wallpaper, layout, tile, and blur persistence
 
 tests/
 ├── unit/
-│   ├── themeService.test.ts     # Theme switching, token resolution, persistence
-│   ├── layoutEngine.test.ts     # Bento grid calculations, tile compaction, responsive breakpoints
-│   └── wallpaperService.test.ts # Validation, upload, fallback behavior
+│   ├── theme_service.test.ts    # Theme switching, token resolution, and blur persistence
+│   ├── layout_service.test.ts   # Bento grid calculations, tile compaction, responsive breakpoints
+│   └── wallpaper_service.test.ts # Validation, upload, fallback behavior
 ├── integration/
-│   ├── themeSettings.test.ts    # Settings UI with theme/layout switching
-│   └── wallpaperIntegration.test.ts # Upload workflow end-to-end
+│   ├── theme_settings.test.ts   # Theme selection states and persistence
+│   ├── wallpaper_settings.test.ts # Wallpaper upload workflow and error states
+│   ├── layout_settings.test.ts  # Layout switching states and persistence
+│   ├── tile_size_settings.test.ts # Tile-size controls and save failures
+│   └── blur_settings.test.ts    # Blur slider states and persistence
 └── e2e/
-    ├── themeSelection.spec.ts   # User selects Modern theme, verifies immediate application
-    ├── wallpaperUpload.spec.ts  # User uploads wallpaper, restarts app, verifies persistence
-    ├── bentoGridLayout.spec.ts  # Bento grid responsive behavior across viewports
-    ├── tileResizing.spec.ts     # User resizes tiles, persists across restart
-    └── blurAdjustment.spec.ts   # Blur intensity slider, immediate visual update
+    ├── homepage.spec.ts         # User selects Modern theme and verifies immediate application
+    ├── wallpaper_upload.spec.ts # User uploads wallpaper, restarts app, verifies persistence
+    ├── bento_grid.spec.ts       # Bento grid responsive behavior across viewports
+    ├── bookmarks.spec.ts        # User resizes tiles, persists across restart
+    ├── blur_intensity.spec.ts   # Blur intensity slider, immediate visual update
+    └── accessibility.spec.ts    # Accessibility and contrast verification
 ```
 
 **Structure Decision**: Single-project Next.js app. Modern theme feature integrates into existing src/ structure via new service modules and components. Database schema extended with new tables for Modern-specific preferences.

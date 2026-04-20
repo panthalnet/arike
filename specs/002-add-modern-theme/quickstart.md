@@ -20,7 +20,7 @@ The feature consists of four independent pieces that can be developed in paralle
 
 ## 1. Database Migration
 
-**File**: `drizzle/migrations/add-modern-theme.sql`
+**File**: `drizzle/0001_add_modern_theme.sql`
 
 **Steps**:
 1. Run the migration SQL (see [data-model.md](data-model.md#migrations))
@@ -40,7 +40,7 @@ npm run db:introspect  # Regenerate Drizzle schema
 
 ### 2.1 Create Token Definitions
 
-**File**: `src/services/theme/modernTheme.ts`
+**File**: `src/services/theme_service.ts`
 
 Define Modern token values (glassmorphism colors, blur, borders, etc.). Reference:
 - [contracts/theme.ts](contracts/theme.ts) for interface
@@ -58,7 +58,7 @@ export const MODERN_TOKENS: ThemeTokens = {
 
 ### 2.2 Update Theme Service
 
-**File**: `src/services/theme/themeService.ts`
+**File**: `src/services/theme_service.ts`
 
 Extend existing theme service to:
 - Register Modern in `THEME_REGISTRY` (see [contracts/theme.ts](contracts/theme.ts))
@@ -116,7 +116,7 @@ async getTheme(): Promise<ThemeName>;
 
 ### 3.1 Create Layout Service
 
-**File**: `src/services/layout/layoutEngine.ts`
+**File**: `src/services/layout_service.ts`
 
 Implement:
 - Get/set layout mode (Uniform Grid vs. Bento Grid)
@@ -127,7 +127,7 @@ Implement:
 
 ### 3.2 Add Bento Grid CSS
 
-**File**: `src/styles/layout/bentoGrid.css`
+**File**: `src/styles/layout/bento_grid.css`
 
 ```css
 .bento-grid {
@@ -158,7 +158,7 @@ Implement:
 
 ### 3.3 Update BookmarkTile Component
 
-**File**: `src/components/BookmarkTile.tsx`
+**File**: `src/components/bookmark_card.tsx`
 
 Add:
 - `tileSize` prop (passed from service)
@@ -171,7 +171,7 @@ Add:
 
 ### 4.1 Create Wallpaper Service
 
-**File**: `src/services/theme/wallpaperService.ts`
+**File**: `src/services/wallpaper_service.ts`
 
 Implement:
 - Validate file (size, type, dimensions)
@@ -184,7 +184,7 @@ Implement:
 
 ### 4.2 Create Wallpaper Upload Component
 
-**File**: `src/components/WallpaperUploader.tsx`
+**File**: `src/components/wallpaper_uploader.tsx`
 
 UI:
 - Drag-and-drop file input
@@ -209,7 +209,7 @@ Endpoints:
 
 ### 5.1 Update Settings Panel
 
-**File**: `src/app/(settings)/theme/page.tsx`
+**File**: `src/components/settings_panel.tsx`
 
 Add:
 - Theme selector dropdown (including Modern)
@@ -231,7 +231,7 @@ Add:
 
 ### 5.3 Update ThemeProvider
 
-**File**: `src/components/ThemeProvider.tsx`
+**File**: `src/components/theme-provider.tsx`
 
 Add:
 - Load Modern preference + wallpaper on init
@@ -245,7 +245,7 @@ Add:
 
 ### Unit Tests
 
-**Files**: `tests/unit/themeService.test.ts`, `tests/unit/layoutEngine.test.ts`, `tests/unit/wallpaperService.test.ts`
+**Files**: `tests/unit/theme_service.test.ts`, `tests/unit/layout_service.test.ts`, `tests/unit/wallpaper_service.test.ts`
 
 Test:
 - Theme switching and token application
@@ -256,7 +256,7 @@ Test:
 
 ### Integration Tests
 
-**Files**: `tests/integration/themeSettings.test.ts`, `tests/integration/wallpaperIntegration.test.ts`
+**Files**: `tests/integration/theme_settings.test.ts`, `tests/integration/wallpaper_settings.test.ts`, `tests/integration/layout_settings.test.ts`, `tests/integration/tile_size_settings.test.ts`, `tests/integration/blur_settings.test.ts`
 
 Test:
 - Theme selector UI updates app state
@@ -266,7 +266,7 @@ Test:
 
 ### E2E Tests
 
-**Files**: `tests/e2e/modern-theme.spec.ts` (or separate per feature)
+**Files**: `tests/e2e/homepage.spec.ts`, `tests/e2e/wallpaper_upload.spec.ts`, `tests/e2e/bento_grid.spec.ts`, `tests/e2e/bookmarks.spec.ts`, `tests/e2e/blur_intensity.spec.ts`
 
 Test user journeys:
 1. User selects Modern theme → homepage updates to glass styling ✅

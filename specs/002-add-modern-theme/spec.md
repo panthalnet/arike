@@ -86,7 +86,7 @@ Users want to tune blur intensity to match readability and personal preference.
 
 **Why this priority**: Blur adjustment improves comfort and accessibility for varying backgrounds and display conditions.
 
-**Independent Test**: Change blur intensity in settings and verify all glass surfaces update immediately and persist after restart.
+**Independent Test**: Change blur intensity within the 8px-20px supported range and verify all glass surfaces update immediately and persist after restart.
 
 **Acceptance Scenarios**:
 
@@ -99,8 +99,10 @@ Users want to tune blur intensity to match readability and personal preference.
 
 - If visual blur effects are not supported by the browser, the system falls back to a semi-opaque surface style that preserves readability and contrast.
 - If uploaded wallpaper files are invalid, corrupted, or unsupported, the upload is rejected with a clear error and the default gradient remains active.
+- If malformed theme, wallpaper, layout, or tile-size requests reach the system, they are rejected with a clear validation error and persisted state remains unchanged.
+- If wallpaper upload or activation fails after file handling begins, the system cleans up partial files and preserves the previously active background.
 - If bento tiles would overflow on smaller screens, the layout enforces single-column stacking below the mobile breakpoint.
-- If blur intensity is reduced to zero-equivalent visual blur, text remains readable through a reinforced background treatment.
+- If blur intensity is set to the minimum supported value of 8px, text remains readable through a reinforced background treatment.
 - If users switch repeatedly between Modern and other built-in themes, each theme restores its own tokens and saved settings without leakage.
 
 ## Requirements *(mandatory)*
@@ -119,7 +121,7 @@ Users want to tune blur intensity to match readability and personal preference.
 - **FR-010**: When layout is set to Bento Grid, system MUST render the bookmark area using a responsive bento grid pattern on desktop and tablet, and single-column layout on mobile.
 - **FR-011**: Users MUST be able to set bookmark tile sizes to small, medium, or large when Bento Grid is active, and the selected size MUST persist per bookmark.
 - **FR-012**: System MUST auto-align and compact bento tiles after bookmark deletions or changes so no persistent blank holes remain.
-- **FR-013**: Users MUST be able to adjust Modern blur intensity within a bounded range, and changes MUST apply immediately and persist.
+- **FR-013**: Users MUST be able to adjust Modern blur intensity between 8px and 20px inclusive, and changes MUST apply immediately and persist.
 - **FR-014**: System MUST maintain minimum WCAG AA body text contrast (4.5:1) on Modern surfaces across supported backgrounds.
 - **FR-015**: If wallpaper validation fails or visual blur capability is unavailable, system MUST use defined fallback behavior that preserves usability and readability.
 - **FR-016**: For fresh installations and new users, system MUST default theme selection to Gruvbox; Modern remains user-selectable but not default in v1.
@@ -128,6 +130,7 @@ Users want to tune blur intensity to match readability and personal preference.
 
 - **ModernThemePreference**: Stores whether Modern is selected and the current Modern token overrides, including blur intensity.
 - **WallpaperAsset**: Represents an uploaded or built-in wallpaper selection, including source type, reference, and active status.
+- **LayoutPreference**: Stores the persisted layout mode independently from theme selection so user-selected overrides survive theme switches.
 - **BookmarkTilePresentation**: Represents per-bookmark presentation settings for Modern, including tile size category (small/medium/large).
 
 ## Success Criteria *(mandatory)*

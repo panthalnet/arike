@@ -1,23 +1,22 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: (template placeholders) → 1.0.0
-Bump rationale: Initial constitution adoption (MAJOR)
+Version change: 1.0.0 → 1.1.0
+Bump rationale: Added enforceable quality and architecture guardrails for validation, transactionality, observability, and static analysis (MINOR)
 
-Modified principles: N/A (all new)
-
-Added sections:
-- Core Principles (7 principles)
-- Workflow Gates
+Modified principles:
+- III. Layered Architecture
+- V. Quality Gates (NON-NEGOTIABLE)
 - Definition of Done
-- Governance
 
-Removed sections: N/A (template placeholders replaced)
+Added sections: N/A
+
+Removed sections: N/A
 
 Templates status:
 - .specify/templates/plan-template.md: ✅ Compatible (Constitution Check section works generically)
 - .specify/templates/spec-template.md: ✅ Compatible (user scenarios support acceptance criteria)
-- .specify/templates/tasks-template.md: ⚠️ Recommend future update: tests should be mandatory per 90% coverage rule
+- .specify/templates/tasks-template.md: ⚠️ Recommend future update: explicit lint/typecheck/build gates should be reflected alongside test requirements
 
 Follow-up TODOs: None
 -->
@@ -57,12 +56,25 @@ creates a fragmented user experience.
 The codebase MUST maintain strict separation between UI, domain logic, and persistence layers.
 
 - **Typed contracts**: All layer boundaries MUST have explicit TypeScript interfaces defining the contract
+- **Runtime boundary validation**: All HTTP request bodies, query parameters, environment variables,
+  and uploaded file metadata MUST be validated with shared runtime schemas before entering domain
+  logic
 - **Vertical slices only**: Every feature MUST be implemented as a complete vertical slice from UI to
   database; horizontal "foundation" layers without user-facing functionality are PROHIBITED
+- **Atomic persistence**: Any operation that mutates multiple rows, tables, or persistent side
+  effects MUST execute within a transaction or equivalent atomic boundary
 - **Pluggable adapters**: External integrations (search engines, calendars, RSS feeds, icon providers)
   MUST use adapter interfaces allowing runtime substitution
 - **Graceful degradation**: When external providers fail or are unavailable, the application MUST
   continue functioning with clear user feedback about reduced functionality
+
+Runtime validation keeps malformed input, unsafe configuration, and unsupported files from crossing
+layer boundaries and turning into implicit behavior deeper in the system. This preserves the
+contract between UI, transport, and domain layers in a way static typing alone cannot enforce.
+
+Atomic persistence prevents partial writes, split-brain state, and recovery ambiguity when a single
+user action spans multiple records or side effects. If the system cannot commit the whole change,
+it must leave durable state unchanged.
 
 **Rationale**: Layered architecture with typed contracts enables testing, maintainability, and the
 ability to swap implementations without cascading changes.
@@ -95,8 +107,15 @@ Quality standards are mandatory checkpoints, not aspirational goals.
   automatically tested end-to-end, the design MUST be revised
 - **Accessibility**: WCAG AA compliance is MANDATORY; full keyboard navigation MUST be supported;
   reduced motion preferences MUST be respected
+- **Structured observability**: Application code MUST use shared structured logging and a stable
+  error taxonomy at service and HTTP boundaries; raw console logging is PROHIBITED in production
+  application code and allowed only in tests and local bootstrap scripts
 - **State completeness**: Every feature MUST implement and test all four states: empty, loading,
   error, and success; missing states block merge
+
+Structured observability turns failures into diagnosable events instead of scattered strings. A
+shared log shape and stable error categories are required for reliable debugging, triage, and
+support in a self-hosted product where maintainers may have limited live access to deployments.
 
 **Rationale**: Quality gates prevent technical debt accumulation. Accessibility is a legal
 requirement in many jurisdictions and an ethical imperative everywhere.
@@ -150,9 +169,15 @@ A feature is complete ONLY when ALL of the following are true:
 
 - [ ] **Spec implemented**: All requirements from the approved specification are implemented
 - [ ] **Tests pass**: All tests pass with minimum 90% coverage maintained
+- [ ] **Static analysis passes**: lint, typecheck, and production build all pass in CI for the
+  merged tree
 - [ ] **Mobile validated**: Feature tested and functional on mobile viewport (375px minimum)
 - [ ] **Docs updated**: README.md and/or docs/design.md updated if feature affects users or architecture
 - [ ] **No license violations**: All new dependencies verified for permissive licensing
+
+Static analysis is a merge gate because strict typing, lint rules, and build integrity are not
+advisory signals in this project. They are the automated proof that the codebase remains coherent,
+deployable, and maintainable under change.
 
 Work not meeting ALL criteria is incomplete and MUST NOT be merged.
 
@@ -189,4 +214,4 @@ This constitution MANDATES rejection of any work that:
 - Uses copyleft-licensed code or dependencies
 - Proceeds without approved specification
 
-**Version**: 1.0.0 | **Ratified**: 2026-04-04 | **Last Amended**: 2026-04-04
+**Version**: 1.1.0 | **Ratified**: 2026-04-04 | **Last Amended**: 2026-04-19

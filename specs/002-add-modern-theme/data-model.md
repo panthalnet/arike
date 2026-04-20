@@ -98,6 +98,36 @@
 
 ---
 
+## Entity: LayoutPreference
+
+**Purpose**: Stores the globally selected layout mode independently from theme selection.
+
+**Fields**:
+- `id` (integer, PRIMARY KEY): Always 1 in v1 (single user)
+- `layout_mode` (string, enum): 'uniform-grid' | 'bento-grid'
+- `created_at` (timestamp): When the preference record was created
+- `updated_at` (timestamp): When the layout mode was last modified
+
+**Relationships**:
+- 1-to-1 with application state (only one active layout preference in v1)
+- Independent from theme selection; theme service can set an initial default without owning the record
+
+**Constraints**:
+- `id` is always 1; application enforces singleton
+- `layout_mode` validated against enum whitelist
+
+**Example Data**:
+```json
+{
+  "id": 1,
+  "layout_mode": "bento-grid",
+  "created_at": "2026-04-19T10:00:00Z",
+  "updated_at": "2026-04-19T10:05:00Z"
+}
+```
+
+---
+
 ## Entity: BookmarkTilePresentation
 
 **Purpose**: Stores per-bookmark display preferences for the Modern theme when Bento Grid layout is active.
@@ -172,6 +202,14 @@ export const wallpaperAsset = sqliteTable('wallpaper_asset', {
   updated_at: text('updated_at').notNull(),
 });
 
+// Layout preference table
+export const layoutPreference = sqliteTable('layout_preference', {
+  id: integer('id').primaryKey({ autoIncrement: false }).notNull(), // Always 1
+  layout_mode: text('layout_mode').notNull().default('uniform-grid'),
+  created_at: text('created_at').notNull(),
+  updated_at: text('updated_at').notNull(),
+});
+
 // Bookmark tile presentation table
 export const bookmarkTilePresentation = sqliteTable(
   'bookmark_tile_presentation',
@@ -194,7 +232,7 @@ export const bookmarkTilePresentation = sqliteTable(
 
 ## Migrations
 
-### Migration: `add-modern-theme.sql`
+### Migration: `0001_add_modern_theme.sql`
 
 ```sql
 -- Create ModernThemePreference table
@@ -212,6 +250,18 @@ CREATE TABLE IF NOT EXISTS modern_theme_preference (
 -- Initialize singleton row
 INSERT INTO modern_theme_preference (id, selected_theme, blur_intensity, created_at, updated_at)
 VALUES (1, 'gruvbox', 12, datetime('now'), datetime('now'));
+
+-- Create LayoutPreference table
+CREATE TABLE IF NOT EXISTS layout_preference (
+  id INTEGER PRIMARY KEY NOT NULL,
+  layout_mode TEXT NOT NULL DEFAULT 'uniform-grid',
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+-- Initialize singleton row
+INSERT INTO layout_preference (id, layout_mode, created_at, updated_at)
+VALUES (1, 'uniform-grid', datetime('now'), datetime('now'));
 
 -- Create WallpaperAsset table
 CREATE TABLE IF NOT EXISTS wallpaper_asset (
@@ -260,6 +310,10 @@ CREATE INDEX IF NOT EXISTS idx_wallpaper_is_active ON wallpaper_asset(is_active)
 - For uploads: `file_path` must exist and be readable; file must be <2MB, ≤1024×1024px
 - For built-ins: `file_path` must be null
 - Only one record can have `is_active=true`
+
+### LayoutPreference
+- `layout_mode`: Must be 'uniform-grid' or 'bento-grid'
+- Only one record exists (id=1 always)
 
 ### BookmarkTilePresentation
 - `tile_size`: Must be 'small', 'medium', or 'large'
