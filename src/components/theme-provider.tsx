@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-type Theme = 'gruvbox' | 'catppuccin' | 'everforest'
+type Theme = 'gruvbox' | 'catppuccin' | 'everforest' | 'modern'
 
 // Theme colors (duplicated from service to avoid server-side imports in client)
 const THEME_COLORS = {
@@ -30,6 +30,14 @@ const THEME_COLORS = {
     accent: '#dbbc7f',
     muted: '#343f44',
   },
+  modern: {
+    primary: '#38bdf8',
+    background: 'linear-gradient(135deg, #1e3a5f 0%, #2d1b5e 100%)',
+    text: '#ffffff',
+    border: 'rgba(255, 255, 255, 0.15)',
+    accent: '#a78bfa',
+    muted: 'rgba(255, 255, 255, 0.65)',
+  },
 } as const
 
 interface ThemeColors {
@@ -42,8 +50,12 @@ interface ThemeColors {
 interface ThemeContextType {
   theme: Theme
   customColors: Partial<ThemeColors>
+  blurIntensity: number
+  activeWallpaper: string | null
   setTheme: (theme: Theme) => void
   setCustomColors: (colors: Partial<ThemeColors>) => void
+  setBlurIntensity: (px: number) => void
+  setActiveWallpaper: (url: string | null) => void
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
@@ -51,19 +63,32 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('gruvbox')
   const [customColors, setCustomColors] = useState<Partial<ThemeColors>>({})
+  const [blurIntensity, setBlurIntensity] = useState<number>(12)
+  const [activeWallpaper, setActiveWallpaper] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
 
   // Load theme settings on mount
   useEffect(() => {
     setMounted(true)
     
+    const BUILTIN_GRADIENTS: Record<string, string> = {
+      'builtin-1': 'linear-gradient(135deg, #0a3d62 0%, #1a5c7a 100%)',
+      'builtin-2': 'linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%)',
+      'builtin-3': 'linear-gradient(135deg, #5d2c3e 0%, #8b4f9f 50%, #e8a555 100%)',
+    }
+
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {
-        if (data.selectedTheme) {
-          setTheme(data.selectedTheme as Theme)
+        const loadedTheme = data.selectedTheme as Theme | undefined
+        if (loadedTheme) {
+          setTheme(loadedTheme)
         }
         
+        if (typeof data.blurIntensity === 'number') {
+          setBlurIntensity(data.blurIntensity)
+        }
+
         const custom: Partial<ThemeColors> = {}
         if (data.customPrimary) custom.primary = data.customPrimary
         if (data.customBackground) custom.background = data.customBackground
@@ -72,6 +97,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         
         if (Object.keys(custom).length > 0) {
           setCustomColors(custom)
+        }
+
+        // Load active wallpaper when on Modern theme
+        if (loadedTheme === 'modern') {
+          fetch('/api/wallpapers')
+            .then(r => r.json())
+            .then((wallpapers: Array<{ id: string; isActive: boolean; sourceType: string }>) => {
+              const active = wallpapers.find(w => w.isActive)
+              if (active) {
+                const gradient = BUILTIN_GRADIENTS[active.id]
+                setActiveWallpaper(gradient ?? `url(/api/wallpapers/file/${active.id})`)
+              }
+            })
+            .catch(() => { /* wallpaper load failure is non-fatal */ })
         }
       })
       .catch(err => {
@@ -115,6 +154,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     // Set theme data attribute (CSS handles the colors via globals.css)
     document.documentElement.setAttribute('data-theme', theme)
+
+    // Apply blur intensity for Modern theme
+    if (theme === 'modern') {
+      document.documentElement.style.setProperty('--glass-blur', `${blurIntensity}px`)
+      
+      // Apply active wallpaper or default gradient
+      if (activeWallpaper) {
+        document.documentElement.style.setProperty('--theme-background', activeWallpaper)
+      } else {
+        document.documentElement.style.removeProperty('--theme-background')
+      }
+    } else {
+      document.documentElement.style.removeProperty('--glass-blur')
+      document.documentElement.style.removeProperty('--theme-background')
+    }
     
     // Apply custom color overrides if set (convert hex to HSL)
     if (customColors.primary) {
@@ -140,10 +194,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       document.documentElement.style.removeProperty('--border')
     }
-  }, [theme, customColors, mounted])
+  }, [theme, customColors, blurIntensity, activeWallpaper, mounted])
 
   return (
-    <ThemeContext.Provider value={{ theme, customColors, setTheme, setCustomColors }}>
+    <ThemeContext.Provider value={{ theme, customColors, blurIntensity, activeWallpaper, setTheme, setCustomColors, setBlurIntensity, setActiveWallpaper }}>
       {children}
     </ThemeContext.Provider>
   )
