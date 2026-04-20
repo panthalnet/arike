@@ -45,6 +45,16 @@ export async function getAllWallpapers(): Promise<WallpaperAssetDTO[]> {
   return rows.map(rowToDTO)
 }
 
+export async function getWallpaperById(id: string): Promise<WallpaperAssetDTO | null> {
+  const rows = await db
+    .select()
+    .from(wallpaperAssets)
+    .where(eq(wallpaperAssets.id, id))
+    .limit(1)
+    .all()
+  return rows.length > 0 ? rowToDTO(rows[0]) : null
+}
+
 export async function getActiveWallpaper(): Promise<WallpaperAssetDTO | null> {
   const rows = await db
     .select()

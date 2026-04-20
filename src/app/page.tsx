@@ -33,7 +33,7 @@ export default async function Home() {
           <Clock />
 
           {/* Settings Button - top-right */}
-          <SettingsPanel initialSettings={settings} />
+          <SettingsPanel initialSettings={settings} initialLayoutMode={layoutMode} />
         </div>
       </header>
 

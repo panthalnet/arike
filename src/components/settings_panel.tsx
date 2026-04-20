@@ -44,6 +44,7 @@ type Wallpaper = {
 
 type SettingsPanelProps = {
   initialSettings?: ThemeSetting
+  initialLayoutMode?: 'uniform-grid' | 'bento-grid'
   onSettingsChange?: (settings: Partial<ThemeSetting>) => void
 }
 
@@ -64,6 +65,7 @@ const THEME_LABELS: Record<string, string> = {
  */
 export function SettingsPanel({ 
   initialSettings,
+  initialLayoutMode = 'uniform-grid',
   onSettingsChange,
 }: SettingsPanelProps) {
   const [open, setOpen] = useState(false)
@@ -81,7 +83,7 @@ export function SettingsPanel({
   const [themeChangeError, setThemeChangeError] = useState<string | null>(null)
   const [wallpapers, setWallpapers] = useState<Wallpaper[]>([])
   const [wallpapersLoaded, setWallpapersLoaded] = useState(false)
-  const [layoutMode, setLayoutModeState] = useState<'uniform-grid' | 'bento-grid'>('uniform-grid')
+  const [layoutMode, setLayoutModeState] = useState<'uniform-grid' | 'bento-grid'>(initialLayoutMode)
 
   // Load initial settings
   useEffect(() => {
@@ -252,9 +254,8 @@ export function SettingsPanel({
       })
       if (res.ok) {
         setLayoutModeState(mode)
-        // Reflect on the live grid by setting data attribute
-        const grid = document.querySelector('[data-testid="bookmarks-grid"]')
-        if (grid) grid.setAttribute('data-layout', mode)
+        // Notify DashboardContent via custom event (cross-component, no prop drilling)
+        window.dispatchEvent(new CustomEvent('arike:layout-change', { detail: { mode } }))
         setAnnouncement(`Layout changed to ${mode === 'bento-grid' ? 'Bento Grid' : 'Uniform Grid'}`)
       }
     } catch (error) {

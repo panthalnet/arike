@@ -92,11 +92,11 @@
 
     /* Modern-specific tokens (used by glass surfaces) */
     --glass-blur: 12px;
-    --glass-surface: rgba(255, 255, 255, 0.08);
-    --glass-surface-hover: rgba(255, 255, 255, 0.12);
-    --glass-border: rgba(255, 255, 255, 0.15);
-    --glass-border-hover: rgba(255, 255, 255, 0.25);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    --glass-surface: rgba(255, 255, 255, 0.12);
+    --glass-surface-hover: rgba(255, 255, 255, 0.18);
+    --glass-border: rgba(255, 255, 255, 0.20);
+    --glass-border-hover: rgba(255, 255, 255, 0.32);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
     --theme-background: linear-gradient(135deg, #1e3a5f 0%, #2d1b5e 100%);
   }
 
@@ -109,9 +109,21 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Modern theme: full-page gradient background */
-  [data-theme="modern"] body {
+  /* Modern theme: wallpaper sits on html itself so backdrop-filter on
+     descendant glass elements can sample it correctly. z-index:-1 pseudo-
+     elements are painted BEHIND html's own background and are invisible to
+     backdrop-filter. Direct html background is the only reliable approach. */
+  [data-theme="modern"] {
     background: var(--theme-background, linear-gradient(135deg, #1e3a5f 0%, #2d1b5e 100%));
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+  }
+
+  [data-theme="modern"] body {
+    background: transparent !important;
+    background-color: transparent !important;
     min-height: 100vh;
   }
 }

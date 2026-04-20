@@ -48,6 +48,16 @@ export function DashboardContent({
   const [collectionManagerOpen, setCollectionManagerOpen] = useState(false)
   const [layoutMode, setLayoutMode] = useState<'uniform-grid' | 'bento-grid'>(initialLayoutMode)
 
+  // Listen for layout changes dispatched by SettingsPanel
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const mode = (e as CustomEvent<{ mode: 'uniform-grid' | 'bento-grid' }>).detail.mode
+      setLayoutMode(mode)
+    }
+    window.addEventListener('arike:layout-change', handler)
+    return () => window.removeEventListener('arike:layout-change', handler)
+  }, [])
+
   const fetchCollections = useCallback(async () => {
     try {
       const res = await fetch('/api/collections')

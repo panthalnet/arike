@@ -181,22 +181,31 @@ export function BookmarkCard({
 
       {/* Tile size picker — bento grid mode only, shown on hover */}
       {layoutMode === 'bento-grid' && onTileSizeChange && (
-        <div className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <select
-            data-testid="tile-size-select"
-            aria-label={`Tile size for ${name}`}
-            value={tileSize}
-            onClick={(e) => e.stopPropagation()}
-            onChange={(e) => {
-              e.stopPropagation()
-              onTileSizeChange(e.target.value as TileSize)
-            }}
-            className="text-xs rounded border border-border bg-background/90 px-1 py-0.5 cursor-pointer"
-          >
-            <option value="small">S</option>
-            <option value="medium">M</option>
-            <option value="large">L</option>
-          </select>
+        <div
+          className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex rounded-md overflow-hidden border border-border"
+          role="group"
+          aria-label={`Tile size for ${name}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {(['small', 'medium', 'large'] as TileSize[]).map((size, i) => (
+            <button
+              key={size}
+              data-testid={i === 0 ? 'tile-size-select' : undefined}
+              aria-label={`${size} tile`}
+              aria-pressed={tileSize === size}
+              onClick={(e) => {
+                e.stopPropagation()
+                onTileSizeChange(size)
+              }}
+              className={`text-xs px-1.5 py-0.5 cursor-pointer transition-colors ${
+                tileSize === size
+                  ? 'bg-primary text-primary-foreground font-semibold'
+                  : 'bg-background/80 text-muted-foreground hover:bg-background hover:text-foreground'
+              }`}
+            >
+              {size[0].toUpperCase()}
+            </button>
+          ))}
         </div>
       )}
     </div>

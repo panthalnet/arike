@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Upload, Check } from 'lucide-react'
+import { setCachedWallpaper } from '@/lib/wallpaper_cache'
 
 interface Wallpaper {
   id: string
@@ -39,14 +40,19 @@ export function WallpaperUploader({
   }
 
   const applyWallpaperCss = (wallpaperId: string | null) => {
+    let cssValue: string | null = null
     if (wallpaperId && BUILTIN_GRADIENTS[wallpaperId]) {
-      document.documentElement.style.setProperty('--theme-background', BUILTIN_GRADIENTS[wallpaperId])
+      cssValue = BUILTIN_GRADIENTS[wallpaperId]
     } else if (wallpaperId) {
-      // Uploaded file — use as background-image URL
-      document.documentElement.style.setProperty('--theme-background', `url(/api/wallpapers/file/${wallpaperId})`)
+      cssValue = `url(/api/wallpapers/file/${wallpaperId})`
+    }
+
+    if (cssValue) {
+      document.documentElement.style.setProperty('--theme-background', cssValue)
     } else {
       document.documentElement.style.removeProperty('--theme-background')
     }
+    setCachedWallpaper(cssValue)
   }
 
   const handleActivate = async (wallpaperId: string) => {
@@ -103,7 +109,9 @@ export function WallpaperUploader({
       }
       const uploaded: Wallpaper = await res.json()
       onWallpaperUploaded(uploaded)
-      announce(`Wallpaper "${uploaded.displayName}" uploaded`)
+      // Auto-activate the just-uploaded wallpaper
+      await handleActivate(uploaded.id)
+      announce(`Wallpaper "${uploaded.displayName}" uploaded and activated`)
     } catch {
       setUploadError('Upload failed. Please try again.')
     } finally {
@@ -133,7 +141,11 @@ export function WallpaperUploader({
               onClick={() => void handleActivate(w.id)}
               className={`relative h-16 rounded-md border-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
                 ${w.isActive ? 'border-primary ring-2 ring-primary/30' : 'border-border hover:border-accent'}`}
-              style={gradient ? { background: gradient } : { backgroundColor: 'var(--muted)' }}
+          style={
+                gradient
+                  ? { background: gradient }
+                  : { backgroundImage: `url(/api/wallpapers/file/${w.id})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+              }
             >
               {w.isActive && (
                 <span className="absolute inset-0 flex items-center justify-center">

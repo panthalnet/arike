@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
+import { getCachedWallpaper, setCachedWallpaper } from '@/lib/wallpaper_cache'
 
 type Theme = 'gruvbox' | 'catppuccin' | 'everforest' | 'modern'
 
@@ -70,6 +71,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Load theme settings on mount
   useEffect(() => {
     setMounted(true)
+
+    // Apply cached wallpaper immediately — avoids flash and skips the API call
+    // when the wallpaper hasn't changed since last visit.
+    const cached = getCachedWallpaper()
+    if (cached) {
+      document.documentElement.style.setProperty('--theme-background', cached)
+      setActiveWallpaper(cached)
+    }
     
     const BUILTIN_GRADIENTS: Record<string, string> = {
       'builtin-1': 'linear-gradient(135deg, #0a3d62 0%, #1a5c7a 100%)',
@@ -99,18 +108,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           setCustomColors(custom)
         }
 
-        // Load active wallpaper when on Modern theme
+        // Verify active wallpaper from server only when on Modern theme.
+        // If the server-side value matches the cache, no DOM update is needed.
         if (loadedTheme === 'modern') {
           fetch('/api/wallpapers')
             .then(r => r.json())
             .then((wallpapers: Array<{ id: string; isActive: boolean; sourceType: string }>) => {
               const active = wallpapers.find(w => w.isActive)
-              if (active) {
-                const gradient = BUILTIN_GRADIENTS[active.id]
-                setActiveWallpaper(gradient ?? `url(/api/wallpapers/file/${active.id})`)
+              const cssValue = active
+                ? (BUILTIN_GRADIENTS[active.id] ?? `url(/api/wallpapers/file/${active.id})`)
+                : null
+              // Only update DOM + cache if the value differs from what's already applied
+              if (cssValue !== getCachedWallpaper()) {
+                setActiveWallpaper(cssValue)
+                setCachedWallpaper(cssValue)
               }
             })
             .catch(() => { /* wallpaper load failure is non-fatal */ })
+        } else {
+          // Non-modern theme: clear wallpaper cache
+          setCachedWallpaper(null)
         }
       })
       .catch(err => {
