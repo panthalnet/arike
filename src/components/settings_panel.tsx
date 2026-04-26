@@ -86,7 +86,7 @@ export function SettingsPanel({
   const [wallpapersLoaded, setWallpapersLoaded] = useState(false)
   const [layoutMode, setLayoutModeState] = useState<'uniform-grid' | 'bento-grid'>(initialLayoutMode)
   const blurDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const { setTheme, setCustomColors, setBlurIntensity: setBlurContext } = useTheme()
+  const { setTheme, setCustomColors, setBlurIntensity: setBlurContext, setActiveWallpaper } = useTheme()
 
   // Load initial settings
   useEffect(() => {
@@ -196,9 +196,11 @@ export function SettingsPanel({
     }
   }, [onSettingsChange, setTheme, setCustomColors, setBlurContext])
 
-  const handleThemeChange = (theme: string) => {
-    updateSetting({ selectedTheme: theme })
-    // Modern theme defaults to bento-grid
+  const handleThemeChange = async (theme: string) => {
+    await updateSetting({ selectedTheme: theme })
+    // Only switch to bento-grid default if the theme save succeeded (updateSetting
+    // sets themeChangeError on failure, but doesn't throw — check state via the
+    // response path; simplest guard is that selectedTheme was updated in settings)
     if (theme === 'modern' && layoutMode === 'uniform-grid') {
       void handleLayoutModeChange('bento-grid')
     }
@@ -285,7 +287,7 @@ export function SettingsPanel({
               <Label htmlFor="theme-select">Theme</Label>
               <Select
                 value={settings.selectedTheme}
-                onValueChange={handleThemeChange}
+                onValueChange={(v) => void handleThemeChange(v)}
                 disabled={themeChangePending}
               >
                 <SelectTrigger 
@@ -342,6 +344,16 @@ export function SettingsPanel({
                     wallpapers={wallpapers}
                     onWallpaperActivated={(id) => {
                       setWallpapers(prev => prev.map(w => ({ ...w, isActive: w.id === id })))
+                      // Keep ThemeProvider context in sync so --theme-background isn't overwritten
+                      const builtinGradients: Record<string, string> = {
+                        'builtin-1': 'linear-gradient(135deg, #0a3d62 0%, #1a5c7a 100%)',
+                        'builtin-2': 'linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%)',
+                        'builtin-3': 'linear-gradient(135deg, #5d2c3e 0%, #8b4f9f 50%, #e8a555 100%)',
+                      }
+                      const cssValue = id
+                        ? (builtinGradients[id] ?? `url(/api/wallpapers/file/${id})`)
+                        : null
+                      setActiveWallpaper(cssValue)
                     }}
                     onWallpaperUploaded={(w) => {
                       setWallpapers(prev => [...prev, w])

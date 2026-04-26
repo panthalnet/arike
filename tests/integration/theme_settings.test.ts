@@ -38,7 +38,7 @@ function setupDb(dbPath: string) {
 }
 
 describe('Theme Settings Integration', () => {
-  let sqlite: ReturnType<typeof Database>
+  let sqlite: Database.Database
   let testDbPath: string
 
   beforeEach(() => {

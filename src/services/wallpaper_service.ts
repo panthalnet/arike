@@ -1,7 +1,8 @@
 import { eq } from 'drizzle-orm'
+import path from 'path'
 import { db } from '@/lib/db'
 import { wallpaperAssets } from '@/lib/schema'
-import { saveWallpaper, deleteWallpaperFile } from '@/lib/storage'
+import { saveWallpaper, deleteWallpaperFile, WALLPAPERS_DIR } from '@/lib/storage'
 
 export const BUILTIN_WALLPAPER_IDS = ['builtin-1', 'builtin-2', 'builtin-3'] as const
 
@@ -150,6 +151,12 @@ export async function deleteWallpaper(wallpaperId: string): Promise<void> {
   }
 
   if (row.filePath) {
+    // Path traversal guard: ensure the stored path is inside WALLPAPERS_DIR
+    const resolvedFile = path.resolve(row.filePath)
+    const resolvedDir = path.resolve(WALLPAPERS_DIR)
+    if (!resolvedFile.startsWith(resolvedDir + path.sep)) {
+      throw new Error('Invalid wallpaper file path')
+    }
     await deleteWallpaperFile(row.filePath)
   }
 
