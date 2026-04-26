@@ -169,16 +169,19 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     }
 
-    if ('tileSize' in body) {
-      if (!(VALID_TILE_SIZES as readonly string[]).includes(body.tileSize)) {
+    const payload = body as Record<string, unknown>
+
+    if ('tileSize' in payload) {
+      const tileSize = payload.tileSize
+      if (typeof tileSize !== 'string' || !(VALID_TILE_SIZES as readonly string[]).includes(tileSize)) {
         return NextResponse.json(
-          { error: `Invalid tileSize: "${body.tileSize}". Must be one of: ${VALID_TILE_SIZES.join(', ')}` },
+          { error: `Invalid tileSize: "${tileSize}". Must be one of: ${VALID_TILE_SIZES.join(', ')}` },
           { status: 400 }
         )
       }
-      await setTileSize(id, body.tileSize as TileSize)
-      const tileSize = await getTileSize(id)
-      return NextResponse.json({ id, tileSize })
+      await setTileSize(id, tileSize as TileSize)
+      const updatedSize = await getTileSize(id)
+      return NextResponse.json({ id, tileSize: updatedSize })
     }
 
     return NextResponse.json({ error: 'No patchable fields provided' }, { status: 400 })

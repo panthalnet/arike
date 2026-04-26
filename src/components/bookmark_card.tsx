@@ -132,8 +132,8 @@ export function BookmarkCard({
         {name}
       </div>
 
-      {/* Action buttons (shown on hover) */}
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      {/* Action buttons (shown on hover or keyboard focus within card) */}
+      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200">
         {onEdit && (
           <Button
             data-testid={`bookmark-edit-button-${name}`}
@@ -178,10 +178,10 @@ export function BookmarkCard({
         {name} - {url}
       </a>
 
-      {/* Tile size picker — bento grid mode only, shown on hover */}
+      {/* Tile size picker — bento grid mode only, shown on hover/focus */}
       {layoutMode === 'bento-grid' && onTileSizeChange && (
         <div
-          className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex rounded-md overflow-hidden border border-border"
+          className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex rounded-md overflow-hidden border border-border"
           role="group"
           aria-label={`Tile size for ${name}`}
           onClick={(e) => e.stopPropagation()}

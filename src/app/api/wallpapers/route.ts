@@ -4,7 +4,9 @@ import { getAllWallpapers, uploadWallpaper } from '@/services/wallpaper_service'
 export async function GET() {
   try {
     const wallpapers = await getAllWallpapers()
-    return NextResponse.json(wallpapers)
+    // Strip server-side filePath — clients use /api/wallpapers/file/[id] instead
+    const safeWallpapers = wallpapers.map(({ filePath: _fp, ...rest }) => rest)
+    return NextResponse.json(safeWallpapers)
   } catch (error) {
     console.error('Failed to fetch wallpapers:', error)
     return NextResponse.json({ error: 'Failed to fetch wallpapers' }, { status: 500 })
@@ -22,14 +24,15 @@ export async function POST(request: Request) {
 
     const result = await uploadWallpaper(file)
 
-    if (!result.success) {
+    if (!result.success || !result.wallpaper) {
       return NextResponse.json(
         { error: result.validationError ?? result.error ?? 'Upload failed' },
         { status: 400 }
       )
     }
 
-    return NextResponse.json(result.wallpaper, { status: 201 })
+    const { filePath: _fp, ...safeWallpaper } = result.wallpaper
+    return NextResponse.json(safeWallpaper, { status: 201 })
   } catch (error) {
     console.error('Wallpaper upload failed:', error)
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 })

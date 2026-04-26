@@ -48,26 +48,28 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     }
 
+    const payload = body as Record<string, unknown>
+
     // Runtime schema validation: at least one known key required
     const knownKeys = ['selectedTheme', 'searchProvider', 'blurIntensity', 'customPrimary',
       'customBackground', 'customText', 'customBorder', 'resetColors']
-    const hasKnown = knownKeys.some(k => k in body)
+    const hasKnown = knownKeys.some(k => k in payload)
     if (!hasKnown) {
       return NextResponse.json({ error: 'No valid settings fields provided' }, { status: 400 })
     }
 
     // Handle theme change
-    if (body.selectedTheme !== undefined) {
-      if (!(AVAILABLE_THEMES as readonly string[]).includes(body.selectedTheme)) {
-        return NextResponse.json({ error: `Invalid theme: ${body.selectedTheme}` }, { status: 400 })
+    if (payload.selectedTheme !== undefined) {
+      if (typeof payload.selectedTheme !== 'string' || !(AVAILABLE_THEMES as readonly string[]).includes(payload.selectedTheme)) {
+        return NextResponse.json({ error: `Invalid theme: ${payload.selectedTheme}` }, { status: 400 })
       }
-      const updated = await updateTheme(body.selectedTheme)
+      const updated = await updateTheme(payload.selectedTheme)
       return NextResponse.json(updated)
     }
 
     // Handle blur intensity change
-    if (body.blurIntensity !== undefined) {
-      const px = Number(body.blurIntensity)
+    if (payload.blurIntensity !== undefined) {
+      const px = Number(payload.blurIntensity)
       if (!Number.isInteger(px) || px < BLUR_MIN || px > BLUR_MAX) {
         return NextResponse.json(
           { error: `blurIntensity must be an integer between ${BLUR_MIN} and ${BLUR_MAX}` },
@@ -79,16 +81,16 @@ export async function PUT(request: NextRequest) {
     }
 
     // Handle search provider change
-    if (body.searchProvider !== undefined) {
-      if (!(AVAILABLE_SEARCH_PROVIDERS as readonly string[]).includes(body.searchProvider)) {
-        return NextResponse.json({ error: `Invalid search provider: ${body.searchProvider}` }, { status: 400 })
+    if (payload.searchProvider !== undefined) {
+      if (typeof payload.searchProvider !== 'string' || !(AVAILABLE_SEARCH_PROVIDERS as readonly string[]).includes(payload.searchProvider)) {
+        return NextResponse.json({ error: `Invalid search provider: ${payload.searchProvider}` }, { status: 400 })
       }
-      const updated = await updateSearchProvider(body.searchProvider)
+      const updated = await updateSearchProvider(payload.searchProvider)
       return NextResponse.json(updated)
     }
 
     // Handle reset colors
-    if (body.resetColors === true) {
+    if (payload.resetColors === true) {
       const updated = await resetCustomColors()
       return NextResponse.json(updated)
     }
@@ -97,20 +99,20 @@ export async function PUT(request: NextRequest) {
     const colorUpdates: CustomColors = {}
     let hasColorUpdates = false
 
-    if ('customPrimary' in body) {
-      colorUpdates.customPrimary = body.customPrimary
+    if ('customPrimary' in payload) {
+      colorUpdates.customPrimary = payload.customPrimary as string | null
       hasColorUpdates = true
     }
-    if ('customBackground' in body) {
-      colorUpdates.customBackground = body.customBackground
+    if ('customBackground' in payload) {
+      colorUpdates.customBackground = payload.customBackground as string | null
       hasColorUpdates = true
     }
-    if ('customText' in body) {
-      colorUpdates.customText = body.customText
+    if ('customText' in payload) {
+      colorUpdates.customText = payload.customText as string | null
       hasColorUpdates = true
     }
-    if ('customBorder' in body) {
-      colorUpdates.customBorder = body.customBorder
+    if ('customBorder' in payload) {
+      colorUpdates.customBorder = payload.customBorder as string | null
       hasColorUpdates = true
     }
 

@@ -24,18 +24,25 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     }
 
-    if (!('layoutMode' in body)) {
+    const payload = body as Record<string, unknown>
+
+    if (!('layoutMode' in payload)) {
       return NextResponse.json({ error: 'layoutMode field is required' }, { status: 400 })
     }
 
-    if (!(VALID_LAYOUT_MODES as readonly string[]).includes(body.layoutMode)) {
+    const layoutMode = payload.layoutMode
+    if (typeof layoutMode !== 'string') {
+      return NextResponse.json({ error: 'layoutMode must be a string' }, { status: 400 })
+    }
+
+    if (!(VALID_LAYOUT_MODES as readonly string[]).includes(layoutMode)) {
       return NextResponse.json(
-        { error: `Invalid layoutMode: "${body.layoutMode}". Must be one of: ${VALID_LAYOUT_MODES.join(', ')}` },
+        { error: `Invalid layoutMode: "${layoutMode}". Must be one of: ${VALID_LAYOUT_MODES.join(', ')}` },
         { status: 400 }
       )
     }
 
-    const updated = await setLayoutMode(body.layoutMode as LayoutMode)
+    const updated = await setLayoutMode(layoutMode as LayoutMode)
     return NextResponse.json(updated)
   } catch (error) {
     console.error('Failed to update layout mode:', error)
