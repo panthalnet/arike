@@ -8,6 +8,13 @@
       "when": 1775431791412,
       "tag": "0000_productive_colleen_wing",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1745078400000,
+      "tag": "0001_add_modern_theme",
+      "breakpoints": true
     }
   ]
 }

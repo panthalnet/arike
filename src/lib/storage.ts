@@ -58,6 +58,39 @@ export async function deleteIcon(filename: string): Promise<void> {
   }
 }
 
+// ── Wallpaper storage ────────────────────────────────────────────────────────
+
+const WALLPAPERS_DIR = process.env.DATA_DIR
+  ? path.join(process.env.DATA_DIR, 'wallpapers')
+  : path.join(process.cwd(), 'data', 'wallpapers')
+
+export async function ensureWallpapersDirectory() {
+  try {
+    await fs.access(WALLPAPERS_DIR)
+  } catch {
+    await fs.mkdir(WALLPAPERS_DIR, { recursive: true })
+  }
+}
+
+export async function saveWallpaper(buffer: Buffer, extension: string): Promise<string> {
+  await ensureWallpapersDirectory()
+  const ext = extension.replace('.', '')
+  const filename = `${crypto.randomUUID()}.${ext}`
+  const filepath = path.join(WALLPAPERS_DIR, filename)
+  await fs.writeFile(filepath, buffer)
+  return filepath
+}
+
+export async function deleteWallpaperFile(filePath: string): Promise<void> {
+  try {
+    await fs.unlink(filePath)
+  } catch (error) {
+    console.warn(`Failed to delete wallpaper file ${filePath}:`, error)
+  }
+}
+
+export { WALLPAPERS_DIR }
+
 // Check if icon file exists
 export async function iconExists(filename: string): Promise<boolean> {
   const filepath = path.join(ICONS_DIR, filename)

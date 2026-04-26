@@ -1,14 +1,17 @@
 import { db } from '@/lib/db'
 import { themeSettings, type ThemeSetting } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
+import {
+  AVAILABLE_THEMES,
+  AVAILABLE_SEARCH_PROVIDERS,
+  BLUR_MIN,
+  BLUR_MAX,
+  BLUR_DEFAULT,
+  THEME_COLORS,
+} from '@/lib/theme-constants'
 
-// Available themes (built-in)
-export const AVAILABLE_THEMES = ['gruvbox', 'catppuccin', 'everforest'] as const
-export type ThemeName = typeof AVAILABLE_THEMES[number]
-
-// Available search providers
-export const AVAILABLE_SEARCH_PROVIDERS = ['duckduckgo', 'google', 'bing', 'brave'] as const
-export type SearchProvider = typeof AVAILABLE_SEARCH_PROVIDERS[number]
+export type { ThemeName, SearchProvider } from '@/lib/theme-constants'
+export { AVAILABLE_THEMES, AVAILABLE_SEARCH_PROVIDERS, BLUR_MIN, BLUR_MAX, BLUR_DEFAULT, THEME_COLORS }
 
 // Custom color configuration
 export type CustomColors = {
@@ -17,34 +20,6 @@ export type CustomColors = {
   customText?: string | null
   customBorder?: string | null
 }
-
-// Theme definitions with CSS custom properties
-export const THEME_COLORS = {
-  gruvbox: {
-    primary: '#d65d0e',
-    background: '#282828',
-    text: '#ebdbb2',
-    border: '#504945',
-    accent: '#d79921',
-    muted: '#3c3836',
-  },
-  catppuccin: {
-    primary: '#89b4fa',  // Blue - better contrast than Mauve
-    background: '#1e1e2e',
-    text: '#cdd6f4',
-    border: '#45475a',
-    accent: '#94e2d5',
-    muted: '#313244',
-  },
-  everforest: {
-    primary: '#a7c080',
-    background: '#2d353b',
-    text: '#d3c6aa',
-    border: '#475258',
-    accent: '#dbbc7f',
-    muted: '#343f44',
-  },
-} as const
 
 // Search provider URL templates
 export const SEARCH_PROVIDER_URLS = {
@@ -73,6 +48,7 @@ export async function getThemeSettings(): Promise<ThemeSetting> {
         customText: null,
         customBorder: null,
         searchProvider: 'duckduckgo',
+        blurIntensity: BLUR_DEFAULT,
         updatedAt: new Date(),
       }
     }
@@ -89,6 +65,7 @@ export async function getThemeSettings(): Promise<ThemeSetting> {
       customText: null,
       customBorder: null,
       searchProvider: 'duckduckgo',
+      blurIntensity: BLUR_DEFAULT,
       updatedAt: new Date(),
     }
   }
@@ -200,6 +177,30 @@ export async function resetCustomColors(): Promise<ThemeSetting> {
     })
     .where(eq(themeSettings.id, 1))
     .returning()
+
+  return updated[0]
+}
+
+/**
+ * Update blur intensity for Modern theme surfaces (8–20px)
+ */
+export async function updateBlurIntensity(pixels: number): Promise<ThemeSetting> {
+  if (!Number.isInteger(pixels) || pixels < BLUR_MIN || pixels > BLUR_MAX) {
+    throw new Error(`Invalid blur intensity: ${pixels}. Must be an integer between ${BLUR_MIN} and ${BLUR_MAX}.`)
+  }
+
+  const updated = await db
+    .update(themeSettings)
+    .set({
+      blurIntensity: pixels,
+      updatedAt: new Date(),
+    })
+    .where(eq(themeSettings.id, 1))
+    .returning()
+
+  if (!updated[0]) {
+    throw new Error('Theme settings row not found; run migrations to seed the singleton row.')
+  }
 
   return updated[0]
 }

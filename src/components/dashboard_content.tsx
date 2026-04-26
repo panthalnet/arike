@@ -23,6 +23,7 @@ type Collection = {
 type DashboardContentProps = {
   initialCollections?: Collection[]
   initialBookmarks?: Bookmark[]
+  initialLayoutMode?: 'uniform-grid' | 'bento-grid'
 }
 
 /**
@@ -38,12 +39,24 @@ type DashboardContentProps = {
 export function DashboardContent({
   initialCollections = [],
   initialBookmarks = [],
+  initialLayoutMode = 'uniform-grid',
 }: DashboardContentProps) {
   const [collections, setCollections] = useState<Collection[]>(initialCollections)
   const [activeCollectionId, setActiveCollectionId] = useState<string>(
     initialCollections[0]?.id ?? ''
   )
   const [collectionManagerOpen, setCollectionManagerOpen] = useState(false)
+  const [layoutMode, setLayoutMode] = useState<'uniform-grid' | 'bento-grid'>(initialLayoutMode)
+
+  // Listen for layout changes dispatched by SettingsPanel
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const mode = (e as CustomEvent<{ mode: 'uniform-grid' | 'bento-grid' }>).detail.mode
+      setLayoutMode(mode)
+    }
+    window.addEventListener('arike:layout-change', handler)
+    return () => window.removeEventListener('arike:layout-change', handler)
+  }, [])
 
   const fetchCollections = useCallback(async () => {
     try {
@@ -106,7 +119,7 @@ export function DashboardContent({
   return (
     <div className="w-full">
       {/* Collection Tabs + Manage button */}
-      <div className="flex items-center gap-2 mb-6">
+      <div className="glass-surface flex items-center gap-2 mb-6 p-2 rounded-xl bg-card border border-border">
         {/* Scrollable tab strip */}
         <div
           data-testid="collection-tabs"
@@ -209,6 +222,7 @@ export function DashboardContent({
               collectionId={col.id}
               collections={collections}
               onBookmarkSaved={handleBookmarkSaved}
+              layoutMode={layoutMode}
             />
           )}
         </div>

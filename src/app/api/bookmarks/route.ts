@@ -5,6 +5,7 @@ import {
   getBookmarksByCollection,
   searchBookmarks,
 } from '@/services/bookmark_service'
+import { addBookmarkToCollection } from '@/services/collection_service'
 
 /**
  * GET /api/bookmarks
@@ -51,10 +52,17 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
+    const body: unknown = await request.json()
+
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+
+    const payload = body as Record<string, unknown>
 
     // Validate required fields
-    if (!body.name || !body.url || !body.icon) {
+    if (!payload.name || !payload.url || !payload.icon ||
+        typeof payload.name !== 'string' || typeof payload.url !== 'string' || typeof payload.icon !== 'string') {
       return NextResponse.json(
         { error: 'Missing required fields: name, url, icon' },
         { status: 400 }
@@ -63,17 +71,17 @@ export async function POST(request: NextRequest) {
 
     // Create bookmark
     const bookmark = await createBookmark({
-      name: body.name,
-      url: body.url,
-      icon: body.icon,
+      name: payload.name,
+      url: payload.url,
+      icon: payload.icon,
     })
 
     // Add to collections if specified
-    if (body.collections && Array.isArray(body.collections)) {
-      const { addBookmarkToCollection } = await import('@/services/bookmark_service')
-      
-      for (const collectionId of body.collections) {
-        await addBookmarkToCollection(bookmark.id, collectionId)
+    if (Array.isArray(payload.collections)) {
+      for (const collectionId of payload.collections) {
+        if (typeof collectionId === 'string') {
+          await addBookmarkToCollection(bookmark.id, collectionId)
+        }
       }
     }
 

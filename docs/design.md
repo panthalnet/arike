@@ -8,6 +8,8 @@ Arike is a self-hosted browser startup page. The v1 release provides:
 - Bookmark management with icon support
 - Collection-based bookmark organisation
 - Full theme customisation (built-in + custom colors)
+- **Modern glassmorphism theme** with wallpaper support and adjustable blur intensity
+- **Bento Grid layout** with per-bookmark tile size controls (small / medium / large)
 - Docker and Node.js CLI deployment
 
 ## Technology Decisions

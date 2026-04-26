@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Settings, X } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Settings } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Slider } from '@/components/ui/slider'
 import {
   Select,
   SelectContent,
@@ -21,6 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { BLUR_MIN, BLUR_MAX } from '@/lib/theme-constants'
+import { useTheme } from '@/components/theme-provider'
+import { WallpaperUploader } from '@/components/wallpaper_uploader'
 
 type ThemeSetting = {
   selectedTheme: string
@@ -29,15 +33,31 @@ type ThemeSetting = {
   customText: string | null
   customBorder: string | null
   searchProvider: string
+  blurIntensity?: number
+}
+
+type Wallpaper = {
+  id: string
+  displayName: string
+  sourceType: 'builtin' | 'upload'
+  isActive: boolean
 }
 
 type SettingsPanelProps = {
   initialSettings?: ThemeSetting
+  initialLayoutMode?: 'uniform-grid' | 'bento-grid'
   onSettingsChange?: (settings: Partial<ThemeSetting>) => void
 }
 
-const AVAILABLE_THEMES = ['gruvbox', 'catppuccin', 'everforest'] as const
+const AVAILABLE_THEMES = ['gruvbox', 'catppuccin', 'everforest', 'modern'] as const
 const AVAILABLE_PROVIDERS = ['duckduckgo', 'google', 'bing', 'brave'] as const
+
+const THEME_LABELS: Record<string, string> = {
+  gruvbox: 'Gruvbox Dark',
+  catppuccin: 'Catppuccin Mocha',
+  everforest: 'Everforest Dark',
+  modern: 'Modern (Glass)',
+}
 
 /**
  * Settings Panel component for theme and search provider configuration
@@ -46,6 +66,7 @@ const AVAILABLE_PROVIDERS = ['duckduckgo', 'google', 'bing', 'brave'] as const
  */
 export function SettingsPanel({ 
   initialSettings,
+  initialLayoutMode = 'uniform-grid',
   onSettingsChange,
 }: SettingsPanelProps) {
   const [open, setOpen] = useState(false)
@@ -56,8 +77,16 @@ export function SettingsPanel({
     customText: null,
     customBorder: null,
     searchProvider: 'duckduckgo',
+    blurIntensity: 12,
   })
   const [announcement, setAnnouncement] = useState('')
+  const [themeChangePending, setThemeChangePending] = useState(false)
+  const [themeChangeError, setThemeChangeError] = useState<string | null>(null)
+  const [wallpapers, setWallpapers] = useState<Wallpaper[]>([])
+  const [wallpapersLoaded, setWallpapersLoaded] = useState(false)
+  const [layoutMode, setLayoutModeState] = useState<'uniform-grid' | 'bento-grid'>(initialLayoutMode)
+  const blurDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { setTheme, setCustomColors, setBlurIntensity: setBlurContext, setActiveWallpaper } = useTheme()
 
   // Load initial settings
   useEffect(() => {
@@ -69,19 +98,51 @@ export function SettingsPanel({
     }
   }, [initialSettings])
 
+  // Clear debounce timer on unmount to prevent state updates after unmount
+  useEffect(() => {
+    return () => {
+      if (blurDebounceRef.current) clearTimeout(blurDebounceRef.current)
+    }
+  }, [])
+
+  // Load wallpapers when Modern theme is selected
+  useEffect(() => {
+    if (settings.selectedTheme === 'modern' && !wallpapersLoaded) {
+      fetch('/api/wallpapers')
+        .then(res => res.json())
+        .then((data: Wallpaper[]) => {
+          setWallpapers(data)
+          setWallpapersLoaded(true)
+        })
+        .catch(err => console.error('Failed to load wallpapers:', err))
+    }
+  }, [settings.selectedTheme, wallpapersLoaded])
+
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/settings')
-      if (response.ok) {
-        const data = await response.json()
+      const [settingsRes, layoutRes] = await Promise.all([
+        fetch('/api/settings'),
+        fetch('/api/layout'),
+      ])
+      if (settingsRes.ok) {
+        const data = await settingsRes.json()
         setSettings(data)
+      }
+      if (layoutRes.ok) {
+        const data = await layoutRes.json()
+        if (data.layoutMode) setLayoutModeState(data.layoutMode)
       }
     } catch (error) {
       console.error('Failed to fetch settings:', error)
     }
   }
 
-  const updateSetting = useCallback(async (updates: Partial<ThemeSetting>) => {
+  const updateSetting = useCallback(async (updates: Partial<ThemeSetting>): Promise<boolean> => {
+    const isThemeChange = 'selectedTheme' in updates
+    if (isThemeChange) {
+      setThemeChangePending(true)
+      setThemeChangeError(null)
+    }
     try {
       const response = await fetch('/api/settings', {
         method: 'PUT',
@@ -91,94 +152,89 @@ export function SettingsPanel({
 
       if (response.ok) {
         const updated = await response.json()
-        setSettings(updated)
+        setSettings(prev => ({ ...prev, ...updated }))
         
         // Notify parent component
         if (onSettingsChange) {
           onSettingsChange(updates)
         }
 
-        // Apply theme immediately (no page reload)
-        applyTheme(updated)
+        // Sync ThemeProvider context (single source of truth for DOM mutations)
+        setTheme(updated.selectedTheme as typeof AVAILABLE_THEMES[number])
+        setCustomColors({
+          ...(updated.customPrimary ? { primary: updated.customPrimary } : {}),
+          ...(updated.customBackground ? { background: updated.customBackground } : {}),
+          ...(updated.customText ? { text: updated.customText } : {}),
+          ...(updated.customBorder ? { border: updated.customBorder } : {}),
+        })
+        if (typeof updated.blurIntensity === 'number') {
+          setBlurContext(updated.blurIntensity)
+        }
 
         // Screen reader announcement
         if (updates.selectedTheme) {
-          setAnnouncement(`Theme updated to ${updates.selectedTheme}`)
+          const label = THEME_LABELS[updates.selectedTheme] ?? updates.selectedTheme
+          setAnnouncement(`Theme updated to ${label}`)
         } else if (updates.searchProvider) {
           setAnnouncement(`Search provider changed to ${updates.searchProvider}`)
+        } else if (updates.blurIntensity !== undefined) {
+          setAnnouncement(`Blur intensity set to ${updates.blurIntensity}px`)
         }
+        return true
+      } else {
+        const errText = await response.text()
+        setThemeChangeError('Failed to save: ' + errText)
+        setAnnouncement('Failed to update settings')
+        return false
       }
     } catch (error) {
       console.error('Failed to update settings:', error)
+      setThemeChangeError('Network error — settings not saved')
       setAnnouncement('Failed to update settings')
-    }
-  }, [onSettingsChange])
-
-  const hexToHSL = (hex: string): string => {
-    // Remove # if present
-    hex = hex.replace('#', '')
-    
-    // Convert hex to RGB
-    const r = parseInt(hex.substring(0, 2), 16) / 255
-    const g = parseInt(hex.substring(2, 4), 16) / 255
-    const b = parseInt(hex.substring(4, 6), 16) / 255
-    
-    const max = Math.max(r, g, b)
-    const min = Math.min(r, g, b)
-    let h = 0, s = 0, l = (max + min) / 2
-    
-    if (max !== min) {
-      const d = max - min
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-      
-      switch (max) {
-        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break
-        case g: h = ((b - r) / d + 2) / 6; break
-        case b: h = ((r - g) / d + 4) / 6; break
+      return false
+    } finally {
+      if (isThemeChange) {
+        setThemeChangePending(false)
       }
     }
-    
-    h = Math.round(h * 360)
-    s = Math.round(s * 100)
-    l = Math.round(l * 100)
-    
-    return `${h} ${s}% ${l}%`
-  }
+  }, [onSettingsChange, setTheme, setCustomColors, setBlurContext])
 
-  const applyTheme = (themeSettings: ThemeSetting) => {
-    const html = document.documentElement
-    
-    // Set theme data attribute (this applies the base theme colors from CSS)
-    html.setAttribute('data-theme', themeSettings.selectedTheme)
-    
-    // Apply custom color overrides if set (convert hex to HSL)
-    if (themeSettings.customPrimary) {
-      html.style.setProperty('--primary', hexToHSL(themeSettings.customPrimary))
-    } else {
-      html.style.removeProperty('--primary')
-    }
-    
-    if (themeSettings.customBackground) {
-      html.style.setProperty('--background', hexToHSL(themeSettings.customBackground))
-    } else {
-      html.style.removeProperty('--background')
-    }
-    
-    if (themeSettings.customText) {
-      html.style.setProperty('--foreground', hexToHSL(themeSettings.customText))
-    } else {
-      html.style.removeProperty('--foreground')
-    }
-    
-    if (themeSettings.customBorder) {
-      html.style.setProperty('--border', hexToHSL(themeSettings.customBorder))
-    } else {
-      html.style.removeProperty('--border')
+  const handleThemeChange = async (theme: string) => {
+    const succeeded = await updateSetting({ selectedTheme: theme })
+    // Only switch to bento-grid default when the theme was actually persisted
+    if (succeeded && theme === 'modern' && layoutMode === 'uniform-grid') {
+      void handleLayoutModeChange('bento-grid')
     }
   }
 
-  const handleThemeChange = (theme: string) => {
-    updateSetting({ selectedTheme: theme })
+  const handleLayoutModeChange = async (mode: 'uniform-grid' | 'bento-grid') => {
+    try {
+      const res = await fetch('/api/layout', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ layoutMode: mode }),
+      })
+      if (res.ok) {
+        setLayoutModeState(mode)
+        // Notify DashboardContent via custom event (cross-component, no prop drilling)
+        window.dispatchEvent(new CustomEvent('arike:layout-change', { detail: { mode } }))
+        setAnnouncement(`Layout changed to ${mode === 'bento-grid' ? 'Bento Grid' : 'Uniform Grid'}`)
+      }
+    } catch (error) {
+      console.error('Failed to update layout mode:', error)
+    }
+  }
+
+  const handleBlurChange = (values: number[]) => {
+    const px = values[0]
+    setSettings(prev => ({ ...prev, blurIntensity: px }))
+    // Update ThemeProvider context for live preview (ThemeProvider owns the CSS var)
+    setBlurContext(px)
+    // Debounce the API write — slider fires on every pixel while dragging
+    if (blurDebounceRef.current) clearTimeout(blurDebounceRef.current)
+    blurDebounceRef.current = setTimeout(() => {
+      updateSetting({ blurIntensity: px })
+    }, 400)
   }
 
   const handleProviderChange = (provider: string) => {
@@ -232,23 +288,80 @@ export function SettingsPanel({
               <Label htmlFor="theme-select">Theme</Label>
               <Select
                 value={settings.selectedTheme}
-                onValueChange={handleThemeChange}
+                onValueChange={(v) => void handleThemeChange(v)}
+                disabled={themeChangePending}
               >
                 <SelectTrigger 
                   id="theme-select"
                   data-testid="theme-select"
                   style={{ minHeight: '44px' }}
+                  aria-busy={themeChangePending}
                 >
                   <SelectValue placeholder="Select theme" />
                 </SelectTrigger>
                 <SelectContent>
                   {AVAILABLE_THEMES.map((theme) => (
                     <SelectItem key={theme} value={theme}>
-                      {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                      {THEME_LABELS[theme] ?? theme}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {themeChangePending && (
+                <p className="text-xs text-muted-foreground" aria-live="polite">Saving…</p>
+              )}
+              {themeChangeError && (
+                <p className="text-xs text-destructive" role="alert">{themeChangeError}</p>
+              )}
+
+              {/* Blur intensity slider — Modern theme only */}
+              {settings.selectedTheme === 'modern' && (
+                <div className="space-y-2 mt-4" data-testid="blur-intensity-control">
+                  <Label htmlFor="blur-slider">
+                    Glass Blur Intensity: {settings.blurIntensity ?? 12}px
+                  </Label>
+                  <Slider
+                    id="blur-slider"
+                    data-testid="blur-slider"
+                    min={BLUR_MIN}
+                    max={BLUR_MAX}
+                    step={1}
+                    value={[settings.blurIntensity ?? 12]}
+                    onValueChange={handleBlurChange}
+                    aria-label="Glass blur intensity"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{BLUR_MIN}px (subtle)</span>
+                    <span>{BLUR_MAX}px (heavy)</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Wallpaper picker — Modern theme only */}
+              {settings.selectedTheme === 'modern' && (
+                <div className="mt-4 space-y-2">
+                  <Label>Background Wallpaper</Label>
+                  <WallpaperUploader
+                    wallpapers={wallpapers}
+                    onWallpaperActivated={(id) => {
+                      setWallpapers(prev => prev.map(w => ({ ...w, isActive: w.id === id })))
+                      // Keep ThemeProvider context in sync so --theme-background isn't overwritten
+                      const builtinGradients: Record<string, string> = {
+                        'builtin-1': 'linear-gradient(135deg, #0a3d62 0%, #1a5c7a 100%)',
+                        'builtin-2': 'linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%)',
+                        'builtin-3': 'linear-gradient(135deg, #5d2c3e 0%, #8b4f9f 50%, #e8a555 100%)',
+                      }
+                      const cssValue = id
+                        ? (builtinGradients[id] ?? `url(/api/wallpapers/file/${id})`)
+                        : null
+                      setActiveWallpaper(cssValue)
+                    }}
+                    onWallpaperUploaded={(w) => {
+                      setWallpapers(prev => [...prev, w])
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Custom Colors */}
@@ -314,6 +427,27 @@ export function SettingsPanel({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Layout Mode */}
+            <div className="space-y-2">
+              <Label htmlFor="layout-mode-select">Layout Mode</Label>
+              <Select
+                value={layoutMode}
+                onValueChange={(value) => void handleLayoutModeChange(value as 'uniform-grid' | 'bento-grid')}
+              >
+                <SelectTrigger
+                  id="layout-mode-select"
+                  data-testid="layout-mode-select"
+                  style={{ minHeight: '44px' }}
+                >
+                  <SelectValue placeholder="Select layout mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="uniform-grid">Uniform Grid</SelectItem>
+                  <SelectItem value="bento-grid">Bento Grid</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Search Provider */}

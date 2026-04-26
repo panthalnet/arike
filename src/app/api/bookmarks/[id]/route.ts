@@ -3,10 +3,14 @@ import {
   getBookmarkById,
   updateBookmark,
   deleteBookmark,
+  type BookmarkInput,
+} from '@/services/bookmark_service'
+import {
   getCollectionsForBookmark,
   addBookmarkToCollection,
   removeBookmarkFromCollection,
-} from '@/services/bookmark_service'
+} from '@/services/collection_service'
+import { setTileSize, getTileSize, VALID_TILE_SIZES, type TileSize } from '@/services/tile_size_service'
 
 type RouteContext = {
   params: Promise<{ id: string }>
@@ -53,13 +57,34 @@ export async function GET(request: NextRequest, context: RouteContext) {
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params
-    const body = await request.json()
+    const body: unknown = await request.json()
+
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+
+    const payload = body as Record<string, unknown>
 
     // Update bookmark fields
-    const updateData: any = {}
-    if (body.name !== undefined) updateData.name = body.name
-    if (body.url !== undefined) updateData.url = body.url
-    if (body.icon !== undefined) updateData.icon = body.icon
+    const updateData: Partial<BookmarkInput> = {}
+    if (payload.name !== undefined) {
+      if (typeof payload.name !== 'string' || payload.name.trim() === '') {
+        return NextResponse.json({ error: 'name must be a non-empty string' }, { status: 400 })
+      }
+      updateData.name = payload.name
+    }
+    if (payload.url !== undefined) {
+      if (typeof payload.url !== 'string') {
+        return NextResponse.json({ error: 'url must be a string' }, { status: 400 })
+      }
+      updateData.url = payload.url
+    }
+    if (payload.icon !== undefined) {
+      if (typeof payload.icon !== 'string') {
+        return NextResponse.json({ error: 'icon must be a string' }, { status: 400 })
+      }
+      updateData.icon = payload.icon
+    }
 
     let bookmark
     if (Object.keys(updateData).length > 0) {
@@ -69,21 +94,24 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     }
 
     // Update collections if specified
-    if (body.collections && Array.isArray(body.collections)) {
+    if (payload.collections && Array.isArray(payload.collections)) {
+      const desiredCollections = payload.collections as string[]
       // Get current collections
       const currentCollections = await getCollectionsForBookmark(id)
 
       // Find collections to add and remove
-      const collectionsToAdd = body.collections.filter(
+      const collectionsToAdd = desiredCollections.filter(
         (c: string) => !currentCollections.includes(c)
       )
       const collectionsToRemove = currentCollections.filter(
-        (c) => !body.collections.includes(c)
+        (c) => !desiredCollections.includes(c)
       )
 
       // Add to new collections
       for (const collectionId of collectionsToAdd) {
-        await addBookmarkToCollection(id, collectionId)
+        if (typeof collectionId === 'string') {
+          await addBookmarkToCollection(id, collectionId)
+        }
       }
 
       // Remove from old collections
@@ -151,5 +179,44 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       { error: 'Failed to delete bookmark' },
       { status: 500 }
     )
+  }
+}
+
+/**
+ * PATCH /api/bookmarks/[id]
+ * Partial update — currently supports: { tileSize: 'small' | 'medium' | 'large' }
+ */
+export async function PATCH(request: NextRequest, context: RouteContext) {
+  try {
+    const params = await context.params
+    const id = params.id
+    const body: unknown = await request.json()
+
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+
+    const payload = body as Record<string, unknown>
+
+    if ('tileSize' in payload) {
+      const tileSize = payload.tileSize
+      if (typeof tileSize !== 'string' || !(VALID_TILE_SIZES as readonly string[]).includes(tileSize)) {
+        return NextResponse.json(
+          { error: `Invalid tileSize: "${tileSize}". Must be one of: ${VALID_TILE_SIZES.join(', ')}` },
+          { status: 400 }
+        )
+      }
+      await setTileSize(id, tileSize as TileSize)
+      const updatedSize = await getTileSize(id)
+      return NextResponse.json({ id, tileSize: updatedSize })
+    }
+
+    return NextResponse.json({ error: 'No patchable fields provided' }, { status: 400 })
+  } catch (error) {
+    console.error('Failed to patch bookmark:', error)
+    if (error instanceof Error && error.message.includes('not found')) {
+      return NextResponse.json({ error: 'Bookmark not found' }, { status: 404 })
+    }
+    return NextResponse.json({ error: 'Failed to update bookmark' }, { status: 500 })
   }
 }

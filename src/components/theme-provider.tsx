@@ -1,36 +1,9 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
+import { getCachedWallpaper, setCachedWallpaper } from '@/lib/wallpaper_cache'
 
-type Theme = 'gruvbox' | 'catppuccin' | 'everforest'
-
-// Theme colors (duplicated from service to avoid server-side imports in client)
-const THEME_COLORS = {
-  gruvbox: {
-    primary: '#d65d0e',
-    background: '#282828',
-    text: '#ebdbb2',
-    border: '#504945',
-    accent: '#d79921',
-    muted: '#3c3836',
-  },
-  catppuccin: {
-    primary: '#89b4fa',  // Blue - better contrast than Mauve
-    background: '#1e1e2e',
-    text: '#cdd6f4',
-    border: '#45475a',
-    accent: '#94e2d5',
-    muted: '#313244',
-  },
-  everforest: {
-    primary: '#a7c080',
-    background: '#2d353b',
-    text: '#d3c6aa',
-    border: '#475258',
-    accent: '#dbbc7f',
-    muted: '#343f44',
-  },
-} as const
+type Theme = 'gruvbox' | 'catppuccin' | 'everforest' | 'modern'
 
 interface ThemeColors {
   primary: string
@@ -42,8 +15,12 @@ interface ThemeColors {
 interface ThemeContextType {
   theme: Theme
   customColors: Partial<ThemeColors>
+  blurIntensity: number
+  activeWallpaper: string | null
   setTheme: (theme: Theme) => void
   setCustomColors: (colors: Partial<ThemeColors>) => void
+  setBlurIntensity: (px: number) => void
+  setActiveWallpaper: (url: string | null) => void
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
@@ -51,19 +28,32 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('gruvbox')
   const [customColors, setCustomColors] = useState<Partial<ThemeColors>>({})
+  const [blurIntensity, setBlurIntensity] = useState<number>(12)
+  const [activeWallpaper, setActiveWallpaper] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
 
   // Load theme settings on mount
   useEffect(() => {
     setMounted(true)
     
+    const BUILTIN_GRADIENTS: Record<string, string> = {
+      'builtin-1': 'linear-gradient(135deg, #0a3d62 0%, #1a5c7a 100%)',
+      'builtin-2': 'linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%)',
+      'builtin-3': 'linear-gradient(135deg, #5d2c3e 0%, #8b4f9f 50%, #e8a555 100%)',
+    }
+
     fetch('/api/settings')
       .then(res => res.json())
       .then(data => {
-        if (data.selectedTheme) {
-          setTheme(data.selectedTheme as Theme)
+        const loadedTheme = data.selectedTheme as Theme | undefined
+        if (loadedTheme) {
+          setTheme(loadedTheme)
         }
         
+        if (typeof data.blurIntensity === 'number') {
+          setBlurIntensity(data.blurIntensity)
+        }
+
         const custom: Partial<ThemeColors> = {}
         if (data.customPrimary) custom.primary = data.customPrimary
         if (data.customBackground) custom.background = data.customBackground
@@ -72,6 +62,35 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         
         if (Object.keys(custom).length > 0) {
           setCustomColors(custom)
+        }
+
+        // Apply cached wallpaper only once we know the theme is Modern —
+        // prevents a wallpaper flash when loading on a non-Modern theme.
+        if (loadedTheme === 'modern') {
+          const cached = getCachedWallpaper()
+          if (cached) {
+            document.documentElement.style.setProperty('--theme-background', cached)
+            setActiveWallpaper(cached)
+          }
+          fetch('/api/wallpapers')
+            .then(r => r.json())
+            .then((wallpapers: Array<{ id: string; isActive: boolean; sourceType: string }>) => {
+              const active = wallpapers.find(w => w.isActive)
+              const cssValue = active
+                ? (BUILTIN_GRADIENTS[active.id] ?? `url(/api/wallpapers/file/${active.id})`)
+                : null
+              // Only update DOM + cache if the value differs from what's already applied
+              if (cssValue !== getCachedWallpaper()) {
+                setActiveWallpaper(cssValue)
+                setCachedWallpaper(cssValue)
+              }
+            })
+            .catch(() => { /* wallpaper load failure is non-fatal */ })
+        } else {
+          // Non-modern theme: clear wallpaper cache and reset state so a
+          // subsequent switch back to Modern re-fetches from the server.
+          setCachedWallpaper(null)
+          setActiveWallpaper(null)
         }
       })
       .catch(err => {
@@ -115,6 +134,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     // Set theme data attribute (CSS handles the colors via globals.css)
     document.documentElement.setAttribute('data-theme', theme)
+
+    // Apply blur intensity for Modern theme
+    if (theme === 'modern') {
+      document.documentElement.style.setProperty('--glass-blur', `${blurIntensity}px`)
+      
+      // Apply active wallpaper or default gradient
+      if (activeWallpaper) {
+        document.documentElement.style.setProperty('--theme-background', activeWallpaper)
+      } else {
+        document.documentElement.style.removeProperty('--theme-background')
+      }
+    } else {
+      document.documentElement.style.removeProperty('--glass-blur')
+      document.documentElement.style.removeProperty('--theme-background')
+    }
     
     // Apply custom color overrides if set (convert hex to HSL)
     if (customColors.primary) {
@@ -140,10 +174,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       document.documentElement.style.removeProperty('--border')
     }
-  }, [theme, customColors, mounted])
+  }, [theme, customColors, blurIntensity, activeWallpaper, mounted])
 
   return (
-    <ThemeContext.Provider value={{ theme, customColors, setTheme, setCustomColors }}>
+    <ThemeContext.Provider value={{ theme, customColors, blurIntensity, activeWallpaper, setTheme, setCustomColors, setBlurIntensity, setActiveWallpaper }}>
       {children}
     </ThemeContext.Provider>
   )

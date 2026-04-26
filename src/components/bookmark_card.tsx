@@ -5,13 +5,18 @@ import { Edit, Trash2 } from 'lucide-react'
 import { parseIconReference } from '@/lib/icon-utils'
 import { Button } from '@/components/ui/button'
 
+type TileSize = 'small' | 'medium' | 'large'
+
 type BookmarkCardProps = {
   id: string
   name: string
   url: string
   icon: string
+  tileSize?: TileSize
+  layoutMode?: 'uniform-grid' | 'bento-grid'
   onEdit?: () => void
   onDelete?: () => void
+  onTileSizeChange?: (size: TileSize) => void
 }
 
 /**
@@ -24,8 +29,11 @@ export function BookmarkCard({
   name,
   url,
   icon,
+  tileSize = 'medium',
+  layoutMode = 'uniform-grid',
   onEdit,
   onDelete,
+  onTileSizeChange,
 }: BookmarkCardProps) {
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't trigger if clicking action buttons
@@ -56,7 +64,7 @@ export function BookmarkCard({
           icon={`material-symbols:${identifier}`}
           width={64}
           height={64}
-          className="text-accent"
+          className="text-primary"
         />
       )
     } else if (type === 'simple') {
@@ -66,7 +74,7 @@ export function BookmarkCard({
           icon={`simple-icons:${identifier}`}
           width={64}
           height={64}
-          className="text-accent"
+          className="text-primary"
         />
       )
     } else if (type === 'upload') {
@@ -93,13 +101,15 @@ export function BookmarkCard({
     )
   }
 
+  const tileSizeClass = layoutMode === 'bento-grid' ? `bento-tile-${tileSize}` : ''
+
   return (
     <div
       data-testid={`bookmark-card-${name}`}
       role="button"
       tabIndex={0}
       aria-label={`Open ${name}`}
-      className="group relative flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-border bg-card hover:bg-accent/10 hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors duration-200 cursor-pointer"
+      className={`group relative flex flex-col items-center gap-2 p-4 glass-surface hover:bg-accent/10 hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors duration-200 cursor-pointer ${tileSizeClass}`}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       style={{ minWidth: '120px', minHeight: '120px' }}
@@ -122,8 +132,8 @@ export function BookmarkCard({
         {name}
       </div>
 
-      {/* Action buttons (shown on hover) */}
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      {/* Action buttons (shown on hover or keyboard focus within card) */}
+      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200">
         {onEdit && (
           <Button
             data-testid={`bookmark-edit-button-${name}`}
@@ -167,6 +177,36 @@ export function BookmarkCard({
       >
         {name} - {url}
       </a>
+
+      {/* Tile size picker — bento grid mode only, shown on hover/focus */}
+      {layoutMode === 'bento-grid' && onTileSizeChange && (
+        <div
+          className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex rounded-md overflow-hidden border border-border"
+          role="group"
+          aria-label={`Tile size for ${name}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {(['small', 'medium', 'large'] as TileSize[]).map((size, i) => (
+            <button
+              key={size}
+              data-testid={i === 0 ? 'tile-size-select' : undefined}
+              aria-label={`${size} tile`}
+              aria-pressed={tileSize === size}
+              onClick={(e) => {
+                e.stopPropagation()
+                onTileSizeChange(size)
+              }}
+              className={`text-xs px-1.5 py-0.5 cursor-pointer transition-colors ${
+                tileSize === size
+                  ? 'bg-primary text-primary-foreground font-semibold'
+                  : 'bg-background/80 text-muted-foreground hover:bg-background hover:text-foreground'
+              }`}
+            >
+              {size[0].toUpperCase()}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

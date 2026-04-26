@@ -19,6 +19,7 @@ type Bookmark = {
   name: string
   url: string
   icon: string
+  tileSize?: 'small' | 'medium' | 'large'
 }
 
 type Collection = {
@@ -33,6 +34,7 @@ type BookmarksGridProps = {
   collectionId?: string
   collections?: Collection[]
   onBookmarkSaved?: () => void
+  layoutMode?: 'uniform-grid' | 'bento-grid'
 }
 
 /**
@@ -40,7 +42,7 @@ type BookmarksGridProps = {
  * Displays bookmarks in a responsive grid with CRUD operations
  * Meets FR-002: 4-column grid (desktop), 2-column (tablet), 1-column (mobile)
  */
-export function BookmarksGrid({ initialBookmarks = [], collectionId, collections = [], onBookmarkSaved }: BookmarksGridProps) {
+export function BookmarksGrid({ initialBookmarks = [], collectionId, collections = [], onBookmarkSaved, layoutMode = 'uniform-grid' }: BookmarksGridProps) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks)
   const [formOpen, setFormOpen] = useState(false)
   const [editingBookmark, setEditingBookmark] = useState<(Bookmark & { collectionIds?: string[] }) | undefined>()
@@ -178,14 +180,31 @@ export function BookmarksGrid({ initialBookmarks = [], collectionId, collections
       {bookmarks.length > 0 ? (
         <div 
           data-testid="bookmarks-grid"
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+          data-layout={layoutMode}
+          className={layoutMode === 'bento-grid'
+            ? 'bento-grid'
+            : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'
+          }
         >
           {bookmarks.map((bookmark) => (
             <BookmarkCard
               key={bookmark.id}
               {...bookmark}
+              layoutMode={layoutMode}
               onEdit={() => handleEditBookmark(bookmark)}
               onDelete={() => handleDeleteClick(bookmark)}
+              onTileSizeChange={async (size) => {
+                const res = await fetch(`/api/bookmarks/${bookmark.id}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ tileSize: size }),
+                })
+                if (res.ok) {
+                  setBookmarks(prev =>
+                    prev.map(b => b.id === bookmark.id ? { ...b, tileSize: size } : b)
+                  )
+                }
+              }}
             />
           ))}
         </div>

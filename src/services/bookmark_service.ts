@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
-import { bookmarks, collectionBookmarks, type Bookmark, type NewBookmark } from '@/lib/schema'
-import { eq, and, inArray } from 'drizzle-orm'
+import { bookmarks, collectionBookmarks, type Bookmark } from '@/lib/schema'
+import { eq, like, or } from 'drizzle-orm'
 import { validateUrl, validateIconReference, parseIconReference } from '@/lib/icon-utils'
 
 /**
@@ -46,6 +46,7 @@ export async function createBookmark(data: BookmarkInput): Promise<Bookmark> {
     name: data.name,
     url: data.url,
     icon: data.icon,
+    tileSize: 'medium' as const,
     createdAt: now,
     updatedAt: now,
   }
@@ -81,6 +82,7 @@ export async function getBookmarksByCollection(collectionId: string): Promise<Bo
       name: bookmarks.name,
       url: bookmarks.url,
       icon: bookmarks.icon,
+      tileSize: bookmarks.tileSize,
       createdAt: bookmarks.createdAt,
       updatedAt: bookmarks.updatedAt,
       order: collectionBookmarks.order,
@@ -107,7 +109,7 @@ export async function updateBookmark(id: string, data: Partial<BookmarkInput>): 
     throw new Error('Invalid icon reference format')
   }
 
-  const updateData: any = {
+  const updateData: Partial<BookmarkInput> & { updatedAt: Date } = {
     ...data,
     updatedAt: new Date(),
   }
@@ -138,70 +140,17 @@ export async function deleteBookmark(id: string): Promise<void> {
 }
 
 /**
- * Add bookmark to a collection
- */
-export async function addBookmarkToCollection(
-  bookmarkId: string,
-  collectionId: string,
-  order?: number
-): Promise<void> {
-  // Get current max order in collection
-  const existingMappings = await db
-    .select()
-    .from(collectionBookmarks)
-    .where(eq(collectionBookmarks.collectionId, collectionId))
-
-  const maxOrder = existingMappings.reduce((max, m) => Math.max(max, m.order), -1)
-  const newOrder = order ?? maxOrder + 1
-
-  await db.insert(collectionBookmarks).values({
-    bookmarkId,
-    collectionId,
-    order: newOrder,
-  })
-}
-
-/**
- * Remove bookmark from a collection
- */
-export async function removeBookmarkFromCollection(
-  bookmarkId: string,
-  collectionId: string
-): Promise<void> {
-  await db
-    .delete(collectionBookmarks)
-    .where(
-      and(
-        eq(collectionBookmarks.bookmarkId, bookmarkId),
-        eq(collectionBookmarks.collectionId, collectionId)
-      )
-    )
-}
-
-/**
- * Get collections containing a bookmark
- */
-export async function getCollectionsForBookmark(bookmarkId: string): Promise<string[]> {
-  const result = await db
-    .select({ collectionId: collectionBookmarks.collectionId })
-    .from(collectionBookmarks)
-    .where(eq(collectionBookmarks.bookmarkId, bookmarkId))
-
-  return result.map((r) => r.collectionId)
-}
-
-/**
- * Search bookmarks by name or URL
+ * Search bookmarks by name or URL using SQL LIKE (filters in the database rather than loading all rows into JS; note: leading wildcard prevents index use).
  */
 export async function searchBookmarks(query: string): Promise<Bookmark[]> {
-  const allBookmarks = await getAllBookmarks()
-  const lowerQuery = query.toLowerCase()
-
-  return allBookmarks.filter(
-    (bookmark) =>
-      bookmark.name.toLowerCase().includes(lowerQuery) ||
-      bookmark.url.toLowerCase().includes(lowerQuery)
-  )
+  const trimmed = query.trim()
+  if (!trimmed) return getAllBookmarks()
+  const pattern = `%${trimmed}%`
+  return db
+    .select()
+    .from(bookmarks)
+    .where(or(like(bookmarks.name, pattern), like(bookmarks.url, pattern)))
+    .orderBy(bookmarks.createdAt)
 }
 
 

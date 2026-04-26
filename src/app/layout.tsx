@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import '@/styles/theme/modern.css'
+import '@/styles/theme/glassmorphism.css'
+import '@/styles/layout/bento_grid.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { getThemeSettings } from '@/services/theme_service'
 

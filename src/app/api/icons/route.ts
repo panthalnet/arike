@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile } from 'fs/promises'
 import path from 'path'
 import { saveIconBuffer } from '@/lib/storage'
 
@@ -108,67 +107,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: 'Failed to upload icon' },
       { status: 500 }
-    )
-  }
-}
-
-/**
- * GET /api/icons/[filename]
- * Serve uploaded icon files
- * Note: This is handled by Next.js static file serving from public/icons/
- * or by storage.ts getIcon() function
- */
-export async function GET(request: NextRequest) {
-  const url = new URL(request.url)
-  const filename = url.searchParams.get('filename')
-
-  if (!filename) {
-    return NextResponse.json(
-      { error: 'Filename required' },
-      { status: 400 }
-    )
-  }
-
-  // Validate filename format (should be UUID.ext)
-  const filenameRegex = /^[a-f0-9-]+\.(png|jpg|jpeg|webp|svg)$/
-  if (!filenameRegex.test(filename)) {
-    return NextResponse.json(
-      { error: 'Invalid filename format' },
-      { status: 400 }
-    )
-  }
-
-  try {
-    // Read file from storage
-    const { getIconPath } = await import('@/lib/storage')
-    const filePath = getIconPath(filename)
-    
-    // Determine content type
-    const extension = filename.substring(filename.lastIndexOf('.'))
-    const contentTypeMap: Record<string, string> = {
-      '.png': 'image/png',
-      '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg',
-      '.webp': 'image/webp',
-      '.svg': 'image/svg+xml',
-    }
-    const contentType = contentTypeMap[extension] || 'application/octet-stream'
-
-    // Read file
-    const fs = await import('fs/promises')
-    const fileBuffer = await fs.readFile(filePath)
-
-    return new NextResponse(fileBuffer, {
-      headers: {
-        'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    })
-  } catch (error) {
-    console.error('Failed to serve icon:', error)
-    return NextResponse.json(
-      { error: 'Icon not found' },
-      { status: 404 }
     )
   }
 }

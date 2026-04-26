@@ -241,7 +241,7 @@ export function SearchBar({ searchProvider = 'duckduckgo' }: SearchBarProps) {
             autoComplete="off"
             spellCheck={false}
             inputMode="search"
-            className="w-full h-12 pl-12 pr-12 rounded-lg border-2 border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
+            className="glass-surface-sm w-full h-12 pl-12 pr-12 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
             style={{
               minWidth: '320px',
               minHeight: '48px',
