@@ -73,7 +73,7 @@
     --foreground: 0 0% 100%;        /* #ffffff */
     --card: 0 0% 100% / 0.08;       /* rgba(255,255,255,0.08) glass surface */
     --card-foreground: 0 0% 100%;
-    --popover: 0 0% 100% / 0.12;
+    --popover: 220 20% 12%;         /* solid dark — popovers/dropdowns must be opaque */
     --popover-foreground: 0 0% 100%;
     --primary: 199 93% 60%;         /* #38bdf8 sky blue */
     --primary-foreground: 215 30% 12%;
