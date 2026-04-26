@@ -7,9 +7,11 @@ A self-hosted, open-source browser startup page and personal dashboard.
 - **Persistent homepage** — Live clock, prominent search bar, bookmark collections
 - **Bookmark management** — Add, edit, and delete bookmarks with icons (Material, brand, or custom)
 - **Collections** — Organise bookmarks into tabs; a bookmark can belong to multiple collections
-- **Themeable** — Gruvbox, Catppuccin, Everforest, or fully custom colors
+- **Themeable** — Gruvbox, Catppuccin, Everforest, or fully custom colors; **Modern glassmorphism theme** with wallpaper support and adjustable blur intensity
+- **Layout modes** — Uniform Grid or Bento Grid (per-bookmark tile sizes: small / medium / large)
+- **Wallpaper support** — Upload custom wallpapers or choose built-in gradients (Modern theme)
 - **Live bookmark search** — Inline dropdown as you type; opens bookmarks or falls back to web search
-- **Responsive** — Mobile-first single-column layout; desktop 4-column bookmark grid
+- **Responsive** — Mobile-first single-column layout; desktop multi-column bookmark grid
 - **No config files** — All settings managed through the dashboard UI
 - **Accessible** — WCAG AA compliant (keyboard nav, screen reader support, focus management)
 
@@ -44,8 +46,9 @@ All data is stored in `./data/`:
 
 | File | Contents |
 |------|----------|
-| `data/arike.db` | SQLite database (bookmarks, collections, settings) |
+| `data/arike.db` | SQLite database (bookmarks, collections, settings, wallpapers, layout) |
 | `data/icons/` | Uploaded custom bookmark icons |
+| `data/wallpapers/` | Uploaded wallpaper images (Modern theme) |
 
 Mount this directory as a Docker volume to persist data across container restarts.
 
