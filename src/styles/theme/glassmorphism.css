@@ -1,8 +1,9 @@
 /**
  * Glassmorphism Styling
- * Frosted glass surfaces using backdrop-filter with @supports fallback
+ * Frosted glass surfaces using backdrop-filter
  *
- * Variables set by ThemeProvider:
+ * backdrop-filter is scoped to [data-theme="modern"] to avoid applying blur
+ * on non-modern themes. Non-modern resets are at the bottom of this file.
  *   --glass-blur         blur radius in px (default 12px, range 8–20)
  *   --glass-surface      rgba surface color
  *   --glass-border       rgba border color

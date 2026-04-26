@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { BLUR_MIN, BLUR_MAX } from '@/lib/theme-constants'
+import { useTheme } from '@/components/theme-provider'
 import { WallpaperUploader } from '@/components/wallpaper_uploader'
 
 type ThemeSetting = {
@@ -85,6 +86,7 @@ export function SettingsPanel({
   const [wallpapersLoaded, setWallpapersLoaded] = useState(false)
   const [layoutMode, setLayoutModeState] = useState<'uniform-grid' | 'bento-grid'>(initialLayoutMode)
   const blurDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { setTheme, setCustomColors, setBlurIntensity: setBlurContext } = useTheme()
 
   // Load initial settings
   useEffect(() => {
@@ -157,8 +159,17 @@ export function SettingsPanel({
           onSettingsChange(updates)
         }
 
-        // Apply theme immediately (no page reload)
-        applyTheme(updated)
+        // Sync ThemeProvider context (single source of truth for DOM mutations)
+        setTheme(updated.selectedTheme as typeof AVAILABLE_THEMES[number])
+        setCustomColors({
+          ...(updated.customPrimary ? { primary: updated.customPrimary } : {}),
+          ...(updated.customBackground ? { background: updated.customBackground } : {}),
+          ...(updated.customText ? { text: updated.customText } : {}),
+          ...(updated.customBorder ? { border: updated.customBorder } : {}),
+        })
+        if (typeof updated.blurIntensity === 'number') {
+          setBlurContext(updated.blurIntensity)
+        }
 
         // Screen reader announcement
         if (updates.selectedTheme) {
@@ -183,70 +194,7 @@ export function SettingsPanel({
         setThemeChangePending(false)
       }
     }
-  }, [onSettingsChange])
-
-  const hexToHSL = (hex: string): string => {
-    // Remove # if present
-    hex = hex.replace('#', '')
-    
-    // Convert hex to RGB
-    const r = parseInt(hex.substring(0, 2), 16) / 255
-    const g = parseInt(hex.substring(2, 4), 16) / 255
-    const b = parseInt(hex.substring(4, 6), 16) / 255
-    
-    const max = Math.max(r, g, b)
-    const min = Math.min(r, g, b)
-    let h = 0, s = 0, l = (max + min) / 2
-    
-    if (max !== min) {
-      const d = max - min
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-      
-      switch (max) {
-        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break
-        case g: h = ((b - r) / d + 2) / 6; break
-        case b: h = ((r - g) / d + 4) / 6; break
-      }
-    }
-    
-    h = Math.round(h * 360)
-    s = Math.round(s * 100)
-    l = Math.round(l * 100)
-    
-    return `${h} ${s}% ${l}%`
-  }
-
-  const applyTheme = (themeSettings: ThemeSetting) => {
-    const html = document.documentElement
-    
-    // Set theme data attribute (this applies the base theme colors from CSS)
-    html.setAttribute('data-theme', themeSettings.selectedTheme)
-    
-    // Apply custom color overrides if set (convert hex to HSL)
-    if (themeSettings.customPrimary) {
-      html.style.setProperty('--primary', hexToHSL(themeSettings.customPrimary))
-    } else {
-      html.style.removeProperty('--primary')
-    }
-    
-    if (themeSettings.customBackground) {
-      html.style.setProperty('--background', hexToHSL(themeSettings.customBackground))
-    } else {
-      html.style.removeProperty('--background')
-    }
-    
-    if (themeSettings.customText) {
-      html.style.setProperty('--foreground', hexToHSL(themeSettings.customText))
-    } else {
-      html.style.removeProperty('--foreground')
-    }
-    
-    if (themeSettings.customBorder) {
-      html.style.setProperty('--border', hexToHSL(themeSettings.customBorder))
-    } else {
-      html.style.removeProperty('--border')
-    }
-  }
+  }, [onSettingsChange, setTheme, setCustomColors, setBlurContext])
 
   const handleThemeChange = (theme: string) => {
     updateSetting({ selectedTheme: theme })
@@ -277,8 +225,8 @@ export function SettingsPanel({
   const handleBlurChange = (values: number[]) => {
     const px = values[0]
     setSettings(prev => ({ ...prev, blurIntensity: px }))
-    // Apply CSS variable immediately for live preview
-    document.documentElement.style.setProperty('--glass-blur', `${px}px`)
+    // Update ThemeProvider context for live preview (ThemeProvider owns the CSS var)
+    setBlurContext(px)
     // Debounce the API write — slider fires on every pixel while dragging
     if (blurDebounceRef.current) clearTimeout(blurDebounceRef.current)
     blurDebounceRef.current = setTimeout(() => {

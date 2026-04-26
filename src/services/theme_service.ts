@@ -198,6 +198,10 @@ export async function updateBlurIntensity(pixels: number): Promise<ThemeSetting>
     .where(eq(themeSettings.id, 1))
     .returning()
 
+  if (!updated[0]) {
+    throw new Error('Theme settings row not found; run migrations to seed the singleton row.')
+  }
+
   return updated[0]
 }
 

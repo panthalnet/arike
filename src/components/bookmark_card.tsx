@@ -109,7 +109,7 @@ export function BookmarkCard({
       role="button"
       tabIndex={0}
       aria-label={`Open ${name}`}
-      className={`group relative flex flex-col items-center gap-2 p-4 glass-surface border-2 border-border bg-card hover:bg-accent/10 hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors duration-200 cursor-pointer ${tileSizeClass}`}
+      className={`group relative flex flex-col items-center gap-2 p-4 glass-surface hover:bg-accent/10 hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors duration-200 cursor-pointer ${tileSizeClass}`}
       onClick={handleCardClick}
       onKeyDown={handleKeyDown}
       style={{ minWidth: '120px', minHeight: '120px' }}
