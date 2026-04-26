@@ -8,7 +8,7 @@ test.describe('Blur Intensity Control', () => {
     const themeSelect = page.locator('[data-testid="theme-select"]')
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
-    await page.waitForTimeout(300)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'modern')
   })
 
   test('blur intensity slider is visible in Modern theme settings', async ({ page }) => {

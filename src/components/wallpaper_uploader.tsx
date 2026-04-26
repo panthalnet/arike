@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, type ChangeEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Upload, Check } from 'lucide-react'
 import { setCachedWallpaper } from '@/lib/wallpaper_cache'
@@ -72,11 +72,15 @@ export function WallpaperUploader({
 
   const handleDeactivate = async () => {
     try {
-      await fetch(`/api/wallpapers/none`, {
+      const response = await fetch(`/api/wallpapers/none`, {
         method: 'POST',
         body: JSON.stringify({ action: 'deactivate' }),
         headers: { 'Content-Type': 'application/json' },
       })
+      if (!response.ok) {
+        announce('Failed to remove wallpaper')
+        return
+      }
       applyWallpaperCss(null)
       onWallpaperActivated(null)
       announce('Wallpaper removed')
@@ -85,7 +89,7 @@ export function WallpaperUploader({
     }
   }
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 

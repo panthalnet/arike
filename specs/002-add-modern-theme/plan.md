@@ -67,7 +67,7 @@ src/
 │   │   ├── wallpapers/route.ts # Wallpaper list and upload handlers
 │   │   ├── wallpapers/[id]/route.ts # Wallpaper activation and delete handlers
 │   │   ├── layout/route.ts     # Layout mode persistence handlers
-│   │   └── bookmarks/[id]/tile-size/route.ts # Per-bookmark tile size handlers
+│   │   └── bookmarks/[id]/route.ts # Bookmark update handlers, including per-bookmark tile size
 │   └── [other app routes - unchanged]
 ├── components/
 │   ├── theme-provider.tsx       # React context for theme switching, token updates

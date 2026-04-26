@@ -8,8 +8,7 @@ test.describe('Wallpaper Upload', () => {
     const themeSelect = page.locator('[data-testid="theme-select"]')
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
-    // Wait for settings to be applied
-    await page.waitForTimeout(500)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'modern')
   })
 
   test('should display built-in wallpaper options in settings panel', async ({ page }) => {

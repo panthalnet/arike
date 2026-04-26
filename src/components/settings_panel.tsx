@@ -136,7 +136,8 @@ export function SettingsPanel({
   }
 
   const updateSetting = useCallback(async (updates: Partial<ThemeSetting>) => {
-    if ('selectedTheme' in updates) {
+    const isThemeChange = 'selectedTheme' in updates
+    if (isThemeChange) {
       setThemeChangePending(true)
       setThemeChangeError(null)
     }
@@ -178,7 +179,9 @@ export function SettingsPanel({
       setThemeChangeError('Network error — settings not saved')
       setAnnouncement('Failed to update settings')
     } finally {
-      setThemeChangePending(false)
+      if (isThemeChange) {
+        setThemeChangePending(false)
+      }
     }
   }, [onSettingsChange])
 

@@ -140,7 +140,7 @@ export async function deleteBookmark(id: string): Promise<void> {
 }
 
 /**
- * Search bookmarks by name or URL using SQL LIKE (avoids full table scan).
+ * Search bookmarks by name or URL using SQL LIKE (filters in the database rather than loading all rows into JS; note: leading wildcard prevents index use).
  */
 export async function searchBookmarks(query: string): Promise<Bookmark[]> {
   const trimmed = query.trim()

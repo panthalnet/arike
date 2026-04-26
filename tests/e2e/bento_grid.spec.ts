@@ -26,7 +26,7 @@ test.describe('Bento Grid Layout', () => {
     const themeSelect = page.locator('[data-testid="theme-select"]')
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
-    await page.waitForTimeout(300)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'modern')
     const grid = page.locator('[data-testid="bookmarks-grid"]')
     await expect(grid).toHaveAttribute('data-layout', 'bento-grid')
   })

@@ -73,9 +73,6 @@ test.describe('Homepage', () => {
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /catppuccin/i }).click()
 
-    // Wait for theme change to apply (300ms per spec)
-    await page.waitForTimeout(400)
-
     // Verify theme changed by checking CSS custom property or data attribute
     const html = page.locator('html')
     await expect(html).toHaveAttribute('data-theme', 'catppuccin')
@@ -113,16 +110,13 @@ test.describe('Homepage', () => {
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /everforest/i }).click()
 
-    // Wait for theme application
-    await page.waitForTimeout(400)
+    // Verify theme applied (ensures page didn't reload)
+    const html = page.locator('html')
+    await expect(html).toHaveAttribute('data-theme', 'everforest')
 
     // Verify page didn't reload (scroll position maintained)
     const afterPosition = await searchBar.boundingBox()
     expect(initialPosition?.y).toBe(afterPosition?.y)
-
-    // Verify theme applied
-    const html = page.locator('html')
-    await expect(html).toHaveAttribute('data-theme', 'everforest')
   })
 
   test('should support keyboard navigation for settings panel', async ({ page }) => {
@@ -185,8 +179,10 @@ test.describe('Homepage', () => {
     // Set custom primary color
     await customPrimaryInput.fill('#ff5733')
 
-    // Wait for theme application
-    await page.waitForTimeout(400)
+    // Wait for debounced API call and CSS property update
+    await page.waitForFunction(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--primary').includes('255')
+    )
 
     // Verify custom color is applied to CSS custom property
     const rootStyles = await page.evaluate(() => {
@@ -246,8 +242,6 @@ test.describe('Homepage', () => {
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
 
-    await page.waitForTimeout(400)
-
     const html = page.locator('html')
     await expect(html).toHaveAttribute('data-theme', 'modern')
 
@@ -266,7 +260,7 @@ test.describe('Homepage', () => {
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
 
-    await page.waitForTimeout(400)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'modern')
 
     await page.reload()
     await page.waitForLoadState('networkidle')
@@ -282,8 +276,6 @@ test.describe('Homepage', () => {
     const themeSelect = page.locator('[data-testid="theme-select"]')
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
-
-    await page.waitForTimeout(400)
 
     const announcement = page.locator('[role="status"][aria-live="polite"]')
     await expect(announcement).toContainText(/Theme updated/i)
