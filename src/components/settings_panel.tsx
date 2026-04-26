@@ -468,16 +468,22 @@ export function SettingsPanel({
             {/* Layout Mode */}
             <div className="space-y-2">
               <Label htmlFor="layout-mode-select">Layout Mode</Label>
-              <select
-                id="layout-mode-select"
-                data-testid="layout-mode-select"
+              <Select
                 value={layoutMode}
-                onChange={(e) => void handleLayoutModeChange(e.target.value as 'uniform-grid' | 'bento-grid')}
-                className="w-full h-11 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                onValueChange={(value) => void handleLayoutModeChange(value as 'uniform-grid' | 'bento-grid')}
               >
-                <option value="uniform-grid">Uniform Grid</option>
-                <option value="bento-grid">Bento Grid</option>
-              </select>
+                <SelectTrigger
+                  id="layout-mode-select"
+                  data-testid="layout-mode-select"
+                  style={{ minHeight: '44px' }}
+                >
+                  <SelectValue placeholder="Select layout mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="uniform-grid">Uniform Grid</SelectItem>
+                  <SelectItem value="bento-grid">Bento Grid</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Search Provider */}
