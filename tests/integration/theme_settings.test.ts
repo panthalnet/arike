@@ -4,16 +4,19 @@
  */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import Database from 'better-sqlite3'
+import os from 'os'
 import path from 'path'
 import fs from 'fs'
 
 // We test at the service layer using an isolated SQLite DB
 import { AVAILABLE_THEMES, BLUR_MIN, BLUR_MAX } from '../../src/services/theme_service'
 
-const TEST_DB_PATH = path.join(process.cwd(), 'tests', 'test-theme-integration.db')
+function makeTempDbPath() {
+  return path.join(os.tmpdir(), `arike-theme-test-${crypto.randomUUID()}.db`)
+}
 
-function setupDb() {
-  const sqlite = new Database(TEST_DB_PATH)
+function setupDb(dbPath: string) {
+  const sqlite = new Database(dbPath)
   sqlite.pragma('foreign_keys = ON')
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS theme_settings (
@@ -36,14 +39,16 @@ function setupDb() {
 
 describe('Theme Settings Integration', () => {
   let sqlite: ReturnType<typeof Database>
+  let testDbPath: string
 
   beforeEach(() => {
-    sqlite = setupDb()
+    testDbPath = makeTempDbPath()
+    sqlite = setupDb(testDbPath)
   })
 
   afterEach(() => {
     sqlite.close()
-    if (fs.existsSync(TEST_DB_PATH)) fs.unlinkSync(TEST_DB_PATH)
+    if (fs.existsSync(testDbPath)) fs.unlinkSync(testDbPath)
   })
 
   it('should switch to Modern theme and persist', () => {

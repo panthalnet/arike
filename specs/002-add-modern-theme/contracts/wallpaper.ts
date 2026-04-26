@@ -47,13 +47,13 @@ export const BUILTIN_WALLPAPERS: BuiltInWallpaper[] = [
 export interface WallpaperValidationRules {
   maxFileSizeBytes: number;     // 2 MB
   maxDimensionsPx: number;      // 1024×1024 px
-  allowedMimeTypes: string[];   // PNG, JPEG, WebP, SVG
+  allowedMimeTypes: string[];   // PNG, JPEG, WebP (SVG excluded — XSS risk via embedded scripts)
 }
 
 export const WALLPAPER_VALIDATION_RULES: WallpaperValidationRules = {
   maxFileSizeBytes: 2 * 1024 * 1024, // 2 MB
   maxDimensionsPx: 1024,
-  allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'],
+  allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
 };
 
 // Wallpaper upload response
@@ -99,32 +99,28 @@ export async function validateWallpaperFile(file: File): Promise<{ valid: boolea
   
   // Check MIME type
   if (!rules.allowedMimeTypes.includes(file.type)) {
-    return { valid: false, error: 'Unsupported file type. Allowed: PNG, JPEG, WebP, SVG' };
+    return { valid: false, error: 'Unsupported file type. Allowed: PNG, JPEG, WebP' };
   }
   
-  // Check dimensions for image files
-  if (file.type !== 'image/svg+xml') {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          if (img.width > rules.maxDimensionsPx || img.height > rules.maxDimensionsPx) {
-            resolve({ valid: false, error: `Image exceeds ${rules.maxDimensionsPx}×${rules.maxDimensionsPx}px` });
-          } else {
-            resolve({ valid: true });
-          }
-        };
-        img.onerror = () => {
-          resolve({ valid: false, error: 'Invalid image file' });
-        };
-        img.src = e.target?.result as string;
+  // Check dimensions for raster image files
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        if (img.width > rules.maxDimensionsPx || img.height > rules.maxDimensionsPx) {
+          resolve({ valid: false, error: `Image exceeds ${rules.maxDimensionsPx}×${rules.maxDimensionsPx}px` });
+        } else {
+          resolve({ valid: true });
+        }
       };
-      reader.readAsDataURL(file);
-    });
-  }
-  
-  return { valid: true };
+      img.onerror = () => {
+        resolve({ valid: false, error: 'Invalid image file' });
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 // Helper: Get CSS background for wallpaper

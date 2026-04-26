@@ -117,20 +117,26 @@ export async function uploadWallpaper(file: File): Promise<WallpaperUploadResult
   const filePath = await saveWallpaper(buffer, ext)
 
   const id = crypto.randomUUID()
-  await db
-    .insert(wallpaperAssets)
-    .values({
-      id,
-      sourceType: 'upload',
-      sourceReference: file.name,
-      filePath,
-      displayName: file.name.replace(/\.[^.]+$/, ''),
-      isActive: false,
-    })
-    .run()
+  try {
+    await db
+      .insert(wallpaperAssets)
+      .values({
+        id,
+        sourceType: 'upload',
+        sourceReference: file.name,
+        filePath,
+        displayName: file.name.replace(/\.[^.]+$/, ''),
+        isActive: false,
+      })
+      .run()
 
-  const [row] = await db.select().from(wallpaperAssets).where(eq(wallpaperAssets.id, id)).all()
-  return { success: true, wallpaper: rowToDTO(row) }
+    const [row] = await db.select().from(wallpaperAssets).where(eq(wallpaperAssets.id, id)).all()
+    return { success: true, wallpaper: rowToDTO(row) }
+  } catch (err) {
+    // DB insert failed — clean up the orphaned file so we don't leak disk space
+    await deleteWallpaperFile(filePath)
+    throw err
+  }
 }
 
 export async function deleteWallpaper(wallpaperId: string): Promise<void> {
