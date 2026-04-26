@@ -154,16 +154,14 @@ export async function deleteCollection(id: string): Promise<void> {
  * Each ID is assigned its position index as the new order.
  * Wrapped in a transaction to prevent partial updates.
  */
-export async function reorderCollections(orderedIds: string[]): Promise<void> {
-  await db.transaction(async (tx) => {
-    await Promise.all(
-      orderedIds.map((id, index) =>
-        tx
-          .update(collections)
-          .set({ order: index, updatedAt: new Date() })
-          .where(eq(collections.id, id))
-      )
-    )
+export function reorderCollections(orderedIds: string[]): void {
+  db.transaction((tx) => {
+    for (const [index, id] of orderedIds.entries()) {
+      tx.update(collections)
+        .set({ order: index, updatedAt: new Date() })
+        .where(eq(collections.id, id))
+        .run()
+    }
   })
 }
 

@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'orderedIds must be an array of strings' }, { status: 400 })
     }
 
-    await reorderCollections(payload.orderedIds)
+    reorderCollections(payload.orderedIds)
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('Failed to reorder collections:', error)

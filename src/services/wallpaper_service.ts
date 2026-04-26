@@ -80,9 +80,9 @@ export async function setActiveWallpaper(wallpaperId: string): Promise<void> {
   }
 
   // Deactivate all then activate target — wrapped in a transaction for atomicity
-  await db.transaction(async (tx) => {
-    await tx.update(wallpaperAssets).set({ isActive: false, updatedAt: new Date() }).run()
-    await tx.update(wallpaperAssets).set({ isActive: true, updatedAt: new Date() }).where(eq(wallpaperAssets.id, wallpaperId)).run()
+  db.transaction((tx) => {
+    tx.update(wallpaperAssets).set({ isActive: false, updatedAt: new Date() }).run()
+    tx.update(wallpaperAssets).set({ isActive: true, updatedAt: new Date() }).where(eq(wallpaperAssets.id, wallpaperId)).run()
   })
 }
 
