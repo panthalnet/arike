@@ -18,7 +18,11 @@ export async function PATCH(_request: NextRequest, { params }: RouteParams) {
     await setActiveWallpaper(id)
     const wallpapers = await getAllWallpapers()
     const active = wallpapers.find(w => w.id === id)
-    return NextResponse.json({ success: true, wallpaper: active })
+    if (active) {
+      const { filePath: _fp, ...safeWallpaper } = active
+      return NextResponse.json({ success: true, wallpaper: safeWallpaper })
+    }
+    return NextResponse.json({ success: true })
   } catch (error) {
     if (error instanceof Error && error.message.includes('not found')) {
       return NextResponse.json({ error: error.message }, { status: 404 })
@@ -47,7 +51,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       await setActiveWallpaper(id)
       const wallpapers = await getAllWallpapers()
       const active = wallpapers.find(w => w.id === id)
-      return NextResponse.json({ success: true, wallpaper: active })
+      if (active) {
+        const { filePath: _fp, ...safeWallpaper } = active
+        return NextResponse.json({ success: true, wallpaper: safeWallpaper })
+      }
+      return NextResponse.json({ success: true })
     }
 
     if (action === 'deactivate') {

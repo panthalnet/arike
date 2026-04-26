@@ -137,7 +137,7 @@ export function SettingsPanel({
     }
   }
 
-  const updateSetting = useCallback(async (updates: Partial<ThemeSetting>) => {
+  const updateSetting = useCallback(async (updates: Partial<ThemeSetting>): Promise<boolean> => {
     const isThemeChange = 'selectedTheme' in updates
     if (isThemeChange) {
       setThemeChangePending(true)
@@ -180,15 +180,18 @@ export function SettingsPanel({
         } else if (updates.blurIntensity !== undefined) {
           setAnnouncement(`Blur intensity set to ${updates.blurIntensity}px`)
         }
+        return true
       } else {
         const errText = await response.text()
         setThemeChangeError('Failed to save: ' + errText)
         setAnnouncement('Failed to update settings')
+        return false
       }
     } catch (error) {
       console.error('Failed to update settings:', error)
       setThemeChangeError('Network error — settings not saved')
       setAnnouncement('Failed to update settings')
+      return false
     } finally {
       if (isThemeChange) {
         setThemeChangePending(false)
@@ -197,11 +200,9 @@ export function SettingsPanel({
   }, [onSettingsChange, setTheme, setCustomColors, setBlurContext])
 
   const handleThemeChange = async (theme: string) => {
-    await updateSetting({ selectedTheme: theme })
-    // Only switch to bento-grid default if the theme save succeeded (updateSetting
-    // sets themeChangeError on failure, but doesn't throw — check state via the
-    // response path; simplest guard is that selectedTheme was updated in settings)
-    if (theme === 'modern' && layoutMode === 'uniform-grid') {
+    const succeeded = await updateSetting({ selectedTheme: theme })
+    // Only switch to bento-grid default when the theme was actually persisted
+    if (succeeded && theme === 'modern' && layoutMode === 'uniform-grid') {
       void handleLayoutModeChange('bento-grid')
     }
   }

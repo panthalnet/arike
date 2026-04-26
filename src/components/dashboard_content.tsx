@@ -119,7 +119,7 @@ export function DashboardContent({
   return (
     <div className="w-full">
       {/* Collection Tabs + Manage button */}
-      <div className="glass-surface flex items-center gap-2 mb-6 p-2">
+      <div className="glass-surface flex items-center gap-2 mb-6 p-2 rounded-xl bg-card border border-border">
         {/* Scrollable tab strip */}
         <div
           data-testid="collection-tabs"
