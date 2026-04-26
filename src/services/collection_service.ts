@@ -48,25 +48,20 @@ export async function getAllCollections(): Promise<CollectionWithCount[]> {
       order: collections.order,
       createdAt: collections.createdAt,
       updatedAt: collections.updatedAt,
+      bookmarkCount: sql<number>`count(${collectionBookmarks.bookmarkId})`,
     })
     .from(collections)
+    .leftJoin(collectionBookmarks, eq(collections.id, collectionBookmarks.collectionId))
+    .groupBy(
+      collections.id,
+      collections.name,
+      collections.order,
+      collections.createdAt,
+      collections.updatedAt,
+    )
     .orderBy(collections.order)
 
-  // Attach bookmark counts
-  const result: CollectionWithCount[] = await Promise.all(
-    rows.map(async (col) => {
-      const countRows = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(collectionBookmarks)
-        .where(eq(collectionBookmarks.collectionId, col.id))
-      return {
-        ...col,
-        bookmarkCount: Number(countRows[0]?.count ?? 0),
-      }
-    })
-  )
-
-  return result
+  return rows.map((row) => ({ ...row, bookmarkCount: Number(row.bookmarkCount ?? 0) }))
 }
 
 /**
@@ -157,16 +152,19 @@ export async function deleteCollection(id: string): Promise<void> {
 /**
  * Reorder collections given an ordered list of IDs.
  * Each ID is assigned its position index as the new order.
+ * Wrapped in a transaction to prevent partial updates.
  */
 export async function reorderCollections(orderedIds: string[]): Promise<void> {
-  await Promise.all(
-    orderedIds.map((id, index) =>
-      db
-        .update(collections)
-        .set({ order: index, updatedAt: new Date() })
-        .where(eq(collections.id, id))
+  await db.transaction(async (tx) => {
+    await Promise.all(
+      orderedIds.map((id, index) =>
+        tx
+          .update(collections)
+          .set({ order: index, updatedAt: new Date() })
+          .where(eq(collections.id, id))
+      )
     )
-  )
+  })
 }
 
 /**

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCollectionsForBookmark } from '@/services/bookmark_service'
+import { getCollectionsForBookmark } from '@/services/collection_service'
 
 type Params = { params: Promise<{ id: string }> }
 

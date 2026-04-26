@@ -10,7 +10,9 @@ const DB_PATH = path.join(DB_DIR, 'arike.db')
 // Ensure data directory exists
 if (!fs.existsSync(DB_DIR)) {
   fs.mkdirSync(DB_DIR, { recursive: true })
-  console.log(`Created data directory: ${DB_DIR}`)
+  if (process.env.NODE_ENV !== 'test') {
+    console.log(`Created data directory: ${DB_DIR}`)
+  }
 }
 
 // Initialize SQLite database
@@ -28,4 +30,6 @@ export const db = drizzle(sqlite)
 // Export raw SQLite instance for transactions
 export { sqlite }
 
-console.log(`Database initialized: ${DB_PATH}`)
+if (process.env.NODE_ENV !== 'test') {
+  console.log(`Database initialized: ${DB_PATH}`)
+}
