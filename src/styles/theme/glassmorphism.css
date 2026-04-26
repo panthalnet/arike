@@ -3,7 +3,8 @@
  * Frosted glass surfaces using backdrop-filter
  *
  * backdrop-filter is scoped to [data-theme="modern"] to avoid applying blur
- * on non-modern themes. Non-modern resets are at the bottom of this file.
+ * on non-modern themes. All rules are scoped to [data-theme="modern"] so they
+ * have no effect on Gruvbox, Catppuccin, or Everforest.
  *   --glass-blur         blur radius in px (default 12px, range 8–20)
  *   --glass-surface      rgba surface color
  *   --glass-border       rgba border color
@@ -11,20 +12,16 @@
  */
 
 /* ─── Glass surface mixin (applied via .glass-surface class) ───── */
-.glass-surface {
+/* autoprefixer: off */
+[data-theme="modern"] .glass-surface {
   background: var(--glass-surface, rgba(255, 255, 255, 0.12));
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.20));
   box-shadow: var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.25));
   border-radius: var(--modern-radius-lg, 16px);
-  transition: background var(--modern-transition-fast, 150ms ease-in-out),
-              border-color var(--modern-transition-fast, 150ms ease-in-out);
-}
-
-/* Blur is scoped to modern theme — avoids @supports specificity battles */
-/* autoprefixer: off */
-[data-theme="modern"] .glass-surface {
   -webkit-backdrop-filter: blur(var(--glass-blur, 12px));
   backdrop-filter: blur(var(--glass-blur, 12px));
+  transition: background var(--modern-transition-fast, 150ms ease-in-out),
+              border-color var(--modern-transition-fast, 150ms ease-in-out);
 }
 /* autoprefixer: on */
 
@@ -34,7 +31,7 @@
 }
 
 /* ─── Compact glass variant (search bar, small cards) ───────────── */
-.glass-surface-sm {
+[data-theme="modern"] .glass-surface-sm {
   background: var(--glass-surface, rgba(255, 255, 255, 0.12));
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.20));
   box-shadow: var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.25));
@@ -48,14 +45,3 @@
   backdrop-filter: blur(var(--glass-blur, 12px));
 }
 /* autoprefixer: on */
-
-/* ─── Non-modern themes: reset glass styles back to card defaults ── */
-html:not([data-theme="modern"]) .glass-surface,
-html:not([data-theme="modern"]) .glass-surface-sm {
-  background: hsl(var(--card));
-  border-color: hsl(var(--border));
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-  box-shadow: none;
-  border-radius: var(--radius, 0.5rem);
-}

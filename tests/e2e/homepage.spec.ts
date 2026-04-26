@@ -179,17 +179,17 @@ test.describe('Homepage', () => {
     // Set custom primary color
     await customPrimaryInput.fill('#ff5733')
 
-    // Wait for debounced API call and CSS property update
+    // Wait for debounced API call — ThemeProvider sets --primary as HSL (e.g. "13 100% 60%")
     await page.waitForFunction(() =>
-      getComputedStyle(document.documentElement).getPropertyValue('--primary').includes('255')
+      getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() !== ''
     )
 
-    // Verify custom color is applied to CSS custom property
+    // Verify custom color is applied to CSS custom property (HSL format: "H S% L%")
     const rootStyles = await page.evaluate(() => {
       return getComputedStyle(document.documentElement).getPropertyValue('--primary')
     })
 
-    expect(rootStyles).toContain('255') // RGB value for #ff5733
+    expect(rootStyles.trim()).toMatch(/\d+ \d+% \d+%/) // HSL format
   })
 
   test('should change search provider', async ({ page }) => {

@@ -67,9 +67,24 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     // Update bookmark fields
     const updateData: Partial<BookmarkInput> = {}
-    if (payload.name !== undefined) updateData.name = payload.name as string
-    if (payload.url !== undefined) updateData.url = payload.url as string
-    if (payload.icon !== undefined) updateData.icon = payload.icon as string
+    if (payload.name !== undefined) {
+      if (typeof payload.name !== 'string' || payload.name.trim() === '') {
+        return NextResponse.json({ error: 'name must be a non-empty string' }, { status: 400 })
+      }
+      updateData.name = payload.name
+    }
+    if (payload.url !== undefined) {
+      if (typeof payload.url !== 'string') {
+        return NextResponse.json({ error: 'url must be a string' }, { status: 400 })
+      }
+      updateData.url = payload.url
+    }
+    if (payload.icon !== undefined) {
+      if (typeof payload.icon !== 'string') {
+        return NextResponse.json({ error: 'icon must be a string' }, { status: 400 })
+      }
+      updateData.icon = payload.icon
+    }
 
     let bookmark
     if (Object.keys(updateData).length > 0) {
