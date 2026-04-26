@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { bookmarks, type Bookmark } from '@/lib/schema'
+import { bookmarks, collectionBookmarks, type Bookmark } from '@/lib/schema'
 import { eq, like, or } from 'drizzle-orm'
 import { validateUrl, validateIconReference, parseIconReference } from '@/lib/icon-utils'
 
