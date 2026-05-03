@@ -332,7 +332,7 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
           {/* Grid */}
           <div
             data-testid={`icon-grid-${tab}`}
-            className="grid grid-cols-8 gap-1.5"
+            className="grid grid-cols-8 gap-1.5 max-h-56 overflow-y-auto pr-1"
             role="listbox"
             aria-label={`${tab === 'material' ? 'Material' : 'Brand'} icons`}
           >

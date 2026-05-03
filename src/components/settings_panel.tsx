@@ -203,11 +203,11 @@ export function SettingsPanel({
     const succeeded = await updateSetting({ selectedTheme: theme })
     // Only switch to bento-grid default when the theme was actually persisted
     if (succeeded && theme === 'modern' && layoutMode === 'uniform-grid') {
-      void handleLayoutModeChange('bento-grid')
+      await handleLayoutModeChange('bento-grid', false)
     }
   }
 
-  const handleLayoutModeChange = async (mode: 'uniform-grid' | 'bento-grid') => {
+  const handleLayoutModeChange = async (mode: 'uniform-grid' | 'bento-grid', announce = true) => {
     try {
       const res = await fetch('/api/layout', {
         method: 'PUT',
@@ -218,7 +218,9 @@ export function SettingsPanel({
         setLayoutModeState(mode)
         // Notify DashboardContent via custom event (cross-component, no prop drilling)
         window.dispatchEvent(new CustomEvent('arike:layout-change', { detail: { mode } }))
-        setAnnouncement(`Layout changed to ${mode === 'bento-grid' ? 'Bento Grid' : 'Uniform Grid'}`)
+        if (announce) {
+          setAnnouncement(`Layout changed to ${mode === 'bento-grid' ? 'Bento Grid' : 'Uniform Grid'}`)
+        }
       }
     } catch (error) {
       console.error('Failed to update layout mode:', error)

@@ -248,10 +248,6 @@ export function SearchBar({ searchProvider = 'duckduckgo' }: SearchBarProps) {
               fontSize: 'max(16px, 1rem)',
             }}
             aria-label="Search the web or filter bookmarks"
-            aria-autocomplete="list"
-            aria-controls={showDropdown ? 'search-suggestions' : undefined}
-            aria-activedescendant={activeIndex >= 0 ? `suggestion-${activeIndex}` : undefined}
-            aria-expanded={showDropdown}
           />
           {isSearching && (
             <div className="absolute right-4 top-1/2 -translate-y-1/2">

@@ -1,8 +1,18 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Bento Grid Layout', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
+    const reset = await request.post('/api/test/reset')
+    expect(reset.ok()).toBeTruthy()
     await page.goto('http://localhost:3000')
+
+    // Seed one bookmark so grid-based assertions have a rendered card container.
+    await page.locator('[data-testid="add-bookmark-button"]').click()
+    await page.locator('[data-testid="bookmark-name-input"]').fill('Bento Seed')
+    await page.locator('[data-testid="bookmark-url-input"]').fill('https://bento-seed.com')
+    await page.locator('[data-testid="bookmark-save-button"]').scrollIntoViewIfNeeded()
+    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await expect(page.locator('[data-testid="bookmark-card-Bento Seed"]')).toBeVisible()
   })
 
   test('default layout is uniform grid', async ({ page }) => {
@@ -27,6 +37,8 @@ test.describe('Bento Grid Layout', () => {
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'modern')
+    await page.locator('[data-testid="settings-close"]').click()
+    await expect(page.locator('[data-testid="bookmark-card-Bento Seed"]')).toBeVisible()
     const grid = page.locator('[data-testid="bookmarks-grid"]')
     await expect(grid).toHaveAttribute('data-layout', 'bento-grid')
   })

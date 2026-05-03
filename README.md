@@ -85,7 +85,8 @@ Mount this directory as a Docker volume to persist data across container restart
 npm install
 npm run dev         # Start dev server on http://localhost:3000
 npm test            # Run unit tests (Vitest)
-npm run test:e2e    # Run E2E tests (Playwright — requires a production build: npm run build)
+npm run test:e2e    # Install Chromium if needed, then run E2E tests (requires: npm run build)
+npm run test:e2e:all  # Optional: install all Playwright browsers and run all projects
 npm run test:coverage  # Unit tests with coverage report
 ```
 

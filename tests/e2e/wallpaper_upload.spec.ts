@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Wallpaper Upload', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
+    const reset = await request.post('/api/test/reset')
+    expect(reset.ok()).toBeTruthy()
     await page.goto('http://localhost:3000')
     // Switch to Modern theme first so wallpaper controls are visible
     await page.locator('[data-testid="settings-button"]').click()
@@ -45,7 +47,7 @@ test.describe('Wallpaper Upload', () => {
   })
 
   test('should announce wallpaper change to screen readers', async ({ page }) => {
-    const announcement = page.locator('[aria-live="polite"]')
+    const announcement = page.locator('[data-testid="wallpaper-section"] [aria-live="polite"]').first()
     const oceanBtn = page.locator('[data-testid="wallpaper-option-builtin-2"]')
     await oceanBtn.click()
     await expect(announcement).toContainText(/wallpaper/i)

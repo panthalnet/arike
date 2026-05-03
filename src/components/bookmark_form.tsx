@@ -117,7 +117,7 @@ export function BookmarkForm({ open, onOpenChange, bookmark, collections = [], a
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         data-testid="bookmark-form-dialog"
-        className="sm:max-w-[500px]"
+        className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto"
       >
         <DialogHeader>
           <DialogTitle>
