@@ -23,8 +23,10 @@ fi
 
 VERSION="$1"
 
-# Basic SemVer validation: X.Y.Z with optional pre-release (-label) and no leading 'v'
-if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9][a-zA-Z0-9.]*)?$ ]]; then
+# Strict SemVer validation: X.Y.Z with optional lowercase-only prerelease (-label.N) and no leading 'v'
+# Valid: 0.1.0  0.1.0-beta.1  1.2.3-rc.2
+# Invalid: 1.2.3foo  1.2.3-  1.2.3-Beta.1  1.2.3-beta..1
+if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+(\.[a-z0-9]+)*)?$ ]]; then
   echo "Error: version must be a valid SemVer string without a leading 'v' (e.g. 0.1.0 or 0.1.0-beta.1)" >&2
   exit 1
 fi

@@ -7,6 +7,9 @@ import { getLayoutMode } from '@/services/layout_service'
 import { getAllCollections } from '@/services/collection_service'
 import { getAllBookmarks } from '@/services/bookmark_service'
 
+// This page reads from the SQLite database on every request; disable static prerendering.
+export const dynamic = 'force-dynamic'
+
 /**
  * Homepage / Dashboard
  * Mobile-first single-column layout

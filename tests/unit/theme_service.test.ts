@@ -1,20 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
 import fs from 'fs'
 import path from 'path'
 import { AVAILABLE_THEMES, AVAILABLE_SEARCH_PROVIDERS, THEME_COLORS, BLUR_MIN, BLUR_MAX, BLUR_DEFAULT } from '../../src/services/theme_service'
 
 // We'll import the theme service after it's created
 // For now, let's define the expected interface
-type ThemeService = {
-  getThemeSettings: () => Promise<ThemeSetting>
-  updateTheme: (theme: string) => Promise<void>
-  updateCustomColors: (colors: CustomColors) => Promise<void>
-  updateSearchProvider: (provider: string) => Promise<void>
-  getAvailableThemes: () => string[]
-  getAvailableSearchProviders: () => string[]
-}
 
 type ThemeSetting = {
   id: number
@@ -28,24 +19,14 @@ type ThemeSetting = {
   updated_at: number
 }
 
-type CustomColors = {
-  customPrimary?: string | null
-  customBackground?: string | null
-  customText?: string | null
-  customBorder?: string | null
-}
-
 describe('Theme Service', () => {
   const TEST_DB_PATH = path.join(process.cwd(), 'tests', 'test-theme.db')
-  let db: ReturnType<typeof drizzle>
   let sqlite: Database.Database
-  let themeService: ThemeService
 
   beforeEach(async () => {
     // Create test database
     sqlite = new Database(TEST_DB_PATH)
     sqlite.pragma('foreign_keys = ON')
-    db = drizzle(sqlite)
 
     // Create schema
     sqlite.exec(`

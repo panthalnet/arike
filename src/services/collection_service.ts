@@ -2,7 +2,6 @@ import { db } from '@/lib/db'
 import {
   collections,
   collectionBookmarks,
-  bookmarks,
   type Collection,
   type NewCollection,
 } from '@/lib/schema'

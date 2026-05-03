@@ -114,8 +114,6 @@ export function DashboardContent({
     }
   }, [collections, fetchCollections])
 
-  const activeCollection = collections.find((c) => c.id === activeCollectionId)
-
   return (
     <div className="w-full">
       {/* Collection Tabs + Manage button */}

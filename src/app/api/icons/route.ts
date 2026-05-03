@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import path from 'path'
 import { saveIconBuffer } from '@/lib/storage'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
-const MAX_DIMENSION = 1024 // 1024x1024px
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']
 const ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.webp', '.svg']
 

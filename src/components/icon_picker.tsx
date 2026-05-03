@@ -5,8 +5,6 @@ import { Icon } from '@iconify/react'
 import { Search, Upload, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-
 const ICONS_PER_PAGE = 40
 
 // Material Symbols icons (subset for quick access + searchable)

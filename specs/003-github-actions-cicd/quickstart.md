@@ -59,9 +59,10 @@ This prevents accidentally merging broken code by requiring CI to pass first.
 2. Click **Add branch protection rule** (or **Add classic branch protection rule**)
 3. **Branch name pattern**: `main`
 4. Check: ✅ **Require status checks to pass before merging**
-5. Search for and add: `quality` (the CI job name from `ci.yml`)
-6. Check: ✅ **Require branches to be up to date before merging**
-7. Click **Save changes**
+5. Search for and add: `Quality` (the CI quality job from `ci.yml`)
+6. Search for and add: `E2E Tests` (the CI end-to-end job from `ci.yml`)
+7. Check: ✅ **Require branches to be up to date before merging**
+8. Click **Save changes**
 
 ---
 

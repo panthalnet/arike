@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { BookmarkCard } from '@/components/bookmark_card'
 import { BookmarkForm } from '@/components/bookmark_form'

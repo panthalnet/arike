@@ -45,7 +45,6 @@ test.describe('Collection Management', () => {
     await expect(editButton).toBeVisible()
     await editButton.click()
 
-    const nameInput = page.locator('input').filter({ has: page.locator('') })
     await page.locator('input').nth(0).fill('Main')
     await page.locator('[data-testid="save-collection-button-Bookmarks"]').click()
 

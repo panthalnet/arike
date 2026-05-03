@@ -56,9 +56,8 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="icon-tab-upload"]').click()
     
     // Simulate file upload (in real test, would upload actual file)
-    const fileInput = page.locator('[data-testid="icon-upload-input"]')
     // Note: This would require a test image file
-    // await fileInput.setInputFiles('tests/fixtures/test-icon.png')
+    // await page.locator('[data-testid="icon-upload-input"]').setInputFiles('tests/fixtures/test-icon.png')
 
     await page.locator('[data-testid="bookmark-save-button"]').click()
 
