@@ -2,6 +2,9 @@
 
 A self-hosted, open-source browser startup page and personal dashboard.
 
+> [!NOTE]
+> Arike is built with AI assistance, but not vibe-coded. The workflow is driven by **[SpecKit](https://github.com/speckit)** — a Specification-Driven Development (SDD) tool that formalises every feature as a spec, design plan, and typed TypeScript contracts *before* any code is written. The AI generates implementations that satisfy those contracts; tests are required, security is reviewed against OWASP Top 10 at every step, and every architectural decision is documented. It's closer to pair programming with a very fast typist than to prompting and hoping.
+
 ## Features
 
 - **Persistent homepage** — Live clock, prominent search bar, bookmark collections
