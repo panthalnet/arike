@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import Database from 'better-sqlite3'
 import fs from 'fs'
 import path from 'path'
+import os from 'os'
 import { validateUrl, validateIconReference, parseIconReference } from '../../src/lib/icon-utils'
 
 type BookmarkRow = {
@@ -14,12 +15,16 @@ type BookmarkRow = {
 }
 
 describe('Bookmark Service', () => {
-  const TEST_DB_PATH = path.join(process.cwd(), 'tests', 'test-bookmarks.db')
+  let testDir: string
+  let testDbPath: string
   let sqlite: Database.Database
 
   beforeEach(async () => {
+    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'arike-bookmark-test-'))
+    testDbPath = path.join(testDir, 'test-bookmarks.db')
+
     // Create test database
-    sqlite = new Database(TEST_DB_PATH)
+    sqlite = new Database(testDbPath)
     sqlite.pragma('foreign_keys = ON')
 
     // Create schema
@@ -64,8 +69,8 @@ describe('Bookmark Service', () => {
   afterEach(() => {
     // Clean up test database
     sqlite.close()
-    if (fs.existsSync(TEST_DB_PATH)) {
-      fs.unlinkSync(TEST_DB_PATH)
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true })
     }
   })
 
