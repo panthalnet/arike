@@ -91,9 +91,9 @@ npm run test:coverage  # Unit tests with coverage report
 
 ## CI Status
 
-Every push and pull request runs the `quality` status check (lint → typecheck → build → coverage) and the `e2e` job in GitHub Actions.
+Every push and pull request runs the `Quality` status check (lint → typecheck → build → coverage) and the `E2E Tests` job in GitHub Actions.
 
-Branch protection on `main` requires the `quality` check to pass before merging. See [.github/workflows/ci.yml](.github/workflows/ci.yml) for the full workflow definition.
+Branch protection on `main` requires both the `Quality` and `E2E Tests` checks to pass before merging. See [.github/workflows/ci.yml](.github/workflows/ci.yml) for the full workflow definition.
 
 ## Configuration
 

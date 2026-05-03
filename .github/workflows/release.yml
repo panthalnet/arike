@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+*"
+      - "v[0-9]*.[0-9]*.[0-9]*"
 
 permissions:
   contents: read
@@ -69,26 +69,25 @@ jobs:
             type=raw,value=latest,enable=${{ !contains(github.ref_name, '-') }}
             type=raw,value=beta,enable=${{ contains(github.ref_name, '-') }}
 
-      - name: Build and push multi-platform image
-        id: build
+      - name: Build single-platform image for smoke test
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: panthalnet/arike:smoke-test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Container smoke test
         shell: bash
         run: |
-          docker pull panthalnet/arike:${{ github.ref_name }}
           docker run -d \
             --name arike-smoke \
             -p 3000:3000 \
             -e DATA_DIR=/tmp/data \
-            panthalnet/arike:${{ github.ref_name }}
+            panthalnet/arike:smoke-test
           echo "Waiting for container to be ready..."
           for i in $(seq 1 24); do
             if curl -sf http://localhost:3000/api/health > /dev/null 2>&1; then
@@ -104,3 +103,14 @@ jobs:
           docker stop arike-smoke
           docker rm arike-smoke
           exit 1
+
+      - name: Build and push multi-platform image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

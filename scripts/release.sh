@@ -23,9 +23,9 @@ fi
 
 VERSION="$1"
 
-# Basic SemVer validation: must start with a digit, no leading 'v'
-if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-  echo "Error: version must be a SemVer string without a leading 'v' (e.g. 0.1.0-beta.1)" >&2
+# Basic SemVer validation: X.Y.Z with optional pre-release (-label) and no leading 'v'
+if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9][a-zA-Z0-9.]*)?$ ]]; then
+  echo "Error: version must be a valid SemVer string without a leading 'v' (e.g. 0.1.0 or 0.1.0-beta.1)" >&2
   exit 1
 fi
 
@@ -50,8 +50,8 @@ if [[ "$CURRENT_BRANCH" != "main" ]]; then
   exit 1
 fi
 
-if ! git diff --quiet HEAD; then
-  echo "Error: working tree has uncommitted changes — commit or stash before releasing" >&2
+if ! git diff --quiet HEAD || [[ -n "$(git ls-files --others --exclude-standard)" ]]; then
+  echo "Error: working tree has uncommitted changes or untracked files — commit or stash before releasing" >&2
   exit 1
 fi
 
@@ -79,7 +79,7 @@ echo "✓ Updated package.json version to $VERSION"
 
 # Update package-lock.json if it exists and npm is available
 if [[ -f "package-lock.json" ]] && command -v npm > /dev/null 2>&1; then
-  npm version "$VERSION" --no-git-tag-version --allow-same-version > /dev/null 2>&1 || true
+  npm version "$VERSION" --no-git-tag-version --allow-same-version > /dev/null
   echo "✓ Updated package-lock.json"
 fi
 

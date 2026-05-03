@@ -32,7 +32,8 @@ GitHub repository → **Settings** → **Branches** → **Add rule**
 
 - Branch name pattern: `main`
 - ✅ Require status checks to pass before merging
-- Add status check: `quality`
+- Add status check: `Quality`
+- Add status check: `E2E Tests`
 - ✅ Require branches to be up to date before merging
 
 ---
@@ -96,4 +97,4 @@ npm run test:coverage  # Unit tests with 90% coverage gate
 npm run build && npm run test:e2e  # E2E tests (requires production build)
 ```
 
-Every push and pull request runs the `quality` status check (lint → typecheck → build → coverage) and the `e2e` job via [.github/workflows/ci.yml](.github/workflows/ci.yml).
+Every push and pull request runs the `Quality` status check (lint → typecheck → build → coverage) and the `E2E Tests` job via [.github/workflows/ci.yml](.github/workflows/ci.yml).
