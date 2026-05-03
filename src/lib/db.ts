@@ -3,6 +3,9 @@ import { drizzle } from 'drizzle-orm/better-sqlite3'
 import path from 'path'
 import fs from 'fs'
 
+const SQLITE_BUSY_TIMEOUT_MS = 5000
+const IS_NEXT_PRODUCTION_BUILD = process.env.NEXT_PHASE === 'phase-production-build'
+
 // Database file location
 const DB_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data')
 const DB_PATH = path.join(DB_DIR, 'arike.db')
@@ -16,10 +19,16 @@ if (!fs.existsSync(DB_DIR)) {
 }
 
 // Initialize SQLite database
-const sqlite = new Database(DB_PATH)
+const sqlite = new Database(DB_PATH, { timeout: SQLITE_BUSY_TIMEOUT_MS })
+
+// Wait briefly when another process holds a write lock.
+sqlite.pragma(`busy_timeout = ${SQLITE_BUSY_TIMEOUT_MS}`)
 
 // Enable WAL mode for better concurrent access
-sqlite.pragma('journal_mode = WAL')
+// Skip in `next build` where concurrent workers can contend on startup.
+if (!IS_NEXT_PRODUCTION_BUILD) {
+  sqlite.pragma('journal_mode = WAL')
+}
 
 // Enable foreign keys
 sqlite.pragma('foreign_keys = ON')
