@@ -2,6 +2,17 @@ import nextConfig from "eslint-config-next/core-web-vitals";
 import nextTypescript from "eslint-config-next/typescript";
 
 export default [
+  {
+    ignores: [
+      ".next/",
+      "coverage/",
+      "drizzle/",
+      "playwright-report/",
+      "test-results/",
+      "node_modules/",
+      "scripts/",
+    ],
+  },
   ...nextConfig,
   ...nextTypescript,
   {
