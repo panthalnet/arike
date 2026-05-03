@@ -1,5 +1,11 @@
 # Arike
 
+[![CI](https://github.com/panthalnet/arike/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/panthalnet/arike/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/panthalnet/arike?include_prereleases&label=release)](https://github.com/panthalnet/arike/releases)
+[![Docker Pulls](https://img.shields.io/docker/pulls/panthalnet/arike)](https://hub.docker.com/r/panthalnet/arike)
+[![Image Size](https://img.shields.io/docker/image-size/panthalnet/arike/latest)](https://hub.docker.com/r/panthalnet/arike)
+[![License](https://img.shields.io/github/license/panthalnet/arike)](LICENSE)
+
 A self-hosted, open-source browser startup page and personal dashboard.
 
 > [!NOTE]
@@ -34,7 +40,25 @@ Open <http://localhost:3000>
 
 Use `PORT=8080 npm start` to run on a different port.
 
-### Option 2: Docker
+### Option 2: Docker (from Docker Hub)
+
+```bash
+# Latest stable release
+docker pull panthalnet/arike:latest
+docker run -d -p 3000:3000 -v /path/to/data:/app/data panthalnet/arike:latest
+
+# Latest beta release
+docker pull panthalnet/arike:beta
+docker run -d -p 3000:3000 -v /path/to/data:/app/data panthalnet/arike:beta
+
+# Specific version
+docker pull panthalnet/arike:v0.1.0-beta.1
+docker run -d -p 3000:3000 -v /path/to/data:/app/data panthalnet/arike:v0.1.0-beta.1
+```
+
+Open <http://localhost:3000>
+
+### Option 3: Docker (build from source)
 
 ```bash
 docker build -t arike .
@@ -61,9 +85,15 @@ Mount this directory as a Docker volume to persist data across container restart
 npm install
 npm run dev         # Start dev server on http://localhost:3000
 npm test            # Run unit tests (Vitest)
-npm run test:e2e    # Run E2E tests (Playwright — requires running server)
+npm run test:e2e    # Run E2E tests (Playwright — requires a production build: npm run build)
 npm run test:coverage  # Unit tests with coverage report
 ```
+
+## CI Status
+
+Every push and pull request runs the `quality` status check (lint → typecheck → build → coverage) and the `e2e` job in GitHub Actions.
+
+Branch protection on `main` requires the `quality` check to pass before merging. See [.github/workflows/ci.yml](.github/workflows/ci.yml) for the full workflow definition.
 
 ## Configuration
 
@@ -75,6 +105,19 @@ npm run test:coverage  # Unit tests with coverage report
 ## Architecture
 
 See [docs/design.md](docs/design.md) for architectural decisions.
+
+## Docker Hub
+
+Images are published to Docker Hub on every release:
+
+| Git tag | Docker Hub tags |
+|---------|----------------|
+| `v0.x.x-beta.N` (pre-release) | `panthalnet/arike:v0.x.x-beta.N`, `panthalnet/arike:beta` |
+| `v0.x.x` (stable) | `panthalnet/arike:v0.x.x`, `panthalnet/arike:latest` |
+
+## Contributing and Releases
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the release ceremony and one-time CI/CD setup guide.
 
 ## License
 

@@ -11,8 +11,8 @@
 
 **Purpose**: Establish repository-level prerequisites for workflow automation.
 
-- [ ] T001 Update CI/release package metadata and add ESLint flat-config compatibility dependency in package.json
-- [ ] T002 Refresh dependency lockfile entries for the CI/release prerequisite changes in package-lock.json
+- [X] T001 Update CI/release package metadata and add ESLint flat-config compatibility dependency in package.json
+- [X] T002 Refresh dependency lockfile entries for the CI/release prerequisite changes in package-lock.json
 
 ---
 
@@ -22,8 +22,8 @@
 
 **⚠️ CRITICAL**: No user story work should be considered complete until these prerequisites are in place.
 
-- [ ] T003 [P] Create ESLint 9 flat configuration compatible with Next.js 16 in eslint.config.mjs
-- [ ] T004 [P] Add CI-friendly production `webServer` settings for Playwright in playwright.config.ts
+- [X] T003 [P] Create ESLint 9 flat configuration compatible with Next.js 16 in eslint.config.mjs
+- [X] T004 [P] Add CI-friendly production `webServer` settings for Playwright in playwright.config.ts
 
 **Checkpoint**: Repository automation prerequisites are fixed; CI and release workflow implementation can proceed.
 
@@ -37,9 +37,9 @@
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Create push/PR CI workflow with `quality` and `e2e` jobs, concurrency control, npm caching, and minimal permissions in .github/workflows/ci.yml
-- [ ] T006 [P] [US1] Document the required `quality` status check and branch-protection expectation for contributors in README.md
-- [ ] T007 [US1] Validate the quality-gate commands and observed CI runtime in .github/workflows/ci.yml against the repository scripts, config, and the 5-minute success criterion
+- [X] T005 [US1] Create push/PR CI workflow with `quality` and `e2e` jobs, concurrency control, npm caching, and minimal permissions in .github/workflows/ci.yml
+- [X] T006 [P] [US1] Document the required `quality` status check and branch-protection expectation for contributors in README.md
+- [X] T007 [US1] Validate the quality-gate commands and observed CI runtime in .github/workflows/ci.yml against the repository scripts, config, and the 5-minute success criterion
 
 **Checkpoint**: User Story 1 is functional when commit and PR automation runs all required checks and exposes merge-ready status.
 
@@ -53,10 +53,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T008 [P] [US2] Create maintainer release helper that bumps version, commits, tags, and pushes in scripts/release.sh
-- [ ] T009 [US2] Create tag-triggered GitHub Release automation with SemVer tag filters, prerelease detection, tag-to-package.json version guard, and release permissions in .github/workflows/release.yml
-- [ ] T010 [P] [US2] Add maintainer-facing versioning and release instructions for beta and stable tags in README.md
-- [ ] T011 [US2] Validate tag filters, prerelease handling, tag-to-package.json version consistency enforcement, GitHub Release generation behavior, and observed release workflow runtime in .github/workflows/release.yml against the 10-minute success criterion
+- [X] T008 [P] [US2] Create maintainer release helper that bumps version, commits, tags, and pushes in scripts/release.sh
+- [X] T009 [US2] Create tag-triggered GitHub Release automation with SemVer tag filters, prerelease detection, tag-to-package.json version guard, and release permissions in .github/workflows/release.yml
+- [X] T010 [P] [US2] Add maintainer-facing versioning and release instructions for beta and stable tags in README.md
+- [X] T011 [US2] Validate tag filters, prerelease handling, tag-to-package.json version consistency enforcement, GitHub Release generation behavior, and observed release workflow runtime in .github/workflows/release.yml against the 10-minute success criterion
 
 **Checkpoint**: User Story 2 is functional when the maintainer can create a beta or stable tag and GitHub publishes the correct release entry automatically.
 
@@ -70,10 +70,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T012 [US3] Extend .github/workflows/release.yml with Docker Buildx, QEMU, Docker Hub login, multi-platform build, cache, and publish steps
-- [ ] T013 [US3] Add a container smoke-test step to .github/workflows/release.yml that runs the built image and verifies the existing health endpoint responds successfully
-- [ ] T014 [P] [US3] Add Docker Hub account setup, secret names, image pull commands, and stable/beta tag guidance in README.md
-- [ ] T015 [US3] Validate Docker tag derivation, multi-platform targets, container startup, health-check behavior, and secret usage rules implemented in .github/workflows/release.yml
+- [X] T012 [US3] Extend .github/workflows/release.yml with Docker Buildx, QEMU, Docker Hub login, multi-platform build, cache, and publish steps
+- [X] T013 [US3] Add a container smoke-test step to .github/workflows/release.yml that runs the built image and verifies the existing health endpoint responds successfully
+- [X] T014 [P] [US3] Add Docker Hub account setup, secret names, image pull commands, and stable/beta tag guidance in README.md
+- [X] T015 [US3] Validate Docker tag derivation, multi-platform targets, container startup, health-check behavior, and secret usage rules implemented in .github/workflows/release.yml
 
 **Checkpoint**: User Story 3 is functional when a release produces the expected Docker Hub image tags and users can pull the documented image names.
 
@@ -83,9 +83,9 @@
 
 **Purpose**: Finalize user-facing documentation and harden workflow consistency across stories.
 
-- [ ] T016 [P] Add the 5 auto-updating shields.io badges row below the project title in README.md
-- [ ] T017 Harden shared workflow defaults such as permissions, concurrency, and cache consistency across .github/workflows/ci.yml and .github/workflows/release.yml
-- [ ] T018 Validate the first-release flow, documented commands, and observed CI/release durations in scripts/release.sh and README.md against the success criteria
+- [X] T016 [P] Add the 5 auto-updating shields.io badges row below the project title in README.md
+- [X] T017 Harden shared workflow defaults such as permissions, concurrency, and cache consistency across .github/workflows/ci.yml and .github/workflows/release.yml
+- [X] T018 Validate the first-release flow, documented commands, and observed CI/release durations in scripts/release.sh and README.md against the success criteria
 
 ---
 
