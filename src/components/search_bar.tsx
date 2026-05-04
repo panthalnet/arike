@@ -241,6 +241,11 @@ export function SearchBar({ searchProvider = 'duckduckgo' }: SearchBarProps) {
             autoComplete="off"
             spellCheck={false}
             inputMode="search"
+            role="combobox"
+            aria-expanded={showDropdown && !!query.trim()}
+            aria-controls="search-suggestions"
+            aria-activedescendant={activeIndex >= 0 ? `suggestion-${activeIndex}` : undefined}
+            aria-autocomplete="list"
             className="glass-surface-sm w-full h-12 pl-12 pr-12 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
             style={{
               minWidth: '320px',
@@ -248,10 +253,6 @@ export function SearchBar({ searchProvider = 'duckduckgo' }: SearchBarProps) {
               fontSize: 'max(16px, 1rem)',
             }}
             aria-label="Search the web or filter bookmarks"
-            aria-autocomplete="list"
-            aria-controls={showDropdown ? 'search-suggestions' : undefined}
-            aria-activedescendant={activeIndex >= 0 ? `suggestion-${activeIndex}` : undefined}
-            aria-expanded={showDropdown}
           />
           {isSearching && (
             <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -260,16 +261,16 @@ export function SearchBar({ searchProvider = 'duckduckgo' }: SearchBarProps) {
           )}
         </div>
 
-        {/* Live search dropdown */}
-        {showDropdown && query.trim() && (
-          <div
-            ref={dropdownRef}
-            id="search-suggestions"
-            data-testid="search-dropdown"
-            role="listbox"
-            aria-label="Bookmark suggestions"
-            className="absolute z-50 w-full mt-2 bg-background border-2 border-border rounded-lg shadow-lg overflow-hidden"
-          >
+        {/* Live search dropdown — always mounted so aria-controls is always valid */}
+        <div
+          ref={dropdownRef}
+          id="search-suggestions"
+          data-testid="search-dropdown"
+          role="listbox"
+          aria-label="Bookmark suggestions"
+          hidden={!(showDropdown && !!query.trim())}
+          className="absolute z-50 w-full mt-2 bg-background border-2 border-border rounded-lg shadow-lg overflow-hidden"
+        >
             {bookmarkResults.length > 0 ? (
               <>
                 <div className="px-3 py-1.5 text-xs text-muted-foreground border-b border-border bg-muted/50">
@@ -333,8 +334,7 @@ export function SearchBar({ searchProvider = 'duckduckgo' }: SearchBarProps) {
                 </button>
               </div>
             ) : null}
-          </div>
-        )}
+        </div>
       </form>
 
       {/* Screen reader announcements */}

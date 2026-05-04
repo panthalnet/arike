@@ -5,8 +5,6 @@ import { Icon } from '@iconify/react'
 import { Search, Upload, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-
 const ICONS_PER_PAGE = 40
 
 // Material Symbols icons (subset for quick access + searchable)
@@ -334,7 +332,7 @@ export function IconPicker({ value, onChange }: IconPickerProps) {
           {/* Grid */}
           <div
             data-testid={`icon-grid-${tab}`}
-            className="grid grid-cols-8 gap-1.5"
+            className="grid grid-cols-8 gap-1.5 max-h-56 overflow-y-auto pr-1"
             role="listbox"
             aria-label={`${tab === 'material' ? 'Material' : 'Brand'} icons`}
           >

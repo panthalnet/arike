@@ -124,16 +124,18 @@ requirement in many jurisdictions and an ethical imperative everywhere.
 
 Documentation MUST be minimal, accurate, and maintained.
 
-- **Two files only**:
+- **Three files only**:
   - `README.md`: User-facing guide including features, installation, configuration, and screenshots
   - `docs/design.md`: Architecture decisions, system design, and technical rationale
+  - `CONTRIBUTING.md`: Maintainer and contributor guide including release ceremony, branch protection setup, and CI/CD secrets configuration
 - **Always current**: Documentation MUST be updated in the same PR as code changes; outdated
   documentation is a blocking defect
 - **No duplication**: Information MUST exist in exactly one place; cross-references are preferred
   over copy-paste
 
-**Rationale**: Excessive documentation becomes stale and misleading. Two well-maintained files
-provide more value than a sprawling wiki.
+**Rationale**: Excessive documentation becomes stale and misleading. Three well-maintained files
+provide more value than a sprawling wiki. CONTRIBUTING.md follows the GitHub open-source convention
+and keeps maintainer-only instructions separate from user-facing content.
 
 ### VII. Legal Compliance
 

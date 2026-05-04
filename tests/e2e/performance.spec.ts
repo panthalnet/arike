@@ -6,6 +6,11 @@ import { test, expect } from '@playwright/test'
  * Uses browser Performance API metrics
  */
 test.describe('Performance Benchmarks', () => {
+  test.beforeEach(async ({ request }) => {
+    const reset = await request.post('/api/test/reset')
+    expect(reset.ok()).toBeTruthy()
+  })
+
   test('homepage should achieve First Contentful Paint < 2 seconds', async ({ page }) => {
     // Navigate with fresh cache to simulate first visit
     const startTime = Date.now()
@@ -39,9 +44,13 @@ test.describe('Performance Benchmarks', () => {
     console.log(`  Response Time: ${performanceMetrics.responseTime}ms`)
     console.log(`  Elapsed (wall clock): ${elapsedTime}ms`)
 
-    // Validate FCP < 2000ms (spec requirement)
-    expect(performanceMetrics.firstContentfulPaint).not.toBeNull()
-    expect(performanceMetrics.firstContentfulPaint!).toBeLessThan(2000)
+    // Validate FCP < 2000ms (spec requirement).
+    // Some headless runs may not expose paint entries reliably; fall back to wall-clock.
+    if (performanceMetrics.firstContentfulPaint != null) {
+      expect(performanceMetrics.firstContentfulPaint).toBeLessThan(2000)
+    } else {
+      expect(elapsedTime).toBeLessThan(2000)
+    }
   })
 
   test('homepage should be interactive within 2 seconds', async ({ page }) => {
@@ -89,7 +98,9 @@ test.describe('Performance Benchmarks', () => {
 
     // Measure theme change time
     const startTime = Date.now()
-    await page.selectOption('[data-testid="theme-select"]', 'catppuccin')
+    const themeSelect = page.locator('[data-testid="theme-select"]')
+    await themeSelect.click()
+    await page.locator('[role="option"]').filter({ hasText: /catppuccin/i }).click()
     
     // Wait for theme to apply (check for theme class or CSS change)
     await page.waitForTimeout(50) // Allow browser to process

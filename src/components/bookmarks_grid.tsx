@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { BookmarkCard } from '@/components/bookmark_card'
 import { BookmarkForm } from '@/components/bookmark_form'
@@ -50,11 +50,6 @@ export function BookmarksGrid({ initialBookmarks = [], collectionId, collections
   const [bookmarkToDelete, setBookmarkToDelete] = useState<Bookmark | null>(null)
   const [announcement, setAnnouncement] = useState('')
 
-  // Fetch bookmarks
-  useEffect(() => {
-    fetchBookmarks()
-  }, [collectionId])
-
   const fetchBookmarks = async () => {
     try {
       const params = new URLSearchParams()
@@ -71,6 +66,11 @@ export function BookmarksGrid({ initialBookmarks = [], collectionId, collections
       console.error('Failed to fetch bookmarks:', error)
     }
   }
+
+  // Fetch bookmarks
+  useEffect(() => {
+    fetchBookmarks()
+  }, [collectionId])
 
   const handleAddBookmark = () => {
     setEditingBookmark(undefined)
@@ -263,7 +263,7 @@ export function BookmarksGrid({ initialBookmarks = [], collectionId, collections
           <DialogHeader>
             <DialogTitle>Delete Bookmark</DialogTitle>
             <DialogDescription>
-              Delete '{bookmarkToDelete?.name}'? This cannot be undone.
+              Delete &apos;{bookmarkToDelete?.name}&apos;? This cannot be undone.
               {collectionId && ' This will remove it from all collections.'}
             </DialogDescription>
           </DialogHeader>

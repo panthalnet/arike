@@ -1,7 +1,5 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { createWriteStream } from 'fs'
-import { pipeline } from 'stream/promises'
 
 const ICONS_DIR = process.env.DATA_DIR 
   ? path.join(process.env.DATA_DIR, 'icons')

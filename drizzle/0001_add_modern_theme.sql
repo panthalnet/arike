@@ -3,6 +3,7 @@
 
 -- Phase 1 (US1/US5): Add blur_intensity to theme_settings
 ALTER TABLE theme_settings ADD COLUMN blur_intensity INTEGER NOT NULL DEFAULT 12;
+--> statement-breakpoint
 
 -- Phase 2 (US2): Add wallpaper_assets table
 CREATE TABLE IF NOT EXISTS wallpaper_assets (
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS wallpaper_assets (
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
+--> statement-breakpoint
 
 -- Seed built-in wallpapers
 INSERT OR IGNORE INTO wallpaper_assets (id, source_type, source_reference, file_path, display_name, is_active)
@@ -22,6 +24,7 @@ VALUES
   ('builtin-1', 'builtin', 'gradient-ocean',  NULL, 'Ocean Gradient',  0),
   ('builtin-2', 'builtin', 'gradient-forest', NULL, 'Forest Gradient', 0),
   ('builtin-3', 'builtin', 'gradient-sunset', NULL, 'Sunset Gradient', 0);
+--> statement-breakpoint
 
 -- Phase 3 (US3): Add layout_preferences table
 CREATE TABLE IF NOT EXISTS layout_preferences (
@@ -30,9 +33,11 @@ CREATE TABLE IF NOT EXISTS layout_preferences (
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch())
 );
+--> statement-breakpoint
 
 -- Seed singleton layout preference
 INSERT OR IGNORE INTO layout_preferences (id, layout_mode) VALUES (1, 'uniform-grid');
+--> statement-breakpoint
 
 -- Phase 4 (US4): Add tile_size column to bookmarks
 ALTER TABLE bookmarks ADD COLUMN tile_size TEXT NOT NULL DEFAULT 'medium' CHECK(tile_size IN ('small', 'medium', 'large'));

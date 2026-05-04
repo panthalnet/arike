@@ -1,36 +1,31 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
 import fs from 'fs'
 import path from 'path'
+import os from 'os'
 import { validateUrl, validateIconReference, parseIconReference } from '../../src/lib/icon-utils'
 
-// Type definitions for the bookmark service (will be implemented)
-type Bookmark = {
+type BookmarkRow = {
   id: string
   name: string
   url: string
   icon: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-type NewBookmark = {
-  name: string
-  url: string
-  icon: string
+  created_at: number
+  updated_at: number
 }
 
 describe('Bookmark Service', () => {
-  const TEST_DB_PATH = path.join(process.cwd(), 'tests', 'test-bookmarks.db')
-  let db: ReturnType<typeof drizzle>
+  let testDir: string
+  let testDbPath: string
   let sqlite: Database.Database
 
   beforeEach(async () => {
+    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'arike-bookmark-test-'))
+    testDbPath = path.join(testDir, 'test-bookmarks.db')
+
     // Create test database
-    sqlite = new Database(TEST_DB_PATH)
+    sqlite = new Database(testDbPath)
     sqlite.pragma('foreign_keys = ON')
-    db = drizzle(sqlite)
 
     // Create schema
     sqlite.exec(`
@@ -74,8 +69,8 @@ describe('Bookmark Service', () => {
   afterEach(() => {
     // Clean up test database
     sqlite.close()
-    if (fs.existsSync(TEST_DB_PATH)) {
-      fs.unlinkSync(TEST_DB_PATH)
+    if (fs.existsSync(testDir)) {
+      fs.rmSync(testDir, { recursive: true, force: true })
     }
   })
 
@@ -87,7 +82,7 @@ describe('Bookmark Service', () => {
       VALUES (?, ?, ?, ?)
     `).run(bookmarkId, 'GitHub', 'https://github.com', 'builtin:material:home')
 
-    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as any
+    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as BookmarkRow
     
     expect(bookmark).toBeDefined()
     expect(bookmark.name).toBe('GitHub')
@@ -120,7 +115,7 @@ describe('Bookmark Service', () => {
       VALUES (?, ?, ?, ?)
     `).run(bookmarkId, 'Test', 'https://test.com', 'builtin:material:star')
 
-    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as any
+    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as BookmarkRow
     
     expect(bookmark).toBeDefined()
     expect(bookmark.id).toBe(bookmarkId)
@@ -143,7 +138,7 @@ describe('Bookmark Service', () => {
       WHERE id = ?
     `).run('Updated', 'https://updated.com', bookmarkId)
 
-    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as any
+    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as BookmarkRow
     
     expect(bookmark.name).toBe('Updated')
     expect(bookmark.url).toBe('https://updated.com')
@@ -246,7 +241,7 @@ describe('Bookmark Service', () => {
       VALUES (?, ?, ?, ?)
     `).run(bookmarkId, 'Material', 'https://material.com', 'builtin:material:home')
 
-    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as any
+    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as BookmarkRow
     
     expect(bookmark.icon).toBe('builtin:material:home')
     expect(bookmark.icon.startsWith('builtin:material:')).toBe(true)
@@ -260,7 +255,7 @@ describe('Bookmark Service', () => {
       VALUES (?, ?, ?, ?)
     `).run(bookmarkId, 'Simple', 'https://simple.com', 'builtin:simple:github')
 
-    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as any
+    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as BookmarkRow
     
     expect(bookmark.icon).toBe('builtin:simple:github')
     expect(bookmark.icon.startsWith('builtin:simple:')).toBe(true)
@@ -275,7 +270,7 @@ describe('Bookmark Service', () => {
       VALUES (?, ?, ?, ?)
     `).run(bookmarkId, 'Custom', 'https://custom.com', `upload:${iconUuid}.png`)
 
-    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as any
+    const bookmark = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bookmarkId) as BookmarkRow
     
     expect(bookmark.icon).toBe(`upload:${iconUuid}.png`)
     expect(bookmark.icon.startsWith('upload:')).toBe(true)
@@ -349,7 +344,7 @@ describe('Bookmark Service', () => {
       VALUES (?, ?, ?, ?)
     `).run(bookmarkId, 'Original', 'https://original.com', 'builtin:material:home')
 
-    const before = sqlite.prepare('SELECT updated_at FROM bookmarks WHERE id = ?').get(bookmarkId) as any
+    const before = sqlite.prepare('SELECT updated_at FROM bookmarks WHERE id = ?').get(bookmarkId) as Pick<BookmarkRow, 'updated_at'>
     
     // Wait at least 1 second so unixepoch() resolution produces a different value
     await new Promise(resolve => setTimeout(resolve, 1100))
@@ -361,7 +356,7 @@ describe('Bookmark Service', () => {
       WHERE id = ?
     `).run('Updated', bookmarkId)
 
-    const after = sqlite.prepare('SELECT updated_at FROM bookmarks WHERE id = ?').get(bookmarkId) as any
+    const after = sqlite.prepare('SELECT updated_at FROM bookmarks WHERE id = ?').get(bookmarkId) as Pick<BookmarkRow, 'updated_at'>
     
     expect(after.updated_at).toBeGreaterThan(before.updated_at)
   })

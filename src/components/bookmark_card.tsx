@@ -25,7 +25,6 @@ type BookmarkCardProps = {
  * Meets FR-002 requirements: 64x64px icon, 44x44px touch target, clickable
  */
 export function BookmarkCard({
-  id,
   name,
   url,
   icon,
@@ -89,7 +88,7 @@ export function BookmarkCard({
         />
       )
     }
-  } catch (error) {
+  } catch {
     // Fallback icon if parsing fails
     iconElement = (
       <Icon 

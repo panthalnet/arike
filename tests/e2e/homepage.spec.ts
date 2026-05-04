@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Homepage', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
+    const reset = await request.post('/api/test/reset')
+    expect(reset.ok()).toBeTruthy()
     // Navigate to homepage
     await page.goto('http://localhost:3000')
   })
@@ -35,11 +37,20 @@ test.describe('Homepage', () => {
   })
 
   test('should have accessible search bar with keyboard navigation', async ({ page }) => {
-    // Tab to search input
-    await page.keyboard.press('Tab')
-    
-    // Verify focus is on search input
     const searchInput = page.locator('[data-testid="search-input"]')
+
+    // Verify the search input is reachable via keyboard Tab navigation
+    // (programmatic .focus() would mask a broken tab order)
+    await page.locator('body').click()
+    let reachedInput = false
+    for (let i = 0; i < 10; i++) {
+      await page.keyboard.press('Tab')
+      if (await searchInput.evaluate(el => el === document.activeElement)) {
+        reachedInput = true
+        break
+      }
+    }
+    expect(reachedInput).toBe(true)
     await expect(searchInput).toBeFocused()
 
     // Type in search
@@ -48,7 +59,7 @@ test.describe('Homepage', () => {
 
     // Press Enter to trigger search
     await searchInput.press('Enter')
-    
+
     // Verify search functionality (opens in new tab or filters bookmarks)
     // Note: Actual behavior will be implemented in T013
   })
@@ -78,7 +89,10 @@ test.describe('Homepage', () => {
     await expect(html).toHaveAttribute('data-theme', 'catppuccin')
 
     // Verify screen reader announcement for theme change
-    const announcement = page.locator('[role="status"][aria-live="polite"]')
+    const announcement = page
+      .locator('[role="status"][aria-live="polite"]')
+      .filter({ hasText: /theme updated/i })
+      .first()
     await expect(announcement).toContainText(/Theme updated/)
 
     // Close settings panel
@@ -203,8 +217,14 @@ test.describe('Homepage', () => {
     await expect(providerSelect).toContainText(/duckduckgo/i)
 
     // Change to Google by clicking trigger then option
+    const searchSave = page.waitForResponse((response) =>
+      response.url().includes('/api/settings') &&
+      response.request().method() === 'PUT' &&
+      response.ok()
+    )
     await providerSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /google/i }).click()
+    await searchSave
 
     // Close settings
     const closeButton = page.locator('[data-testid="settings-close"]')
@@ -257,10 +277,21 @@ test.describe('Homepage', () => {
     await settingsButton.click()
 
     const themeSelect = page.locator('[data-testid="theme-select"]')
+    const themeSave = page.waitForResponse((response) =>
+      response.url().includes('/api/settings') &&
+      response.request().method() === 'PUT' &&
+      response.ok()
+    )
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
+    await themeSave
 
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'modern')
+    const themeAnnouncement = page
+      .locator('[role="status"][aria-live="polite"]')
+      .filter({ hasText: /theme updated to modern/i })
+      .first()
+    await expect(themeAnnouncement).toBeVisible()
 
     await page.reload()
     await page.waitForLoadState('networkidle')
@@ -277,7 +308,10 @@ test.describe('Homepage', () => {
     await themeSelect.click()
     await page.locator('[role="option"]').filter({ hasText: /modern/i }).click()
 
-    const announcement = page.locator('[role="status"][aria-live="polite"]')
+    const announcement = page
+      .locator('[role="status"][aria-live="polite"]')
+      .filter({ hasText: /theme updated/i })
+      .first()
     await expect(announcement).toContainText(/Theme updated/i)
   })
 })

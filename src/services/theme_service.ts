@@ -8,6 +8,8 @@ import {
   BLUR_MAX,
   BLUR_DEFAULT,
   THEME_COLORS,
+  type ThemeName,
+  type SearchProvider,
 } from '@/lib/theme-constants'
 
 export type { ThemeName, SearchProvider } from '@/lib/theme-constants'

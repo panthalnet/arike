@@ -1,7 +1,7 @@
 import { db } from '@/lib/db'
 import { bookmarks, collectionBookmarks, type Bookmark } from '@/lib/schema'
 import { eq, like, or } from 'drizzle-orm'
-import { validateUrl, validateIconReference, parseIconReference } from '@/lib/icon-utils'
+import { validateUrl, validateIconReference } from '@/lib/icon-utils'
 
 /**
  * Icon format types

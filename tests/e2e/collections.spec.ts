@@ -1,7 +1,15 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
+
+async function clickBookmarkSave(page: Page) {
+  const saveButton = page.locator('[data-testid="bookmark-save-button"]')
+  await saveButton.scrollIntoViewIfNeeded()
+  await saveButton.click()
+}
 
 test.describe('Collection Management', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
+    const reset = await request.post('/api/test/reset')
+    expect(reset.ok()).toBeTruthy()
     await page.goto('http://localhost:3000')
   })
 
@@ -45,7 +53,6 @@ test.describe('Collection Management', () => {
     await expect(editButton).toBeVisible()
     await editButton.click()
 
-    const nameInput = page.locator('input').filter({ has: page.locator('') })
     await page.locator('input').nth(0).fill('Main')
     await page.locator('[data-testid="save-collection-button-Bookmarks"]').click()
 
@@ -59,7 +66,7 @@ test.describe('Collection Management', () => {
     await page.locator('[data-testid="add-bookmark-button"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('Default Bookmark')
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://default.com')
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Create a new collection
     const manageBtn = page.locator('[data-testid="manage-collections-button"]')
@@ -78,7 +85,9 @@ test.describe('Collection Management', () => {
     await page.locator('[data-testid="add-bookmark-button"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('Personal Bookmark')
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://personal.com')
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await page.locator('[data-testid="collection-checkbox-Bookmarks"]').uncheck()
+    await page.locator('[data-testid="collection-checkbox-Personal"]').check()
+    await clickBookmarkSave(page)
 
     // Verify only personal bookmark is shown
     await expect(page.locator('[data-testid="bookmark-card-Personal Bookmark"]')).toBeVisible()
@@ -108,7 +117,7 @@ test.describe('Collection Management', () => {
     await page.locator('[data-testid="collection-checkbox-Bookmarks"]').check()
     await page.locator('[data-testid="collection-checkbox-Both"]').check()
 
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Should appear in both Bookmarks tab
     const defaultTab = page.locator('[data-testid="collection-tab-Bookmarks"]')
@@ -208,7 +217,7 @@ test.describe('Collection Management', () => {
     await page.locator('[data-testid="add-bookmark-button"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('Badge Test')
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://badge.com')
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Check for badge count on tab
     const tabBadge = page.locator('[data-testid="collection-tab-Bookmarks"] [data-testid="tab-badge"]')
@@ -229,14 +238,20 @@ test.describe('Collection Management', () => {
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://shared.com')
     await page.locator('[data-testid="collection-checkbox-Bookmarks"]').check()
     await page.locator('[data-testid="collection-checkbox-Second"]').check()
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
+    await expect(page.locator('[data-testid="bookmark-card-Shared"]')).toBeVisible()
+
+    // Verify it appears in Second before edit as well.
+    await page.locator('[data-testid="collection-tab-Second"]').click()
+    await expect(page.locator('[data-testid="bookmark-card-Shared"]')).toBeVisible()
+    await page.locator('[data-testid="collection-tab-Bookmarks"]').click()
 
     // Edit bookmark in default collection
     const bookmarkCard = page.locator('[data-testid="bookmark-card-Shared"]')
     await bookmarkCard.hover()
     await page.locator('[data-testid="bookmark-edit-button-Shared"]').click()
     await page.locator('[data-testid="bookmark-name-input"]').fill('Shared Updated')
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Verify updated in Bookmarks tab
     await expect(page.locator('[data-testid="bookmark-card-Shared Updated"]')).toBeVisible()

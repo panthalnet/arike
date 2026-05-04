@@ -1,4 +1,6 @@
 FROM node:20-alpine AS base
+# su-exec is used in the entrypoint to drop from root to the nextjs user
+RUN apk add --no-cache su-exec
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -29,16 +31,19 @@ ENV PORT=3000
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Create data directory for SQLite and uploads
-RUN mkdir -p /app/data /app/data/icons && chown -R nextjs:nodejs /app/data
+# Create data directory; subdirectory ownership is handled at runtime by
+# entrypoint.sh so bind-mounted volumes work without clobbering host ownership
+RUN mkdir -p /app/data
 
-COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
 
-USER nextjs
+# Entrypoint fixes /app/data ownership for mounted volumes then drops to nextjs
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
+# Run as root so the entrypoint can chown the data directory before dropping privileges
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+ENTRYPOINT ["/entrypoint.sh"]

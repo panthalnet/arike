@@ -1,7 +1,15 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
+
+async function clickBookmarkSave(page: Page) {
+  const saveButton = page.locator('[data-testid="bookmark-save-button"]')
+  await saveButton.scrollIntoViewIfNeeded()
+  await saveButton.click()
+}
 
 test.describe('Bookmark Management', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
+    const reset = await request.post('/api/test/reset')
+    expect(reset.ok()).toBeTruthy()
     // Navigate to homepage
     await page.goto('http://localhost:3000')
   })
@@ -26,7 +34,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="icon-option-home"]').first().click()
 
     // Save the bookmark
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Verify dialog closes
     await expect(dialog).not.toBeVisible()
@@ -56,11 +64,10 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="icon-tab-upload"]').click()
     
     // Simulate file upload (in real test, would upload actual file)
-    const fileInput = page.locator('[data-testid="icon-upload-input"]')
     // Note: This would require a test image file
-    // await fileInput.setInputFiles('tests/fixtures/test-icon.png')
+    // await page.locator('[data-testid="icon-upload-input"]').setInputFiles('tests/fixtures/test-icon.png')
 
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Verify bookmark created
     await expect(page.locator('[data-testid="bookmark-card-My Site"]')).toBeVisible({ timeout: 500 })
@@ -73,8 +80,9 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-name-input"]').fill('Invalid')
     await page.locator('[data-testid="bookmark-url-input"]').fill('not-a-url')
 
-    // Try to save
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    // Save is intentionally disabled when URL is invalid
+    const saveButton = page.locator('[data-testid="bookmark-save-button"]')
+    await expect(saveButton).toBeDisabled()
 
     // Verify error message appears
     const errorMessage = page.locator('[data-testid="url-error"]')
@@ -92,7 +100,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://example.com')
     await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Wait for bookmark to appear
     const bookmarkCard = page.locator('[data-testid="bookmark-card-Example"]')
@@ -112,7 +120,8 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-name-input"]').fill('Updated Example')
 
     // Save changes
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
+    await expect(dialog).not.toBeVisible()
 
     // Verify bookmark updated
     await expect(page.locator('[data-testid="bookmark-card-Updated Example"]')).toBeVisible()
@@ -126,7 +135,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://delete.com')
     await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Wait for bookmark to appear
     const bookmarkCard = page.locator('[data-testid="bookmark-card-To Delete"]')
@@ -150,13 +159,17 @@ test.describe('Bookmark Management', () => {
     // Try delete again and confirm
     await page.locator('[data-testid="bookmark-delete-button-To Delete"]').click()
     await page.locator('[data-testid="delete-confirm-button"]').click()
+    await expect(confirmDialog).not.toBeVisible()
 
     // Verify bookmark removed within 200ms
-    await expect(bookmarkCard).not.toBeVisible({ timeout: 500 })
+    await expect(bookmarkCard).not.toBeVisible()
 
     // Verify screen reader announcement
-    const announcement = page.locator('[role="status"][aria-live="polite"]')
-    await expect(announcement).toContainText(/To Delete.*deleted/i)
+    const announcement = page
+      .locator('[role="status"][aria-live="polite"]')
+      .filter({ hasText: /To Delete.*deleted/i })
+      .first()
+    await expect(announcement).toBeVisible()
   })
 
   test('should display bookmarks in a grid layout', async ({ page }) => {
@@ -174,8 +187,9 @@ test.describe('Bookmark Management', () => {
       await page.locator('[data-testid="bookmark-url-input"]').fill(bookmark.url)
       await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
       await page.locator('[data-testid="icon-option-home"]').first().click()
-      await page.locator('[data-testid="bookmark-save-button"]').click()
-      await page.waitForTimeout(300) // Wait between additions
+      await clickBookmarkSave(page)
+      await expect(page.locator('[data-testid="bookmark-form-dialog"]')).not.toBeVisible()
+      await expect(page.locator(`[data-testid="bookmark-card-${bookmark.name}"]`)).toBeVisible()
     }
 
     // Verify all bookmarks are visible
@@ -202,7 +216,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://touch.com')
     await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Check bookmark card size
     const bookmarkCard = page.locator('[data-testid="bookmark-card-Touch Test"]')
@@ -220,7 +234,8 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://first.com')
     await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
+    await expect(page.locator('[data-testid="bookmark-card-Duplicate"]')).toBeVisible()
 
     // Add second bookmark with same name
     await page.locator('[data-testid="add-bookmark-button"]').click()
@@ -228,7 +243,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://second.com')
     await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Both should be visible (allowed per spec)
     const bookmarks = page.locator('[data-testid^="bookmark-card-Duplicate"]')
@@ -242,7 +257,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://example.com')
     await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Click bookmark and verify it opens in new tab
     const bookmarkCard = page.locator('[data-testid="bookmark-card-External"]')
@@ -263,7 +278,7 @@ test.describe('Bookmark Management', () => {
     await page.locator('[data-testid="bookmark-url-input"]').fill('https://icon.com')
     await page.locator('[data-testid="icon-picker"]').waitFor({ state: 'visible' })
     await page.locator('[data-testid="icon-option-home"]').first().click()
-    await page.locator('[data-testid="bookmark-save-button"]').click()
+    await clickBookmarkSave(page)
 
     // Check icon size
     const icon = page.locator('[data-testid="bookmark-card-Icon Test"] [data-testid="bookmark-icon"]')

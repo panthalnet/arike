@@ -1,18 +1,40 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import Database from 'better-sqlite3'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
 import fs from 'fs'
 import path from 'path'
 
+type CollectionRow = {
+  id: string
+  name: string
+  order: number
+  created_at: number
+  updated_at: number
+}
+
+type CollectionBookmarkRow = {
+  collection_id: string
+  bookmark_id: string
+  order: number
+}
+
+type BookmarkRow = {
+  id: string
+  name: string
+  url: string
+  icon: string
+  created_at: number
+  updated_at: number
+}
+
+type CountRow = { c: number }
+
 describe('Collection Service', () => {
   const TEST_DB_PATH = path.join(process.cwd(), 'tests', 'test-collections.db')
-  let db: ReturnType<typeof drizzle>
   let sqlite: Database.Database
 
   beforeEach(async () => {
     sqlite = new Database(TEST_DB_PATH)
     sqlite.pragma('foreign_keys = ON')
-    db = drizzle(sqlite)
 
     // Create schema
     sqlite.exec(`
@@ -62,7 +84,7 @@ describe('Collection Service', () => {
       INSERT INTO collections (id, name, "order") VALUES (?, ?, ?)
     `).run(id, 'Work', 0)
 
-    const col = sqlite.prepare('SELECT * FROM collections WHERE id = ?').get(id) as any
+    const col = sqlite.prepare('SELECT * FROM collections WHERE id = ?').get(id) as CollectionRow
     expect(col).toBeDefined()
     expect(col.name).toBe('Work')
     expect(col.order).toBe(0)
@@ -75,7 +97,7 @@ describe('Collection Service', () => {
       crypto.randomUUID(), 'C', 1,
     )
 
-    const cols = sqlite.prepare('SELECT * FROM collections ORDER BY "order"').all() as any[]
+    const cols = sqlite.prepare('SELECT * FROM collections ORDER BY "order"').all() as CollectionRow[]
     expect(cols).toHaveLength(3)
     expect(cols[0].name).toBe('A')
     expect(cols[1].name).toBe('C')
@@ -96,7 +118,7 @@ describe('Collection Service', () => {
 
     sqlite.prepare(`UPDATE collections SET name = ? WHERE id = ?`).run('Renamed', id)
 
-    const col = sqlite.prepare('SELECT * FROM collections WHERE id = ?').get(id) as any
+    const col = sqlite.prepare('SELECT * FROM collections WHERE id = ?').get(id) as CollectionRow
     expect(col.name).toBe('Renamed')
   })
 
@@ -165,7 +187,7 @@ describe('Collection Service', () => {
 
     const remaining = sqlite.prepare('SELECT * FROM collection_bookmarks WHERE bookmark_id = ?').all(bmId)
     expect(remaining).toHaveLength(1)
-    expect((remaining[0] as any).collection_id).toBe(col2)
+    expect((remaining[0] as CollectionBookmarkRow).collection_id).toBe(col2)
 
     // Bookmark should still exist
     const bm = sqlite.prepare('SELECT * FROM bookmarks WHERE id = ?').get(bmId)
@@ -195,7 +217,7 @@ describe('Collection Service', () => {
       JOIN collection_bookmarks cb ON b.id = cb.bookmark_id
       WHERE cb.collection_id = ?
       ORDER BY cb."order"
-    `).all(colId) as any[]
+    `).all(colId) as BookmarkRow[]
 
     expect(bms).toHaveLength(3)
     expect(bms[0].name).toBe('A') // order 0
@@ -214,7 +236,7 @@ describe('Collection Service', () => {
 
     const cols = sqlite.prepare(`
       SELECT collection_id FROM collection_bookmarks WHERE bookmark_id = ?
-    `).all(bmId) as any[]
+    `).all(bmId) as CollectionBookmarkRow[]
     const ids = cols.map(r => r.collection_id)
 
     expect(ids).toContain(col1)
@@ -229,7 +251,7 @@ describe('Collection Service', () => {
       INSERT OR IGNORE INTO collections (id, name, "order") VALUES (?, ?, ?)
     `).run(id, 'Bookmarks', 0)
 
-    const col = sqlite.prepare('SELECT * FROM collections WHERE id = ?').get(id) as any
+    const col = sqlite.prepare('SELECT * FROM collections WHERE id = ?').get(id) as CollectionRow
     expect(col).toBeDefined()
     expect(col.name).toBe('Bookmarks')
   })
@@ -240,7 +262,7 @@ describe('Collection Service', () => {
       sqlite.prepare(`INSERT INTO collections (id, name, "order") VALUES (?, ?, ?)`).run(crypto.randomUUID(), `Col ${i}`, i)
     }
 
-    const count = (sqlite.prepare('SELECT COUNT(*) as c FROM collections').get() as any).c
+    const count = (sqlite.prepare('SELECT COUNT(*) as c FROM collections').get() as CountRow).c
     expect(count).toBe(50)
 
     // Any application-level limit enforcement is in the service layer; here we verify the count
@@ -258,7 +280,7 @@ describe('Collection Service', () => {
     sqlite.prepare(`UPDATE collections SET "order" = ? WHERE id = ?`).run(1, id1)
     sqlite.prepare(`UPDATE collections SET "order" = ? WHERE id = ?`).run(0, id2)
 
-    const cols = sqlite.prepare('SELECT * FROM collections ORDER BY "order"').all() as any[]
+    const cols = sqlite.prepare('SELECT * FROM collections ORDER BY "order"').all() as CollectionRow[]
     expect(cols[0].name).toBe('Second')
     expect(cols[1].name).toBe('First')
   })
