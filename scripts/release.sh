@@ -92,8 +92,12 @@ if [[ -f "package-lock.json" ]]; then
   git add package-lock.json
 fi
 
-git commit -m "chore: release $TAG"
-echo "✓ Created commit: chore: release $TAG"
+if git diff --cached --quiet; then
+  echo "✓ package.json already at $VERSION — skipping version bump commit"
+else
+  git commit -m "chore: release $TAG"
+  echo "✓ Created commit: chore: release $TAG"
+fi
 
 git tag -a "$TAG" -m "Release $TAG"
 echo "✓ Created tag: $TAG"

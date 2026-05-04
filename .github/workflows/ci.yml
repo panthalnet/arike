@@ -6,11 +6,19 @@ on:
     paths-ignore:
       - "**/*.md"
       - "docs/**"
+      - ".gitignore"
+      - "scripts/release.sh"
+      - "specs/**"
+      - ".specify/**"
   pull_request:
     branches: ["**"]
     paths-ignore:
       - "**/*.md"
       - "docs/**"
+      - ".gitignore"
+      - "scripts/release.sh"
+      - "specs/**"
+      - ".specify/**"
 
 concurrency:
   group: ci-${{ github.ref }}
