@@ -57,9 +57,14 @@ if ! git diff --quiet HEAD || [[ -n "$(git ls-files --others --exclude-standard)
   exit 1
 fi
 
-# Check if tag already exists
+# Check if tag already exists locally or on remote
 if git rev-parse "$TAG" > /dev/null 2>&1; then
-  echo "Error: tag $TAG already exists" >&2
+  echo "Error: tag $TAG already exists locally. If it was not pushed, delete it with:" >&2
+  echo "  git tag -d $TAG" >&2
+  exit 1
+fi
+if git ls-remote --tags origin "$TAG" | grep -q "$TAG"; then
+  echo "Error: tag $TAG already exists on origin" >&2
   exit 1
 fi
 
