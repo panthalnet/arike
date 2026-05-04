@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "test": "vitest",
     "e2e:install": "playwright install chromium",
-    "test:e2e": "npm run e2e:install && playwright test --project=chromium",
+    "test:e2e": "playwright test --project=chromium",
     "test:e2e:all": "playwright install && playwright test",
     "test:coverage": "vitest --coverage"
   },

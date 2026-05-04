@@ -94,6 +94,7 @@ npm run dev            # Dev server at http://localhost:3000
 npm run lint           # ESLint
 npx tsc --noEmit       # Typecheck
 npm run test:coverage  # Unit tests with 90% coverage gate
+npm run e2e:install    # Install Playwright browsers (one-time setup)
 npm run build && npm run test:e2e  # E2E tests (requires production build)
 ```
 

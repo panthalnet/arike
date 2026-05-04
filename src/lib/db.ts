@@ -7,10 +7,13 @@ const SQLITE_BUSY_TIMEOUT_MS = 5000
 const IS_NEXT_PRODUCTION_BUILD = process.env.NEXT_PHASE === 'phase-production-build'
 
 // Database file location
-const DB_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data')
+// Stored in a 'db' subdirectory of DATA_DIR so the container entrypoint
+// can chown just that subdirectory without touching the bind-mount root.
+const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data')
+const DB_DIR = path.join(DATA_DIR, 'db')
 const DB_PATH = path.join(DB_DIR, 'arike.db')
 
-// Ensure data directory exists
+// Ensure db subdirectory exists
 if (!fs.existsSync(DB_DIR)) {
   fs.mkdirSync(DB_DIR, { recursive: true })
   if (process.env.NODE_ENV !== 'test') {

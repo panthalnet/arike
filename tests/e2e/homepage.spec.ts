@@ -38,7 +38,19 @@ test.describe('Homepage', () => {
 
   test('should have accessible search bar with keyboard navigation', async ({ page }) => {
     const searchInput = page.locator('[data-testid="search-input"]')
-    await searchInput.focus()
+
+    // Verify the search input is reachable via keyboard Tab navigation
+    // (programmatic .focus() would mask a broken tab order)
+    await page.locator('body').click()
+    let reachedInput = false
+    for (let i = 0; i < 10; i++) {
+      await page.keyboard.press('Tab')
+      if (await searchInput.evaluate(el => el === document.activeElement)) {
+        reachedInput = true
+        break
+      }
+    }
+    expect(reachedInput).toBe(true)
     await expect(searchInput).toBeFocused()
 
     // Type in search
@@ -47,7 +59,7 @@ test.describe('Homepage', () => {
 
     // Press Enter to trigger search
     await searchInput.press('Enter')
-    
+
     // Verify search functionality (opens in new tab or filters bookmarks)
     // Note: Actual behavior will be implemented in T013
   })
