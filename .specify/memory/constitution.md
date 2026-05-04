@@ -63,6 +63,9 @@ The codebase MUST maintain strict separation between UI, domain logic, and persi
   database; horizontal "foundation" layers without user-facing functionality are PROHIBITED
 - **Atomic persistence**: Any operation that mutates multiple rows, tables, or persistent side
   effects MUST execute within a transaction or equivalent atomic boundary
+- **Migration immutability**: Drizzle migration files in `drizzle/` are **append-only and
+  immutable** once merged to `main`; existing `.sql` files MUST NEVER be edited or deleted;
+  schema changes MUST always be expressed as new migration files generated via `drizzle-kit`
 - **Pluggable adapters**: External integrations (search engines, calendars, RSS feeds, icon providers)
   MUST use adapter interfaces allowing runtime substitution
 - **Graceful degradation**: When external providers fail or are unavailable, the application MUST

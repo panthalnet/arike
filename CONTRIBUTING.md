@@ -74,6 +74,24 @@ GitHub Actions then runs automatically:
 | `v0.x.x-beta.N` | Pre-release | `panthalnet/arike:v0.x.x-beta.N`, `panthalnet/arike:beta` |
 | `v0.x.x` | Release | `panthalnet/arike:v0.x.x`, `panthalnet/arike:latest` |
 
+### Recovering from a Failed Release Job
+
+If the `release` workflow run fails on the `docker` job (GitHub Release already created, Docker push failed):
+
+1. Go to **Actions** → click the failed workflow run for the tag
+2. Click **Re-run failed jobs** (top right of the run page)
+3. Only the failed `docker` job re-runs — the tag and GitHub Release are untouched
+
+If the `release` job itself failed (GitHub Release not created):
+
+1. Delete the tag locally and remotely, then re-run the script after fixing the issue:
+   ```bash
+   git tag -d v<version>
+   git push origin --delete v<version>
+   # fix the issue, then:
+   bash scripts/release.sh <version>
+   ```
+
 ### Version Increment Reference
 
 | Situation | Example |

@@ -6,6 +6,10 @@ RUN apk add --no-cache su-exec
 FROM base AS deps
 WORKDIR /app
 
+# Build tools required by better-sqlite3 (native addon) when the pre-built
+# binary download fails — python3 + make + g++ are needed by node-gyp
+RUN apk add --no-cache python3 make g++
+
 # Copy package files
 COPY package.json package-lock.json* ./
 
