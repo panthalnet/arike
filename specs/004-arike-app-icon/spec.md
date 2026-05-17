@@ -75,14 +75,14 @@ As a user who installs Arike as a Progressive Web App or home screen shortcut, I
 ### Functional Requirements
 
 - **FR-001**: An Arike brand icon MUST be designed and made available in SVG format (scalable, suitable as the source asset), in two variants: (a) dark-background with warm accent for app/favicon/Docker/social use, and (b) transparent-background with dark icon for README and light-context documentation
-- **FR-002**: The icon MUST be exported in raster sizes: 16×16, 32×32, 48×48, 180×180 (Apple touch), 192×192, and 512×512 pixels in PNG format
+- **FR-002**: The icon MUST be exported in raster sizes: 16×16, 32×32, 180×180 (Apple touch), 192×192, and 512×512 pixels in PNG format (48×48 is not required — no modern browser favicon spec mandates it separately from 32×32 and 64×64)
 - **FR-003**: A `.ico` file containing 16×16 and 32×32 variants MUST be provided for maximum browser compatibility
 - **FR-004**: The Next.js application MUST serve the favicon from the `app/` directory so it appears in the browser tab automatically
 - **FR-005**: The Next.js app metadata MUST be updated to include `icons` and Open Graph image references
 - **FR-006**: A `site.webmanifest` file MUST be created and linked in the app metadata, referencing the 192×192 and 512×512 icons for PWA support
 - **FR-007**: An Apple touch icon (180×180) MUST be included and referenced in the app metadata for iOS home screen installations
 - **FR-008**: The README MUST be updated to display the Arike icon at the top as a project logo
-- **FR-009**: A social preview image (1280×640 px) MUST be created for GitHub repository Open Graph use
+- **FR-009**: A social preview image (1200×630 px) MUST be created for GitHub repository Open Graph use (GitHub accepts 1200×630; this is the same image served by Next.js at `/opengraph-image.png`)
 - **FR-010**: An AI icon generation platform MUST be researched and recommended for creating the initial icon artwork, with preference for free/open-source-friendly tools
 - **FR-010a**: The icon MUST be generated using the chosen AI platform as part of this feature — resulting SVG/PNG assets MUST be committed to the repository
 
@@ -102,7 +102,7 @@ As a user who installs Arike as a Progressive Web App or home screen shortcut, I
 - **Favicon**: Browser tab icon derived from the brand icon. Formats: `.ico` (16/32), `favicon.svg`, `favicon-96x96.png`
 - **PWA Manifest Icons**: Raster PNG icons used by the web app manifest for installation. Sizes: 192×192, 512×512
 - **Apple Touch Icon**: 180×180 PNG for iOS home screen
-- **Social Preview Image**: 1280×640 PNG for GitHub and Open Graph link previews
+- **Social Preview Image**: 1200×630 PNG for GitHub and Open Graph link previews
 
 ## Icon Placement Map *(Where the Icon Should Be Used)*
 
@@ -111,14 +111,14 @@ The following locations in the Arike project should use the brand icon, listed i
 | Location | Purpose | Format | Size | Priority |
 |----------|---------|--------|------|----------|
 | `src/app/favicon.ico` | Browser tab icon (Next.js auto-serves) | ICO | 16×16, 32×32 | P1 |
-| `src/app/icon.svg` or `icon.png` | Next.js app icon (metadata API) | SVG/PNG | any | P1 |
-| `public/favicon.svg` | High-quality favicon for modern browsers | SVG | scalable | P1 |
+| `src/app/icon.svg` | Next.js app icon (metadata API, auto-injects `<link rel="icon">`) | SVG | scalable | P1 |
+| `src/app/icon.png` | Next.js app icon fallback (metadata API) | PNG | 512×512 | P1 |
 | `public/apple-touch-icon.png` | iOS home screen icon | PNG | 180×180 | P2 |
 | `public/icon-192.png` | PWA manifest icon | PNG | 192×192 | P2 |
 | `public/icon-512.png` | PWA manifest icon (splash) | PNG | 512×512 | P2 |
-| `public/site.webmanifest` | PWA metadata linking icons | JSON | — | P2 |
+| `src/app/manifest.ts` | PWA metadata (typed Next.js route, served at `/manifest.webmanifest`) | TypeScript | — | P2 |
 | `README.md` header | Project logo in docs | PNG/SVG | ~120px tall | P2 |
-| GitHub Social Preview | Repository link unfurl image | PNG | 1280×640 | P2 |
+| GitHub Social Preview | Repository link unfurl image | PNG | 1200×630 | P2 |
 | `public/og-image.png` | Open Graph / Twitter card | PNG | 1200×630 | P3 |
 | Docker Hub repository logo | Branding on hub.docker.com/r/panthalnet/arike | PNG | 240×240 | P2 |
 | `Dockerfile` OCI label | Machine-readable icon metadata for container image | URL ref | — | P3 |
