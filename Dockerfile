@@ -44,6 +44,7 @@ RUN mkdir -p /app/data
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Entrypoint fixes /app/data ownership for mounted volumes then drops to nextjs
 COPY entrypoint.sh /entrypoint.sh
