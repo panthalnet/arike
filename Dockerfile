@@ -32,6 +32,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
+LABEL org.opencontainers.image.logo="https://raw.githubusercontent.com/panthalnet/arike/main/public/icon-512.png"
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 

@@ -211,3 +211,63 @@ No authentication. All settings are installation-wide. Designed for personal, se
 | Types | tsc --noEmit | Compile-time safety |
 
 Coverage target: 90%+ lines/functions/branches/statements.
+
+---
+
+## Brand Assets
+
+### Icon Concept
+
+The Arike icon depicts a **home and bookmark side-by-side** — a literal representation of the app's two core capabilities: a personal dashboard (home) and a bookmarks manager. The home shape is a minimal house silhouette; the bookmark is a classic ribbon-tab shape. Together they communicate the app's purpose at a glance without relying on abstract metaphor.
+
+### Design Specifications
+
+| Attribute | Value |
+|-----------|-------|
+| Icon concept | Home + bookmark side-by-side — dashboard and bookmarks |
+| Dark variant bg | `#303437` (dark charcoal) |
+| Home outline | `#5BA298` (teal) |
+| Bookmark shape | `#CB6C40` / `#8C4E2F` (burnt orange / brown) |
+| Light variant bg | Transparent; `#DADBDB` (light grey) icon background |
+| Light variant accent | `#5DA298` (teal), `#8F4F2E` (brown) |
+| Artboard | 1024×1024 px SVG viewBox |
+| Style | Flat icon, minimal, home silhouette + bookmark ribbon |
+
+### Asset Variants
+
+| File | Usage |
+|------|-------|
+| `docs/brand/arike-icon-dark.svg` | Canonical dark master (source for all derived raster assets) |
+| `docs/brand/arike-icon-light.svg` | Light/transparent variant — README, documentation on white backgrounds |
+
+### Generation Platform
+
+Assets generated via Recraft.ai Basic plan (2026-05-16). Full commercial rights retained by the owner per Recraft.ai paid-tier terms. License: safe for MIT open-source redistribution.
+
+### Derivation Pipeline
+
+All derived raster assets are generated from `docs/brand/arike-icon-dark.svg` via `npm run generate-icons` (uses `sharp`):
+
+```
+docs/brand/arike-icon-dark.svg
+    ├── src/app/favicon.ico         (16×16 + 32×32 ICO)
+    ├── src/app/icon.svg            (copy, scalable)
+    ├── src/app/icon.png            (512×512 PNG)
+    ├── src/app/apple-icon.png      (180×180 PNG)
+    ├── src/app/opengraph-image.png (1200×630 PNG)
+    ├── public/icon-192.png         (192×192 PNG)
+    └── public/icon-512.png         (512×512 PNG)
+```
+
+### Placement Map
+
+| Asset | Where used |
+|-------|-----------|
+| `src/app/favicon.ico` | Browser tab favicon (Next.js auto-serves at `/favicon.ico`) |
+| `src/app/icon.svg` | SVG favicon (modern browsers) |
+| `src/app/icon.png` | Primary tab icon (512×512) |
+| `src/app/apple-icon.png` | iOS home screen shortcut |
+| `src/app/opengraph-image.png` | Social sharing preview (Open Graph / Twitter card) |
+| `public/icon-192.png` + `public/icon-512.png` | PWA manifest icons |
+| `docs/brand/arike-icon-light.svg` | README header logo (GitHub renders on white background) |
+

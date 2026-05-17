@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import '@/styles/theme/modern.css'
@@ -9,9 +9,26 @@ import { getThemeSettings } from '@/services/theme_service'
 
 const inter = Inter({ subsets: ['latin'] })
 
+export const viewport: Viewport = {
+  themeColor: '#1a1a2e',
+}
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'),
   title: 'Arike - Your Personal Dashboard',
   description: 'Self-hosted browser startup page and personal dashboard',
+  manifest: '/manifest.webmanifest',
+  openGraph: {
+    title: 'Arike',
+    description: 'Self-hosted browser startup page and personal dashboard',
+    type: 'website',
+    images: [{ url: '/opengraph-image.png', width: 1200, height: 630, alt: 'Arike — Your Personal Dashboard' }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'Arike',
+    statusBarStyle: 'black-translucent',
+  },
 }
 
 export default async function RootLayout({

@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "generate-icons": "node scripts/generate-icons.mjs",
     "test": "vitest",
     "e2e:install": "playwright install chromium",
     "test:e2e": "playwright test --project=chromium",

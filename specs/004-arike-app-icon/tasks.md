@@ -17,9 +17,9 @@
 
 **Purpose**: Create directory structure and generation tooling before any asset work begins.
 
-- [ ] T001 Create `docs/brand/` directory for master SVG source assets
-- [ ] T002 [P] Create `scripts/generate-icons.mjs` — Node.js ESM script using `sharp` to resize dark-variant SVG to all required PNG/ICO outputs: 16×16, 32×32, 180×180, 192×192, 512×512 PNG + 16/32 ICO (see data-model.md derivation pipeline)
-- [ ] T003 [P] Add `"generate-icons": "node scripts/generate-icons.mjs"` script to `package.json`
+- [X] T001 Create `docs/brand/` directory for master SVG source assets
+- [X] T002 [P] Create `scripts/generate-icons.mjs` — Node.js ESM script using `sharp` to resize dark-variant SVG to all required PNG/ICO outputs: 16×16, 32×32, 180×180, 192×192, 512×512 PNG + 16/32 ICO (see data-model.md derivation pipeline)
+- [X] T003 [P] Add `"generate-icons": "node scripts/generate-icons.mjs"` script to `package.json`
 
 **Checkpoint**: Directory structure ready; generation script executable via `npm run generate-icons`
 
@@ -31,10 +31,11 @@
 
 **⚠️ CRITICAL**: All downstream phases depend on `docs/brand/arike-icon-dark.svg` and `docs/brand/arike-icon-light.svg` existing.
 
-- [ ] T004 Generate `docs/brand/arike-icon-dark.svg` using Recraft.ai (paid, Basic $10/mo) or ChatGPT/DALL-E 3 (free) with the exact prompt from `research.md` section 5; verify the icon is legible at 16×16 px before committing
-- [ ] T005 Generate `docs/brand/arike-icon-light.svg` — transparent background, dark navy icon paths — from the same AI platform (see `quickstart.md` Stage 1 light-variant instructions)
-- [ ] T006 Verify license compliance: confirm the chosen platform's terms permit open-source (MIT) redistribution; document the platform used and license basis in a comment at the top of both SVG files
-- [ ] T007 Run `npm run generate-icons` to produce all derived raster assets; verify all output files exist at their expected paths (see data-model.md Asset Entities table)
+- [X] T004 Generate `docs/brand/arike-icon-dark.svg` using Recraft.ai (paid, Basic $10/mo) or ChatGPT/DALL-E 3 (free) with the exact prompt from `research.md` section 5; verify the icon is legible at 16×16 px before committing
+- [X] T005 Generate `docs/brand/arike-icon-light.svg` — transparent background, dark navy icon paths — from the same AI platform (see `quickstart.md` Stage 1 light-variant instructions)
+- [X] T006 Verify license compliance: confirm the chosen platform's terms permit open-source (MIT) redistribution; document the platform used and license basis in a comment at the top of both SVG files
+  - Platform: Recraft.ai Basic plan ($10/mo, 2026-05-16); full commercial rights retained by owner per paid-tier terms; safe for MIT redistribution
+- [X] T007 Run `npm run generate-icons` to produce all derived raster assets; verify all output files exist at their expected paths (see data-model.md Asset Entities table)
 
 **Checkpoint**: All brand asset files committed; `docs/brand/` contains two SVGs; `src/app/` and `public/` contain all generated PNG/ICO/SVG files
 
@@ -48,11 +49,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T008 [P] [US1] Place generated `src/app/favicon.ico` (16×16 + 32×32 ICO) — verify Next.js auto-serves it at `/favicon.ico` (file-based convention, no code change needed)
-- [ ] T009 [P] [US1] Place generated `src/app/icon.svg` (dark variant, scalable) — verify Next.js injects `<link rel="icon" type="image/svg+xml" sizes="any">`
-- [ ] T010 [US1] Place generated `src/app/icon.png` (512×512, dark variant) — verify Next.js injects `<link rel="icon" type="image/png" sizes="512x512">`
-- [ ] T011 [US1] Update `src/app/layout.tsx`: add `metadataBase` and `viewport` export per `quickstart.md` Stage 3a; verify TypeScript compiles cleanly (`npm run build`)
-- [ ] T011a [P] [US1] Add Playwright E2E test `tests/e2e/icon.spec.ts`: load `http://localhost:3000`, assert `<link rel="icon">` with `href` containing `favicon.ico` or `icon.` is present in `<head>`; assert `<link rel="manifest">` is present; assert `<meta property="og:image">` is present — run with `npx playwright test tests/e2e/icon.spec.ts`
+- [X] T008 [P] [US1] Place generated `src/app/favicon.ico` (16×16 + 32×32 ICO) — verify Next.js auto-serves it at `/favicon.ico` (file-based convention, no code change needed)
+- [X] T009 [P] [US1] Place generated `src/app/icon.svg` (dark variant, scalable) — verify Next.js injects `<link rel="icon" type="image/svg+xml" sizes="any">`
+- [X] T010 [US1] Place generated `src/app/icon.png` (512×512, dark variant) — verify Next.js injects `<link rel="icon" type="image/png" sizes="512x512">`
+- [X] T011 [US1] Update `src/app/layout.tsx`: add `metadataBase` and `viewport` export per `quickstart.md` Stage 3a; verify TypeScript compiles cleanly (`npm run build`)
+- [X] T011a [P] [US1] Add Playwright E2E test `tests/e2e/icon.spec.ts`: load `http://localhost:3000`, assert `<link rel="icon">` with `href` containing `favicon.ico` or `icon.` is present in `<head>`; assert `<link rel="manifest">` is present; assert `<meta property="og:image">` is present — run with `npx playwright test tests/e2e/icon.spec.ts`
 
 **Checkpoint**: Browser tab shows the Arike icon. `npm run build` passes. Playwright icon test passes. US1 independently complete.
 
@@ -66,10 +67,11 @@
 
 ### Implementation for User Story 2
 
-- [ ] T012 [P] [US2] Place generated `src/app/opengraph-image.png` (1200×630, dark variant icon centered on navy background) and create `src/app/opengraph-image.alt.txt` containing `Arike — Your Personal Dashboard`
-- [ ] T013 [US2] Update `src/app/layout.tsx`: add `openGraph` metadata block (title, description, type, images array pointing to `/opengraph-image.png`) per `quickstart.md` Stage 3a; verify `metadataBase` is set so relative URL resolves correctly
-- [ ] T014 [US2] Update `README.md`: add `<p align="center"><img src="docs/brand/arike-icon-light.svg" alt="Arike logo" height="120" /></p>` immediately before the first `#` heading
-- [ ] T015 [US2] Configure GitHub repository social preview: upload `src/app/opengraph-image.png` (1200×630) as the repository's social preview image via GitHub Settings → Social preview (manual step; document in `CONTRIBUTING.md` under "First-time repo setup")
+- [X] T012 [P] [US2] Place generated `src/app/opengraph-image.png` (1200×630, dark variant icon centered on navy background) and create `src/app/opengraph-image.alt.txt` containing `Arike — Your Personal Dashboard`
+- [X] T013 [US2] Update `src/app/layout.tsx`: add `openGraph` metadata block (title, description, type, images array pointing to `/opengraph-image.png`) per `quickstart.md` Stage 3a; verify `metadataBase` is set so relative URL resolves correctly
+- [X] T014 [US2] Update `README.md`: add `<p align="center"><img src="docs/brand/arike-icon-light.svg" alt="Arike logo" height="120" /></p>` immediately before the first `#` heading
+- [X] T015 [US2] Configure GitHub repository social preview: upload `src/app/opengraph-image.png` (1200×630) as the repository's social preview image via GitHub Settings → Social preview (manual step; document in `CONTRIBUTING.md` under "First-time repo setup")
+  - Completed 2026-05-16: opengraph-image.png uploaded as GitHub repository social preview.
 
 **Checkpoint**: README shows Arike logo on GitHub. Sharing the repo URL produces a branded link preview. US2 independently complete.
 
@@ -83,10 +85,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T016 [P] [US3] Place generated `src/app/apple-icon.png` (180×180, dark variant) — verify Next.js injects `<link rel="apple-touch-icon">`
-- [ ] T017 [P] [US3] Place generated `public/icon-192.png` and `public/icon-512.png` for PWA manifest use
-- [ ] T018 [US3] Create `src/app/manifest.ts` with typed `MetadataRoute.Manifest` export per `quickstart.md` Stage 3b and `contracts/manifest.schema.json`; verify output at `/manifest.webmanifest` matches the JSON schema contract
-- [ ] T019 [US3] Update `src/app/layout.tsx`: add `manifest: '/manifest.webmanifest'` and `appleWebApp` block per `quickstart.md` Stage 3a; verify DevTools → Application → Manifest shows all icons loading without errors
+- [X] T016 [P] [US3] Place generated `src/app/apple-icon.png` (180×180, dark variant) — verify Next.js injects `<link rel="apple-touch-icon">`
+- [X] T017 [P] [US3] Place generated `public/icon-192.png` and `public/icon-512.png` for PWA manifest use
+- [X] T018 [US3] Create `src/app/manifest.ts` with typed `MetadataRoute.Manifest` export per `quickstart.md` Stage 3b and `contracts/manifest.schema.json`; verify output at `/manifest.webmanifest` matches the JSON schema contract
+- [X] T019 [US3] Update `src/app/layout.tsx`: add `manifest: '/manifest.webmanifest'` and `appleWebApp` block per `quickstart.md` Stage 3a; verify DevTools → Application → Manifest shows all icons loading without errors
 
 **Checkpoint**: Chrome shows PWA install button. iOS "Add to Home Screen" produces Arike icon. DevTools Application→Manifest reports no errors. US3 independently complete.
 
@@ -96,11 +98,12 @@
 
 **Purpose**: Docker Hub branding, Dockerfile OCI annotation, and final verification across all placements.
 
-- [ ] T020 Update `Dockerfile`: add `LABEL org.opencontainers.image.logo="https://raw.githubusercontent.com/panthalnet/arike/main/public/icon-512.png"` in the runner stage (after existing `ENV` lines, before `EXPOSE`) per `quickstart.md` Stage 3c
-- [ ] T021 Upload Docker Hub repository logo: log in to hub.docker.com → panthalnet/arike → Settings → Repository logo → upload `public/icon-512.png` (manual step; document in `CONTRIBUTING.md` under "First-time repo setup")
-- [ ] T022 [P] Run full build and verify no TypeScript/lint errors: `npm run build && npm run lint`
-- [ ] T023 [P] Manual cross-browser favicon check: open Arike in Chrome, Firefox, and Safari — verify tab icon appears correctly in all three; verify bookmarking produces correct icon
-- [ ] T024 Update `docs/design.md` to add a "Brand Assets" section documenting the icon concept ("closer to home"), variants, generation platform, derivation pipeline, and placement map — per Constitution Principle VI (docs updated in same PR)
+- [X] T020 Update `Dockerfile`: add `LABEL org.opencontainers.image.logo="https://raw.githubusercontent.com/panthalnet/arike/main/public/icon-512.png"` in the runner stage (after existing `ENV` lines, before `EXPOSE`) per `quickstart.md` Stage 3c
+- [X] T021 Upload Docker Hub repository logo: log in to hub.docker.com → panthalnet/arike → Settings → Repository logo → upload `public/icon-512.png` (manual step; document in `CONTRIBUTING.md` under "First-time repo setup")
+  - N/A: Docker Hub custom repository logos are only supported for organization accounts, not personal accounts. `panthalnet` is a personal account. OCI annotation in Dockerfile serves as the alternative. CONTRIBUTING.md updated.
+- [X] T022 [P] Run full build and verify no TypeScript/lint errors: `npm run build && npm run lint`
+- [X] T023 [P] Manual cross-browser favicon check: open Arike in Chrome, Firefox, and Safari — verify tab icon appears correctly in all three; verify bookmarking produces correct icon
+- [X] T024 Update `docs/design.md` to add a "Brand Assets" section documenting the icon concept ("closer to home"), variants, generation platform, derivation pipeline, and placement map — per Constitution Principle VI (docs updated in same PR)
 
 ---
 

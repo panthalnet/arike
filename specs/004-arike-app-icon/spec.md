@@ -10,7 +10,7 @@
 ### Session 2026-05-16
 
 - Q: Should Docker Hub icon presence include the repository logo (visible on hub.docker.com), an OCI image annotation in the Dockerfile, or both? → A: Both — Docker Hub repository logo upload + OCI `org.opencontainers.image.logo` annotation in Dockerfile
-- Q: What should the Arike icon look like visually? → A: Thematic symbol — "closer to home"; "Arike" means "closer" in Malayalam, so the icon should convey the concept of being closer to home (a home/warmth/proximity motif)
+- Q: What should the Arike icon look like visually? → A: A home and bookmark side-by-side — depicting the app's two core capabilities (personal dashboard + bookmarks manager). The final design shows a house silhouette next to a bookmark ribbon shape, communicating the app's purpose literally and recognisably.
 - Q: What color style should the icon use? → A: Dark background with warm accent — deep navy/charcoal background with a warm amber/gold or soft purple glow, matching Arike's existing glassmorphism aesthetic
 - Q: Should AI platform research and icon generation both happen within this feature, or research only? → A: Both — tasks include evaluating AI platforms, generating the icon using the chosen tool, and committing resulting assets
 - Q: Should the icon include a light-background variant for README/documentation contexts? → A: Two variants — dark-background icon (favicon, browser tab, Docker Hub, social preview) + transparent/light variant (README and documentation on light backgrounds)
@@ -74,7 +74,7 @@ As a user who installs Arike as a Progressive Web App or home screen shortcut, I
 
 ### Functional Requirements
 
-- **FR-001**: An Arike brand icon MUST be designed and made available in SVG format (scalable, suitable as the source asset), in two variants: (a) dark-background with warm accent for app/favicon/Docker/social use, and (b) transparent-background with dark icon for README and light-context documentation
+- **FR-001**: An Arike brand icon MUST be designed and made available in SVG format (scalable, suitable as the source asset), in two variants: (a) dark-background (`#303437` charcoal) with teal and brown accent for app/favicon/Docker/social use, and (b) transparent-background with light-grey icon background for README and light-context documentation
 - **FR-002**: The icon MUST be exported in raster sizes: 16×16, 32×32, 180×180 (Apple touch), 192×192, and 512×512 pixels in PNG format (48×48 is not required — no modern browser favicon spec mandates it separately from 32×32 and 64×64)
 - **FR-003**: A `.ico` file containing 16×16 and 32×32 variants MUST be provided for maximum browser compatibility
 - **FR-004**: The Next.js application MUST serve the favicon from the `app/` directory so it appears in the browser tab automatically
@@ -98,7 +98,7 @@ As a user who installs Arike as a Progressive Web App or home screen shortcut, I
 
 ### Key Entities
 
-- **Brand Icon**: The primary visual mark for Arike — a thematic symbol conveying "closer to home" (inspired by the Malayalam meaning of "Arike" = closer). Visual motif: a home/house shape combined with a warmth or proximity element (e.g., a subtle glow, concentric arcs, or a gentle curve suggesting nearness). Key attributes: SVG source, two color variants — (a) dark-background/warm-accent for app contexts, (b) transparent/light-background for documentation — square aspect ratio, legible at 16×16 px
+- **Brand Icon**: The primary visual mark for Arike — a home and bookmark side-by-side, representing the app's two core capabilities: a personal dashboard (home) and a bookmarks manager (bookmark). Key attributes: SVG source, two color variants — (a) dark-background/warm-accent for app contexts, (b) transparent/light-background for documentation — square aspect ratio, legible at 16×16 px
 - **Favicon**: Browser tab icon derived from the brand icon. Formats: `.ico` (16/32), `favicon.svg`, `favicon-96x96.png`
 - **PWA Manifest Icons**: Raster PNG icons used by the web app manifest for installation. Sizes: 192×192, 512×512
 - **Apple Touch Icon**: 180×180 PNG for iOS home screen
@@ -113,7 +113,7 @@ The following locations in the Arike project should use the brand icon, listed i
 | `src/app/favicon.ico` | Browser tab icon (Next.js auto-serves) | ICO | 16×16, 32×32 | P1 |
 | `src/app/icon.svg` | Next.js app icon (metadata API, auto-injects `<link rel="icon">`) | SVG | scalable | P1 |
 | `src/app/icon.png` | Next.js app icon fallback (metadata API) | PNG | 512×512 | P1 |
-| `public/apple-touch-icon.png` | iOS home screen icon | PNG | 180×180 | P2 |
+| `src/app/apple-icon.png` | iOS home screen icon (Next.js App Router convention) | PNG | 180×180 | P2 |
 | `public/icon-192.png` | PWA manifest icon | PNG | 192×192 | P2 |
 | `public/icon-512.png` | PWA manifest icon (splash) | PNG | 512×512 | P2 |
 | `src/app/manifest.ts` | PWA metadata (typed Next.js route, served at `/manifest.webmanifest`) | TypeScript | — | P2 |
@@ -141,8 +141,8 @@ The following locations in the Arike project should use the brand icon, listed i
 
 ## Assumptions
 
-- The Arike brand color palette is: **dark background** (deep navy or charcoal, e.g. `#0f172a` / `#1e293b`) with a **warm accent** — amber/gold or soft purple glow — matching the existing Modern glassmorphism theme. The icon must look cohesive alongside the app's dark UI.
-- "Arike" means "closer" in Malayalam. The icon concept is **"closer to home"** — a thematic symbol combining a home motif with a sense of warmth or proximity. This meaning should inform the AI generation prompt and the overall visual identity.
+- The Arike brand icon color palette (as generated): **dark background** (`#303437` dark charcoal) with **teal** (`#5BA298`) for the home silhouette and **burnt orange/brown** (`#CB6C40` / `#8C4E2F`) for the bookmark shape. The light variant uses a transparent background with `#DADBDB` grey icon background, teal (`#5DA298`) and brown (`#8F4F2E`) icon paths.
+- "Arike" means "closer" in Malayalam. The final icon design shows a **home and bookmark side-by-side** — a literal depiction of the app's two core capabilities (dashboard + bookmarks manager). The AI generation prompt was iterated to arrive at this concept.
 - Icon generation via AI is acceptable for an open-source project provided the resulting asset has a compatible license for open-source distribution (e.g., CC0 or the AI platform's standard commercial license)
 - A coding agent (like GitHub Copilot) is not the right tool to generate visual artwork — a dedicated AI image generation platform is needed; this spec covers researching which one is most appropriate
 - The icon does not need to be animated in v1
