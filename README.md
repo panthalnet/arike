@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/brand/arike-icon-light.svg" alt="Arike logo" height="120" />
+</p>
+
 # Arike
 
 [![CI](https://github.com/panthalnet/arike/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/panthalnet/arike/actions/workflows/ci.yml)

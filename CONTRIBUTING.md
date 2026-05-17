@@ -117,3 +117,20 @@ npm run build && npm run test:e2e  # E2E tests (requires production build)
 ```
 
 Every push and pull request runs the `Quality` status check (lint → typecheck → build → coverage) and the `E2E Tests` job via [.github/workflows/ci.yml](.github/workflows/ci.yml).
+
+---
+
+## First-Time Repository Setup (Maintainer)
+
+These steps are one-time manual actions required after initial repository creation or when branding assets change.
+
+### GitHub Repository Social Preview
+
+1. Navigate to the GitHub repository → **Settings** → **Social preview**
+2. Upload `src/app/opengraph-image.png` (1200×630 PNG) as the repository social preview image
+3. This image appears when the repository URL is shared in social media or chat apps
+
+### Docker Hub Repository Logo
+
+> **Note**: Docker Hub only supports custom repository logos for **organization accounts**, not personal accounts. Since `panthalnet` is a personal account, a custom repository logo cannot be set on hub.docker.com. The `org.opencontainers.image.logo` OCI annotation in the Dockerfile provides machine-readable logo metadata as an alternative.
+

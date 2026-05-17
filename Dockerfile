@@ -32,6 +32,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
+LABEL org.opencontainers.image.logo="https://raw.githubusercontent.com/panthalnet/arike/main/public/icon-512.png"
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
@@ -42,6 +44,7 @@ RUN mkdir -p /app/data
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Entrypoint fixes /app/data ownership for mounted volumes then drops to nextjs
 COPY entrypoint.sh /entrypoint.sh
